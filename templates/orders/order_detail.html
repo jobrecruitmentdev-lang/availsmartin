@@ -1,0 +1,241 @@
+{% extends 'base.html' %}
+
+{% block title %}Order #{{ order.order_number }} | Crookeries by AvailSmart{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-[#FAF8F5] py-10 sm:py-14">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
+        
+        <!-- Top Header & Breadcrumbs -->
+        <div class="border-b border-[#E8E4DC] pb-6 flex flex-col sm:flex-row sm:items-baseline sm:justify-between gap-4">
+            <div>
+                <nav class="flex items-center gap-2 text-xs text-[#8A8477] tracking-wider uppercase mb-3">
+                    <a href="/" class="hover:text-[#14241B] transition">Home</a>
+                    <span class="text-[#D3CBBF]">/</span>
+                    <a href="/accounts/profile/" class="hover:text-[#14241B] transition">Account</a>
+                    <span class="text-[#D3CBBF]">/</span>
+                    <a href="{% url 'orders:my_orders' %}" class="hover:text-[#14241B] transition">Order Ledger</a>
+                    <span class="text-[#D3CBBF]">/</span>
+                    <span class="font-mono text-[#14241B]">#{{ order.order_number }}</span>
+                </nav>
+                <div class="flex items-center gap-3">
+                    <h1 class="text-3xl sm:text-4xl font-normal font-editorial text-[#14241B] tracking-tight">
+                        Order <span class="italic text-[#C2714F]">Details</span>
+                    </h1>
+                    <span class="px-3 py-1 rounded-full text-[10px] uppercase tracking-wider font-medium {% if order.order_status == 'delivered' %}bg-[#EFECE6] text-[#14241B]{% elif order.order_status == 'cancelled' %}bg-red-50 text-red-700{% else %}bg-[#14241B] text-white{% endif %}">
+                        {{ order.get_order_status_display }}
+                    </span>
+                </div>
+                <p class="text-xs text-[#5C564B] mt-1">Commissioned on {{ order.created_at|date:"d F Y, h:i A" }}</p>
+            </div>
+
+            <div class="flex items-center gap-3">
+                <a 
+                    href="{% url 'orders:track_order' %}?order_number={{ order.order_number }}" 
+                    class="px-5 py-2.5 rounded-full bg-[#FAF8F5] hover:bg-[#EFECE6] border border-[#E8E4DC] text-[#14241B] text-xs uppercase tracking-widest font-medium transition"
+                >
+                    Track Dispatch
+                </a>
+                <button 
+                    type="button" 
+                    onclick="window.print()" 
+                    class="px-5 py-2.5 rounded-full bg-white hover:bg-[#FAF8F5] border border-[#E8E4DC] text-[#14241B] text-xs uppercase tracking-widest font-medium transition flex items-center gap-2"
+                >
+                    <svg class="w-3.5 h-3.5 text-[#C2714F]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
+                    <span>Print Invoice</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Fulfillment Progress Timeline -->
+        {% if order.order_status != 'cancelled' %}
+            <div class="bg-white rounded-3xl border border-[#E8E4DC] p-6 sm:p-8 shadow-sm">
+                <div class="flex items-center justify-between mb-8">
+                    <h3 class="text-xs uppercase tracking-widest text-[#8A8477] font-medium">Studio Dispatch Timeline</h3>
+                    {% if order.tracking_number %}
+                        <span class="text-xs font-mono text-[#14241B]">AWB: {{ order.tracking_number }}</span>
+                    {% endif %}
+                </div>
+                
+                <div class="relative flex items-center justify-between text-center text-xs">
+                    <!-- Line background -->
+                    <div class="absolute left-6 right-6 top-1/2 -translate-y-1/2 h-0.5 bg-[#E8E4DC] z-0">
+                        <div 
+                            class="h-full bg-[#14241B] transition-all duration-500"
+                            style="width: {% if order.order_status == 'delivered' %}100%{% elif order.order_status == 'shipped' %}75%{% elif order.order_status == 'packed' %}50%{% elif order.order_status == 'confirmed' %}25%{% else %}10%{% endif %};"
+                        ></div>
+                    </div>
+
+                    <!-- Step 1: Placed -->
+                    <div class="relative z-10 flex flex-col items-center">
+                        <div class="w-8 h-8 rounded-full bg-[#14241B] text-white flex items-center justify-center font-editorial text-xs ring-4 ring-white">✓</div>
+                        <span class="font-medium text-[#14241B] mt-2 text-[11px] uppercase tracking-wider">Placed</span>
+                    </div>
+
+                    <!-- Step 2: Confirmed -->
+                    <div class="relative z-10 flex flex-col items-center">
+                        <div class="w-8 h-8 rounded-full {% if order.order_status in 'confirmed,packed,shipped,delivered' %}bg-[#14241B] text-white{% else %}bg-[#FAF8F5] text-[#8A8477] border border-[#E8E4DC]{% endif %} flex items-center justify-center font-editorial text-xs ring-4 ring-white">
+                            {% if order.order_status in 'confirmed,packed,shipped,delivered' %}✓{% else %}2{% endif %}
+                        </div>
+                        <span class="font-medium mt-2 text-[11px] uppercase tracking-wider {% if order.order_status in 'confirmed,packed,shipped,delivered' %}text-[#14241B]{% else %}text-[#8A8477]{% endif %}">Confirmed</span>
+                    </div>
+
+                    <!-- Step 3: Packed -->
+                    <div class="relative z-10 flex flex-col items-center">
+                        <div class="w-8 h-8 rounded-full {% if order.order_status in 'packed,shipped,delivered' %}bg-[#14241B] text-white{% else %}bg-[#FAF8F5] text-[#8A8477] border border-[#E8E4DC]{% endif %} flex items-center justify-center font-editorial text-xs ring-4 ring-white">
+                            {% if order.order_status in 'packed,shipped,delivered' %}✓{% else %}3{% endif %}
+                        </div>
+                        <span class="font-medium mt-2 text-[11px] uppercase tracking-wider {% if order.order_status in 'packed,shipped,delivered' %}text-[#14241B]{% else %}text-[#8A8477]{% endif %}">Inspected & Packed</span>
+                    </div>
+
+                    <!-- Step 4: Shipped -->
+                    <div class="relative z-10 flex flex-col items-center">
+                        <div class="w-8 h-8 rounded-full {% if order.order_status in 'shipped,delivered' %}bg-[#14241B] text-white{% else %}bg-[#FAF8F5] text-[#8A8477] border border-[#E8E4DC]{% endif %} flex items-center justify-center font-editorial text-xs ring-4 ring-white">
+                            {% if order.order_status in 'shipped,delivered' %}✓{% else %}4{% endif %}
+                        </div>
+                        <span class="font-medium mt-2 text-[11px] uppercase tracking-wider {% if order.order_status in 'shipped,delivered' %}text-[#14241B]{% else %}text-[#8A8477]{% endif %}">Dispatched</span>
+                    </div>
+
+                    <!-- Step 5: Delivered -->
+                    <div class="relative z-10 flex flex-col items-center">
+                        <div class="w-8 h-8 rounded-full {% if order.order_status == 'delivered' %}bg-[#14241B] text-white{% else %}bg-[#FAF8F5] text-[#8A8477] border border-[#E8E4DC]{% endif %} flex items-center justify-center font-editorial text-xs ring-4 ring-white">
+                            {% if order.order_status == 'delivered' %}✓{% else %}5{% endif %}
+                        </div>
+                        <span class="font-medium mt-2 text-[11px] uppercase tracking-wider {% if order.order_status == 'delivered' %}text-[#14241B]{% else %}text-[#8A8477]{% endif %}">Delivered</span>
+                    </div>
+                </div>
+
+                {% if order.tracking_number %}
+                    <div class="mt-8 pt-4 border-t border-[#E8E4DC] flex items-center justify-between text-xs text-[#5C564B]">
+                        <span>
+                            Carrier: <strong class="text-[#14241B]">{{ order.shipping_partner|default:"Artisan Courier" }}</strong>
+                        </span>
+                        <span>
+                            Waybill Reference: <strong class="font-mono text-[#14241B]">{{ order.tracking_number }}</strong>
+                        </span>
+                    </div>
+                {% endif %}
+            </div>
+        {% endif %}
+
+        <!-- Address & Payment Overview -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            
+            <!-- Delivery Address -->
+            <div class="bg-white rounded-3xl border border-[#E8E4DC] p-6 sm:p-7 shadow-sm space-y-2 text-xs">
+                <div class="flex items-center justify-between border-b border-[#E8E4DC] pb-3 mb-2">
+                    <h3 class="uppercase tracking-widest text-[#8A8477] font-medium">Shipping Destination</h3>
+                    <span class="text-[#C2714F]">Fragile Insured</span>
+                </div>
+                <p class="text-sm font-semibold text-[#14241B]">{{ order.shipping_address_snapshot.full_name }}</p>
+                <p class="text-[#5C564B] leading-relaxed">
+                    {{ order.shipping_address_snapshot.address_line1 }}{% if order.shipping_address_snapshot.address_line2 %}, {{ order.shipping_address_snapshot.address_line2 }}{% endif %}<br>
+                    {{ order.shipping_address_snapshot.city }}, {{ order.shipping_address_snapshot.state }} - {{ order.shipping_address_snapshot.pincode }}<br>
+                    {{ order.shipping_address_snapshot.country }}
+                </p>
+                <p class="pt-2 text-[#8A8477]">Contact: +91 {{ order.shipping_address_snapshot.phone }}</p>
+            </div>
+
+            <!-- Payment Details -->
+            <div class="bg-white rounded-3xl border border-[#E8E4DC] p-6 sm:p-7 shadow-sm space-y-3 text-xs">
+                <div class="flex items-center justify-between border-b border-[#E8E4DC] pb-3 mb-2">
+                    <h3 class="uppercase tracking-widest text-[#8A8477] font-medium">Financial Breakdown</h3>
+                    <span class="font-mono text-[#14241B]">INR</span>
+                </div>
+                <div class="space-y-2.5">
+                    <div class="flex items-center justify-between">
+                        <span class="text-[#8A8477]">Payment Mode:</span>
+                        <span class="font-medium text-[#14241B] uppercase tracking-wider">{{ order.get_payment_method_display }}</span>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <span class="text-[#8A8477]">Payment Status:</span>
+                        <span class="px-2.5 py-0.5 rounded-full text-[10px] tracking-wider uppercase font-medium bg-[#FAF8F5] border border-[#E8E4DC] text-[#C2714F]">
+                            {{ order.get_payment_status_display }}
+                        </span>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <span class="text-[#8A8477]">Subtotal:</span>
+                        <span class="font-medium text-[#14241B]">₹{{ order.subtotal }}</span>
+                    </div>
+                    {% if order.discount > 0 %}
+                        <div class="flex items-center justify-between text-[#C2714F]">
+                            <span>Studio Coupon:</span>
+                            <span class="font-medium">- ₹{{ order.discount }}</span>
+                        </div>
+                    {% endif %}
+                    <div class="flex items-center justify-between">
+                        <span class="text-[#8A8477]">Artisan Shipping:</span>
+                        <span class="font-medium {% if order.shipping_charge == 0 %}text-[#14241B]{% else %}text-[#14241B]{% endif %}">
+                            {% if order.shipping_charge == 0 %}COMPLIMENTARY{% else %}₹{{ order.shipping_charge }}{% endif %}
+                        </span>
+                    </div>
+                    <div class="pt-3 border-t border-[#E8E4DC] flex items-baseline justify-between">
+                        <span class="text-xs uppercase tracking-wider text-[#8A8477]">Grand Total:</span>
+                        <span class="text-2xl font-normal font-editorial text-[#14241B]">₹{{ order.total }}</span>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Items List -->
+        <div class="bg-white rounded-3xl border border-[#E8E4DC] p-6 sm:p-8 shadow-sm space-y-4">
+            <div class="flex items-baseline justify-between border-b border-[#E8E4DC] pb-3">
+                <h3 class="text-xs uppercase tracking-widest text-[#8A8477] font-medium">Acquired Ceramic Pieces ({{ order.item_count }})</h3>
+                <span class="text-xs text-[#5C564B]">Handmade in India</span>
+            </div>
+            
+            <div class="divide-y divide-[#E8E4DC]">
+                {% for item in order.items.all %}
+                    <div class="py-4 flex items-center justify-between gap-4 text-xs">
+                        <div class="flex items-center gap-3.5 min-w-0">
+                            <div class="w-14 h-16 bg-[#FAF8F5] rounded-xl shrink-0 border border-[#E8E4DC] flex items-center justify-center overflow-hidden">
+                                {% with prim=item.variant.product.primary_image %}
+                                    {% if prim and prim.image %}
+                                        <img src="{{ prim.image.url }}" alt="{{ item.product_name_snapshot }}" class="w-full h-full object-cover">
+                                    {% else %}
+                                        <span class="text-xs text-[#8A8477] font-editorial">✦</span>
+                                    {% endif %}
+                                {% endwith %}
+                            </div>
+                            <div class="min-w-0">
+                                {% if item.variant and item.variant.product %}
+                                    <a href="{% url 'catalog:product_detail' slug=item.variant.product.slug %}" class="font-medium text-sm text-[#14241B] hover:text-[#C2714F] truncate block transition">
+                                        {{ item.product_name_snapshot }}
+                                    </a>
+                                {% else %}
+                                    <span class="font-medium text-sm text-[#14241B] truncate block">{{ item.product_name_snapshot }}</span>
+                                {% endif %}
+                                <p class="text-[#8A8477] text-xs mt-0.5">
+                                    {{ item.color }} {% if item.size %}· {{ item.size }}{% endif %} &bull; Quantity: {{ item.quantity }}
+                                </p>
+                            </div>
+                        </div>
+                        <div class="text-right shrink-0">
+                            <span class="text-sm font-normal font-editorial text-[#14241B]">₹{{ item.total_price }}</span>
+                            <span class="block text-[10px] text-[#8A8477]">₹{{ item.price_snapshot }} each</span>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Order Cancellation (If Eligible) -->
+        {% if order.order_status in 'pending,confirmed' %}
+            <div class="p-6 rounded-3xl bg-[#FAF8F5] border border-[#E8E4DC] flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                <div>
+                    <h4 class="text-sm font-editorial text-[#14241B]">Request Studio Order Cancellation</h4>
+                    <p class="text-xs text-[#8A8477] mt-0.5">You can cancel this order prior to packing & courier handover for an immediate resolution.</p>
+                </div>
+                <form method="POST" action="{% url 'orders:cancel_order' order_number=order.order_number %}" onsubmit="return confirm('Are you sure you want to cancel Order #{{ order.order_number }}?');">
+                    {% csrf_token %}
+                    <button type="submit" class="px-6 py-2.5 rounded-full border border-red-300 bg-white hover:bg-red-50 text-red-700 text-xs uppercase tracking-widest font-medium transition">
+                        Cancel Acquisition
+                    </button>
+                </form>
+            </div>
+        {% endif %}
+
+    </div>
+</div>
+{% endblock %}

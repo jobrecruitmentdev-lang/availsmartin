@@ -1,0 +1,120 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ title }} | Crookeries by AvailSmart{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-[#FAF8F5] py-12 sm:py-16">
+    <div class="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8">
+        
+        <div class="bg-white rounded-3xl border border-[#E8E4DC] p-8 sm:p-10 shadow-sm">
+            
+            <!-- Header -->
+            <div class="mb-8 border-b border-[#E8E4DC] pb-5">
+                <nav class="flex items-center gap-2 text-xs text-[#8A8477] tracking-wider uppercase mb-3">
+                    <a href="/" class="hover:text-[#14241B] transition">Home</a>
+                    <span class="text-[#D3CBBF]">/</span>
+                    <a href="{% url 'accounts:profile' %}" class="hover:text-[#14241B] transition">Account</a>
+                    <span class="text-[#D3CBBF]">/</span>
+                    <a href="{% url 'accounts:addresses' %}" class="hover:text-[#14241B] transition">Addresses</a>
+                    <span class="text-[#D3CBBF]">/</span>
+                    <span class="font-medium text-[#14241B]">{{ title }}</span>
+                </nav>
+                <h1 class="text-3xl font-normal font-editorial text-[#14241B] tracking-tight">{{ title }}</h1>
+                <p class="text-xs text-[#5C564B] mt-1">Please ensure accurate postal pincode and contact information for safe ceramic delivery.</p>
+            </div>
+
+            <!-- Address Form -->
+            <form method="POST" class="space-y-4">
+                {% csrf_token %}
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs uppercase tracking-wider text-[#5C564B] font-medium mb-1.5">Full Name *</label>
+                        {{ form.full_name }}
+                        {% if form.full_name.errors %}
+                            <p class="text-xs text-red-600 mt-1 pl-1">{{ form.full_name.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                    <div>
+                        <label class="block text-xs uppercase tracking-wider text-[#5C564B] font-medium mb-1.5">Phone Number *</label>
+                        {{ form.phone }}
+                        {% if form.phone.errors %}
+                            <p class="text-xs text-red-600 mt-1 pl-1">{{ form.phone.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs uppercase tracking-wider text-[#5C564B] font-medium mb-1.5">Address Line 1 (Flat, House no., Street) *</label>
+                    {{ form.address_line1 }}
+                    {% if form.address_line1.errors %}
+                        <p class="text-xs text-red-600 mt-1 pl-1">{{ form.address_line1.errors.0 }}</p>
+                    {% endif %}
+                </div>
+
+                <div>
+                    <label class="block text-xs uppercase tracking-wider text-[#5C564B] font-medium mb-1.5">Address Line 2 (Landmark, Sector - Optional)</label>
+                    {{ form.address_line2 }}
+                    {% if form.address_line2.errors %}
+                        <p class="text-xs text-red-600 mt-1 pl-1">{{ form.address_line2.errors.0 }}</p>
+                    {% endif %}
+                </div>
+
+                <div class="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                    <div>
+                        <label class="block text-xs uppercase tracking-wider text-[#5C564B] font-medium mb-1.5">City *</label>
+                        {{ form.city }}
+                        {% if form.city.errors %}
+                            <p class="text-xs text-red-600 mt-1 pl-1">{{ form.city.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                    <div>
+                        <label class="block text-xs uppercase tracking-wider text-[#5C564B] font-medium mb-1.5">State *</label>
+                        {{ form.state }}
+                        {% if form.state.errors %}
+                            <p class="text-xs text-red-600 mt-1 pl-1">{{ form.state.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                    <div class="col-span-2 sm:col-span-1">
+                        <label class="block text-xs uppercase tracking-wider text-[#5C564B] font-medium mb-1.5">Postal Code *</label>
+                        {{ form.pincode }}
+                        {% if form.pincode.errors %}
+                            <p class="text-xs text-red-600 mt-1 pl-1">{{ form.pincode.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs uppercase tracking-wider text-[#5C564B] font-medium mb-1.5">Country</label>
+                        {{ form.country }}
+                    </div>
+                    <div>
+                        <label class="block text-xs uppercase tracking-wider text-[#5C564B] font-medium mb-1.5">Address Type</label>
+                        {{ form.address_type }}
+                    </div>
+                </div>
+
+                <div class="pt-2">
+                    <label class="flex items-center gap-2 text-xs text-[#5C564B] cursor-pointer">
+                        {{ form.is_default }}
+                        <span>Set as my primary delivery destination</span>
+                    </label>
+                </div>
+
+                <div class="pt-6 border-t border-[#E8E4DC] flex items-center justify-end gap-3">
+                    <a href="{{ next_url|default:'/accounts/addresses/' }}" class="px-6 py-3 rounded-full border border-[#E8E4DC] bg-white text-[#5C564B] text-xs uppercase tracking-widest font-medium hover:bg-[#FAF8F5] transition">
+                        Cancel
+                    </a>
+                    <button type="submit" class="px-7 py-3 rounded-full bg-[#14241B] hover:bg-[#C2714F] text-white text-xs uppercase tracking-widest font-medium transition shadow-sm active:scale-95">
+                        Save Destination
+                    </button>
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+</div>
+{% endblock %}

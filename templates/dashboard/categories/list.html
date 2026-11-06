@@ -1,0 +1,225 @@
+{% extends 'dashboard/base.html' %}
+
+{% block header_title %}Category Management{% endblock %}
+
+{% block admin_content %}
+<div class="space-y-6">
+    
+    <!-- Top Bar with Stats & Add CTA -->
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+            <h2 class="text-xl font-bold text-emerald-dark">Store Categories & Taxonomy</h2>
+            <p class="text-xs text-textMuted mt-0.5">Manage master parent verticals, subcategories, sort orders, and product distributions</p>
+        </div>
+
+        <div class="flex items-center gap-3">
+            <form method="GET" class="relative">
+                {% if level %}<input type="hidden" name="level" value="{{ level }}">{% endif %}
+                <input 
+                    type="text" 
+                    name="q" 
+                    value="{{ query }}" 
+                    placeholder="Search categories..." 
+                    class="pl-9 pr-4 py-2 bg-white border border-emerald-border rounded-xl text-xs text-textMain focus:outline-none focus:ring-2 focus:ring-emerald transition w-48 sm:w-64 shadow-xs"
+                >
+                <div class="absolute left-3 top-2.5 text-textMuted">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                </div>
+            </form>
+
+            <a href="{% url 'dashboard:category_add' %}" class="flex items-center gap-2 px-4 py-2 bg-emerald hover:bg-emerald-hover text-white rounded-xl text-xs font-bold transition shadow-sm active:scale-95 shrink-0">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
+                <span>Add Category</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- Quick Filter Tabs -->
+    <div class="flex items-center gap-2 border-b border-emerald-border/60 pb-3 text-xs font-medium">
+        <a 
+            href="?level=all{% if query %}&q={{ query }}{% endif %}" 
+            class="px-4 py-2 rounded-xl transition flex items-center gap-2 {% if level == 'all' or not level %}bg-emerald text-white font-bold shadow-xs{% else %}bg-white text-textMuted hover:text-emerald-dark hover:bg-mint-tint border border-emerald-border/50{% endif %}"
+        >
+            <span>All Categories</span>
+            <span class="px-2 py-0.5 rounded-full text-[10px] {% if level == 'all' or not level %}bg-white/20 text-white{% else %}bg-mint-soft text-emerald{% endif %}">{{ total_count }}</span>
+        </a>
+
+        <a 
+            href="?level=parents{% if query %}&q={{ query }}{% endif %}" 
+            class="px-4 py-2 rounded-xl transition flex items-center gap-2 {% if level == 'parents' %}bg-emerald text-white font-bold shadow-xs{% else %}bg-white text-textMuted hover:text-emerald-dark hover:bg-mint-tint border border-emerald-border/50{% endif %}"
+        >
+            <span>Parent Verticals</span>
+            <span class="px-2 py-0.5 rounded-full text-[10px] {% if level == 'parents' %}bg-white/20 text-white{% else %}bg-mint-soft text-emerald{% endif %}">{{ parents_count }}</span>
+        </a>
+
+        <a 
+            href="?level=subcategories{% if query %}&q={{ query }}{% endif %}" 
+            class="px-4 py-2 rounded-xl transition flex items-center gap-2 {% if level == 'subcategories' %}bg-emerald text-white font-bold shadow-xs{% else %}bg-white text-textMuted hover:text-emerald-dark hover:bg-mint-tint border border-emerald-border/50{% endif %}"
+        >
+            <span>Subcategories</span>
+            <span class="px-2 py-0.5 rounded-full text-[10px] {% if level == 'subcategories' %}bg-white/20 text-white{% else %}bg-mint-soft text-emerald{% endif %}">{{ subcategories_count }}</span>
+        </a>
+    </div>
+
+    <!-- Categories Data Table Card -->
+    <div class="bg-white rounded-2xl border border-emerald-border/70 shadow-sm overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs">
+                <thead>
+                    <tr class="bg-mint-tint/60 border-b border-emerald-border/60 text-textMuted uppercase tracking-wider text-[11px]">
+                        <th class="py-3.5 px-4 font-semibold w-16">Icon</th>
+                        <th class="py-3.5 px-4 font-semibold min-w-[200px]">Category & Slug</th>
+                        <th class="py-3.5 px-4 font-semibold min-w-[160px]">Hierarchy Level</th>
+                        <th class="py-3.5 px-4 font-semibold">Total Items</th>
+                        <th class="py-3.5 px-4 font-semibold">Sort</th>
+                        <th class="py-3.5 px-4 font-semibold">Status</th>
+                        <th class="py-3.5 px-4 font-semibold text-right min-w-[160px]">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-emerald-border/30">
+                    {% for cat in page_obj %}
+                        <tr class="{% if not cat.parent %}bg-[#FAFBF9]/80 font-medium{% else %}hover:bg-page/60{% endif %} transition">
+                            <!-- Thumbnail / Modern Placeholder -->
+                            <td class="py-3 px-4">
+                                <div class="w-10 h-10 rounded-xl {% if not cat.parent %}bg-emerald/10 border-emerald/20{% else %}bg-mint-tint border-emerald-border/40{% endif %} border overflow-hidden flex items-center justify-center shrink-0">
+                                    {% if cat.image %}
+                                        <img src="{{ cat.image.url }}" alt="{{ cat.name }}" class="w-full h-full object-cover">
+                                    {% else %}
+                                        {% if not cat.parent %}
+                                            <svg class="w-5 h-5 text-emerald" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
+                                        {% else %}
+                                            <svg class="w-4 h-4 text-textMuted" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/></svg>
+                                        {% endif %}
+                                    {% endif %}
+                                </div>
+                            </td>
+
+                            <!-- Category Name & Tree Indicator -->
+                            <td class="py-3 px-4">
+                                <div class="flex items-center gap-2">
+                                    {% if cat.parent %}
+                                        <span class="text-textMuted font-mono text-sm leading-none pl-2">↳</span>
+                                    {% endif %}
+                                    <div>
+                                        <div class="flex items-center gap-2">
+                                            <span class="{% if not cat.parent %}font-bold text-forest-dark text-sm{% else %}font-medium text-textMain text-xs{% endif %}">
+                                                {{ cat.name }}
+                                            </span>
+                                            {% if not cat.parent %}
+                                                <span class="px-2 py-0.5 rounded-full text-[9px] font-bold bg-forest-dark text-white uppercase tracking-wider">Vertical</span>
+                                            {% endif %}
+                                        </div>
+                                        <span class="text-[10px] text-textMuted font-mono block mt-0.5">/{{ cat.slug }}/</span>
+                                    </div>
+                                </div>
+                            </td>
+
+                            <!-- Hierarchy Level Badge (Strict Non-Wrapping) -->
+                            <td class="py-3 px-4">
+                                {% if cat.parent %}
+                                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px] font-semibold bg-gray-100 text-gray-700 whitespace-nowrap border border-gray-200">
+                                        <span class="text-textMuted">Child of:</span>
+                                        <span class="font-bold text-forest-dark">{{ cat.parent.name }}</span>
+                                    </span>
+                                {% else %}
+                                    <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[10px] font-bold bg-mint-soft text-emerald whitespace-nowrap border border-emerald/20">
+                                        <svg class="w-3 h-3 text-emerald" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                                        <span>Top-Level Parent</span>
+                                    </span>
+                                {% endif %}
+                            </td>
+
+                            <!-- Products Count -->
+                            <td class="py-3 px-4 font-semibold text-textMain whitespace-nowrap">
+                                <span class="px-2 py-0.5 rounded-md {% if cat.total_items_count > 0 %}bg-mint-tint text-emerald-dark font-bold{% else %}bg-gray-100 text-gray-500{% endif %}">
+                                    {{ cat.total_items_count }} items
+                                </span>
+                                {% if not cat.parent and cat.children.count > 0 %}
+                                    <span class="text-[10px] text-textMuted block mt-0.5 font-normal">
+                                        Across {{ cat.children.count }} subcategories
+                                    </span>
+                                {% endif %}
+                            </td>
+
+                            <!-- Sort Order -->
+                            <td class="py-3 px-4 text-textMuted font-mono">
+                                {{ cat.sort_order }}
+                            </td>
+
+                            <!-- Status -->
+                            <td class="py-3 px-4 whitespace-nowrap">
+                                {% if cat.is_active %}
+                                    <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-mint-soft text-emerald">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-emerald"></span>
+                                        <span>Active</span>
+                                    </span>
+                                {% else %}
+                                    <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-gray-100 text-gray-500">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-gray-400"></span>
+                                        <span>Hidden</span>
+                                    </span>
+                                {% endif %}
+                            </td>
+
+                            <!-- Actions (Styled Buttons) -->
+                            <td class="py-3 px-4 text-right whitespace-nowrap">
+                                <div class="flex items-center justify-end gap-1.5">
+                                    <a 
+                                        href="{% url 'dashboard:category_edit' cat.id %}" 
+                                        class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg border border-emerald-border/80 text-emerald hover:bg-mint-tint font-bold text-xs transition hover:border-emerald"
+                                        title="Edit Category"
+                                    >
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
+                                        <span>Edit</span>
+                                    </a>
+
+                                    <form method="POST" action="{% url 'dashboard:category_delete' cat.id %}" onsubmit="return confirm('Are you sure you want to delete category {{ cat.name }}? This cannot be undone.');" class="inline">
+                                        {% csrf_token %}
+                                        <button 
+                                            type="submit" 
+                                            class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg border border-red-200 text-red-600 hover:bg-red-50 font-bold text-xs transition hover:border-red-400"
+                                            title="Delete Category"
+                                        >
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                            <span>Delete</span>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="7" class="py-12 text-center text-textMuted">
+                                <div class="max-w-xs mx-auto space-y-2">
+                                    <svg class="w-8 h-8 text-textMuted mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"/></svg>
+                                    <p class="font-bold text-forest-dark">No categories found</p>
+                                    <p class="text-[11px]">No categories match your search or filter criteria.</p>
+                                </div>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination -->
+        {% if page_obj.has_other_pages %}
+            <div class="px-6 py-4 border-t border-emerald-border/60 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-textMuted">
+                <span>Showing {{ page_obj.start_index }} - {{ page_obj.end_index }} of {{ page_obj.paginator.count }} categories</span>
+                <div class="flex items-center gap-1.5">
+                    {% if page_obj.has_previous %}
+                        <a href="?page={{ page_obj.previous_page_number }}{% if query %}&q={{ query }}{% endif %}{% if level %}&level={{ level }}{% endif %}" class="px-3 py-1.5 rounded-lg border border-emerald-border hover:bg-mint-tint font-medium transition">Previous</a>
+                    {% endif %}
+                    
+                    <span class="px-3 py-1.5 bg-emerald text-white font-bold rounded-lg shadow-xs">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+                    
+                    {% if page_obj.has_next %}
+                        <a href="?page={{ page_obj.next_page_number }}{% if query %}&q={{ query }}{% endif %}{% if level %}&level={{ level }}{% endif %}" class="px-3 py-1.5 rounded-lg border border-emerald-border hover:bg-mint-tint font-medium transition">Next</a>
+                    {% endif %}
+                </div>
+            </div>
+        {% endif %}
+    </div>
+
+</div>
+{% endblock %}

@@ -1,0 +1,81 @@
+<!-- AvailSmart Luxury Editorial Footer - Crookeries Edition -->
+<footer class="bg-forest-dark text-[#FAF8F5] pt-14 pb-24 md:pb-14 mt-20 border-t border-forest">
+    <!-- Main Footer Content -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+        <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-8">
+            
+            <!-- Brand Column -->
+            <div class="col-span-2 space-y-4">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-2xl bg-forest border border-emerald/30 flex items-center justify-center text-white shadow-xs">
+                        <svg class="w-5 h-5 text-emerald-tint" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg>
+                    </div>
+                    <span class="font-editorial text-2xl font-bold tracking-tight text-white">Avail<span class="text-emerald font-sans font-bold">Smart</span><span class="text-clay text-2xl font-editorial">.</span></span>
+                </div>
+                <p class="text-xs text-[#FAF8F5]/70 leading-relaxed max-w-sm font-normal">
+                    Curated objects shaped for slow mornings, tactile permanence, and intentional living. Hand-poured ceramics, organic textiles, and conscious lifestyle essentials.
+                </p>
+                <div class="flex items-center gap-2.5 text-[11px] text-[#FAF8F5]/60 pt-1">
+                    <span class="inline-block w-2 h-2 rounded-full bg-clay animate-pulse"></span>
+                    <span>Studio Support Active • Mon–Sat 9:00 AM – 8:00 PM IST</span>
+                </div>
+            </div>
+
+            <!-- Categories -->
+            <div>
+                <h5 class="text-[11px] font-bold uppercase tracking-widest text-[#FAF8F5]/50 mb-3.5">Curations</h5>
+                <ul class="space-y-2 text-xs text-[#FAF8F5]/80">
+                    <li><a href="/catalog/home-living/" class="hover:text-white transition">Ceramics & Tableware</a></li>
+                    <li><a href="/catalog/fashion/" class="hover:text-white transition">Linen & Wardrobe</a></li>
+                    <li><a href="/catalog/electronics/" class="hover:text-white transition">Acoustic Audio</a></li>
+                    <li><a href="/catalog/beauty-wellness/" class="hover:text-white transition">Botanical Care</a></li>
+                    <li><a href="/catalog/lifestyle-fitness/" class="hover:text-white transition">Sanctuary Objects</a></li>
+                </ul>
+            </div>
+
+            <!-- Customer Service -->
+            <div>
+                <h5 class="text-[11px] font-bold uppercase tracking-widest text-[#FAF8F5]/50 mb-3.5">Concierge</h5>
+                <ul class="space-y-2 text-xs text-[#FAF8F5]/80">
+                    <li><a href="{% url 'orders:track_order' %}" class="hover:text-white transition">Track Delivery</a></li>
+                    <li><a href="{% url 'catalog:story' %}" class="hover:text-white transition">The Studio Story</a></li>
+                    <li><a href="{% url 'orders:returns_policy' %}" class="hover:text-white transition">7-Day Home Trial & Returns</a></li>
+                    <li><a href="{% url 'catalog:contact' %}" class="hover:text-white transition">Contact Concierge</a></li>
+                    <li><a href="{% url 'catalog:faqs' %}" class="hover:text-white transition">Studio Care FAQs</a></li>
+                    <li><a href="/avail-admin/" class="text-clay hover:underline transition text-xs font-semibold">Staff Admin Desk</a></li>
+                </ul>
+            </div>
+
+            <!-- Newsletter -->
+            <div class="col-span-2 md:col-span-1">
+                <h5 class="text-[11px] font-bold uppercase tracking-widest text-[#FAF8F5]/50 mb-3.5">Private Releases</h5>
+                <p class="text-xs text-[#FAF8F5]/70 mb-3 leading-relaxed">Join our mailing circle for quiet studio drops and seasonal archives.</p>
+                <form class="space-y-2" onsubmit="event.preventDefault(); window.dispatchEvent(new CustomEvent('toast', { detail: { message: 'Subscribed to studio circle.', type: 'success' } }));">
+                    <input 
+                        type="email" 
+                        placeholder="Your email address" 
+                        class="w-full px-4 py-2.5 rounded-full bg-forest border border-[#FAF8F5]/20 text-white placeholder-[#FAF8F5]/40 text-xs focus:outline-none focus:ring-2 focus:ring-clay"
+                        required
+                    >
+                    <button type="submit" class="w-full py-2.5 bg-clay hover:bg-clay-hover text-white rounded-full text-xs font-semibold tracking-wider transition shadow-2xs">
+                        Request Invite
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bottom Bar -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 border-t border-forest/60 flex flex-col sm:flex-row items-center justify-between gap-4 text-[11px] text-[#FAF8F5]/50">
+        <div>
+            © 2026 AvailSmart Studio Private Limited. Crafted with Django, Alpine.js & Tailwind CSS.
+        </div>
+        <div class="flex items-center gap-4">
+            <a href="{% url 'catalog:story' %}" class="hover:text-white cursor-pointer transition">Studio Manifesto</a>
+            <span>•</span>
+            <a href="{% url 'catalog:privacy' %}" class="hover:text-white cursor-pointer transition">Privacy & Ethics</a>
+            <span>•</span>
+            <a href="{% url 'catalog:terms' %}" class="hover:text-white cursor-pointer transition">Terms of Craft</a>
+        </div>
+    </div>
+</footer>

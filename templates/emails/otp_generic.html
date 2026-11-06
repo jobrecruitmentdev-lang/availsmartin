@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Verification Code - AvailSmart</title>
+</head>
+<body style="font-family: sans-serif; background: #FAF8F5; padding: 20px;">
+    <div style="max-width: 500px; margin: 0 auto; background: #fff; padding: 30px; border-radius: 16px; border: 1px solid #EAE5DE;">
+        <h2 style="color: #14241B;">AvailSmart Security Code</h2>
+        <p>Your 6-digit verification code is:</p>
+        <div style="font-size: 32px; font-weight: bold; letter-spacing: 6px; padding: 15px; background: #F5EFEB; text-align: center; border-radius: 10px; margin: 20px 0;">
+            {{ otp_code }}
+        </div>
+        <p style="font-size: 12px; color: #777;">Valid for {{ expiry_minutes }} minutes.</p>
+    </div>
+</body>
+</html>

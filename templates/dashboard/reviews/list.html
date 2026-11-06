@@ -1,0 +1,117 @@
+{% extends 'dashboard/base.html' %}
+
+{% block header_title %}Customer Reviews{% endblock %}
+
+{% block admin_content %}
+<div class="space-y-6">
+    
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+            <h2 class="text-xl font-bold text-emerald-dark">Product Reviews & Ratings</h2>
+            <p class="text-xs text-textMuted">Moderate customer reviews before they appear live on product pages</p>
+        </div>
+
+        <div class="flex items-center gap-2">
+            <a href="{% url 'dashboard:review_list' %}" class="px-3.5 py-1.5 rounded-full text-xs font-semibold {% if not selected_status %}bg-emerald text-white{% else %}bg-white border border-emerald-border text-textMain hover:bg-page{% endif %} transition">
+                All Reviews
+            </a>
+            <a href="{% url 'dashboard:review_list' %}?status=pending" class="px-3.5 py-1.5 rounded-full text-xs font-semibold {% if selected_status == 'pending' %}bg-accent-orange text-white{% else %}bg-white border border-emerald-border text-textMain hover:bg-page{% endif %} transition">
+                Pending Approval
+            </a>
+            <a href="{% url 'dashboard:review_list' %}?status=approved" class="px-3.5 py-1.5 rounded-full text-xs font-semibold {% if selected_status == 'approved' %}bg-emerald text-white{% else %}bg-white border border-emerald-border text-textMain hover:bg-page{% endif %} transition">
+                Approved
+            </a>
+        </div>
+    </div>
+
+    <!-- Reviews Table Card -->
+    <div class="bg-white rounded-2xl border border-emerald-border/70 shadow-sm overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs">
+                <thead>
+                    <tr class="bg-mint-tint/50 border-b border-emerald-border/60 text-textMuted uppercase tracking-wider">
+                        <th class="py-3.5 px-4 font-semibold">Product</th>
+                        <th class="py-3.5 px-4 font-semibold">Customer</th>
+                        <th class="py-3.5 px-4 font-semibold">Rating</th>
+                        <th class="py-3.5 px-4 font-semibold">Review Comment</th>
+                        <th class="py-3.5 px-4 font-semibold">Date</th>
+                        <th class="py-3.5 px-4 font-semibold">Status</th>
+                        <th class="py-3.5 px-4 font-semibold text-right">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-emerald-border/30">
+                    {% for r in page_obj %}
+                        <tr class="hover:bg-page transition">
+                            <td class="py-3.5 px-4">
+                                <a href="{% url 'dashboard:product_edit' r.product.id %}" class="font-bold text-textMain hover:text-emerald line-clamp-1">
+                                    {{ r.product.name }}
+                                </a>
+                            </td>
+                            <td class="py-3.5 px-4">
+                                <span class="font-semibold text-textMain block">{{ r.user.name }}</span>
+                                <span class="text-[10px] text-textMuted">{{ r.user.email }}</span>
+                            </td>
+                            <td class="py-3.5 px-4 font-bold text-amber-500 text-sm">
+                                ★ {{ r.rating }}
+                            </td>
+                            <td class="py-3.5 px-4 text-textMain max-w-sm">
+                                <p class="line-clamp-2">{{ r.comment }}</p>
+                            </td>
+                            <td class="py-3.5 px-4 text-textMuted">
+                                {{ r.created_at|date:"M d, Y" }}
+                            </td>
+                            <td class="py-3.5 px-4">
+                                {% if r.is_approved %}
+                                    <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-mint-soft text-emerald">Approved</span>
+                                {% else %}
+                                    <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800">Pending</span>
+                                {% endif %}
+                            </td>
+                            <td class="py-3.5 px-4 text-right">
+                                <div class="flex items-center justify-end gap-2">
+                                    {% if not r.is_approved %}
+                                        <form method="POST" action="{% url 'dashboard:review_approve' r.id %}" class="inline">
+                                            {% csrf_token %}
+                                            <button type="submit" class="px-3 py-1 rounded-lg bg-emerald text-white hover:bg-emerald-hover text-xs font-bold transition">
+                                                Approve
+                                            </button>
+                                        </form>
+                                    {% endif %}
+                                    <form method="POST" action="{% url 'dashboard:review_delete' r.id %}" onsubmit="return confirm('Delete this review?');" class="inline">
+                                        {% csrf_token %}
+                                        <button type="submit" class="px-2.5 py-1 rounded-lg text-red-600 hover:bg-red-50 text-xs font-semibold transition">
+                                            Delete
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="7" class="py-12 text-center text-textMuted">
+                                No reviews found in this view.
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        {% if page_obj.has_other_pages %}
+            <div class="px-6 py-4 border-t border-emerald-border/60 flex items-center justify-between text-xs text-textMuted">
+                <span>Showing {{ page_obj.start_index }} - {{ page_obj.end_index }} of {{ page_obj.paginator.count }}</span>
+                <div class="flex items-center gap-1">
+                    {% if page_obj.has_previous %}
+                        <a href="?page={{ page_obj.previous_page_number }}{% if selected_status %}&status={{ selected_status }}{% endif %}" class="px-3 py-1 rounded-lg border border-emerald-border hover:bg-mint-tint">Previous</a>
+                    {% endif %}
+                    <span class="px-3 py-1 bg-mint-tint font-bold text-emerald rounded-lg">{{ page_obj.number }}</span>
+                    {% if page_obj.has_next %}
+                        <a href="?page={{ page_obj.next_page_number }}{% if selected_status %}&status={{ selected_status }}{% endif %}" class="px-3 py-1 rounded-lg border border-emerald-border hover:bg-mint-tint">Next</a>
+                    {% endif %}
+                </div>
+            </div>
+        {% endif %}
+    </div>
+
+</div>
+{% endblock %}

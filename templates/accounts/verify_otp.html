@@ -1,0 +1,232 @@
+{% extends 'base.html' %}
+
+{% block title %}Verify Email - AvailSmart{% endblock %}
+
+{% block content %}
+<div class="min-h-[75vh] flex items-center justify-center py-12 px-4 sm:px-6">
+    <div class="max-w-md w-full" x-data="otpVerificationApp()">
+        
+        <!-- Luxury Card -->
+        <div class="bg-white rounded-3xl border border-alabaster-border p-8 sm:p-10 shadow-luxury">
+            
+            <!-- Seal Icon -->
+            <div class="w-14 h-14 rounded-2xl bg-[#F5EFEB] border border-alabaster-border flex items-center justify-center mx-auto mb-6 text-forest-dark shadow-2xs">
+                <svg class="w-7 h-7 text-forest-dark" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+            </div>
+
+            <div class="text-center mb-8">
+                <span class="text-[10px] font-extrabold uppercase tracking-widest text-clay block mb-1">
+                    Security Verification
+                </span>
+                <h1 class="text-2xl font-bold font-editorial text-forest-dark">Verify Your Email</h1>
+                <p class="text-xs text-textMuted mt-2 leading-relaxed">
+                    We have dispatched a 6-digit confirmation code to:
+                    <span class="font-bold text-forest-dark block mt-0.5">{{ email }}</span>
+                </p>
+            </div>
+
+            <!-- Messages / Alerts -->
+            {% if messages %}
+                <div class="mb-6 space-y-2">
+                    {% for message in messages %}
+                        <div class="p-3.5 rounded-2xl text-xs font-medium flex items-center gap-2 {% if message.tags == 'error' %}bg-red-50 text-red-700 border border-red-200{% else %}bg-mint-tint text-emerald-dark border border-emerald-border/60{% endif %}">
+                            <span>{% if message.tags == 'error' %}⚠️{% else %}✓{% endif %}</span>
+                            <span>{{ message }}</span>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            <!-- OTP Form -->
+            <form method="POST" action="{% url 'accounts:verify_email' %}" @submit="handleSubmit">
+                {% csrf_token %}
+                <input type="hidden" name="email" value="{{ email }}">
+                <input type="hidden" name="otp_code" x-model="fullOtp">
+
+                <!-- 6 Digit Input Boxes -->
+                <div class="flex items-center justify-center gap-2 sm:gap-3 mb-6">
+                    <template x-for="(digit, index) in 6" :key="index">
+                        <input 
+                            type="text" 
+                            maxlength="1" 
+                            inputmode="numeric"
+                            pattern="[0-9]*"
+                            x-ref="'digit_' + index"
+                            @input="handleInput($event, index)"
+                            @keydown="handleKeyDown($event, index)"
+                            @paste="handlePaste($event)"
+                            class="w-12 h-14 text-center text-xl font-bold text-forest-dark bg-[#FAF8F5] border border-alabaster-border rounded-2xl focus:bg-white focus:border-forest-dark focus:ring-2 focus:ring-forest-light/20 outline-none transition shadow-2xs font-mono"
+                        >
+                    </template>
+                </div>
+
+                <!-- Submit Button -->
+                <button 
+                    type="submit" 
+                    :disabled="fullOtp.length !== 6 || isSubmitting"
+                    class="w-full py-3.5 rounded-full bg-forest-dark hover:bg-forest text-white text-xs font-semibold tracking-wider transition active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm flex items-center justify-center gap-2"
+                >
+                    <span x-show="!isSubmitting">Verify & Complete Registration &rarr;</span>
+                    <span x-show="isSubmitting" style="display: none;">Verifying Security Code...</span>
+                </button>
+            </form>
+
+            <!-- Resend Strip -->
+            <div class="mt-8 pt-6 border-t border-alabaster-border text-center">
+                <p class="text-xs text-textMuted mb-2">
+                    Didn't receive the email? Check your spam folder or
+                </p>
+                
+                <div class="flex items-center justify-center gap-2">
+                    <button 
+                        type="button" 
+                        @click="resendOtp()" 
+                        :disabled="timer > 0 || isResending"
+                        class="text-xs font-bold text-clay hover:underline disabled:text-textMuted disabled:no-underline transition flex items-center gap-1.5"
+                    >
+                        <span x-show="!isResending">Resend Code</span>
+                        <span x-show="isResending" style="display: none;">Dispatching...</span>
+                        <span x-show="timer > 0" class="text-textMuted font-mono">
+                            (<span x-text="formatTimer()"></span>)
+                        </span>
+                    </button>
+                </div>
+
+                <div class="mt-4">
+                    <a href="{% url 'accounts:register' %}" class="text-[11px] text-textMuted hover:text-forest-dark transition">
+                        &larr; Use a different email address
+                    </a>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+<!-- Alpine Controller for OTP Interaction -->
+<script>
+function otpVerificationApp() {
+    return {
+        email: '{{ email }}',
+        digits: ['', '', '', '', '', ''],
+        fullOtp: '',
+        timer: 45,
+        timerInterval: null,
+        isSubmitting: false,
+        isResending: false,
+
+        init() {
+            this.startTimer();
+            this.$nextTick(() => {
+                if (this.$refs['digit_0']) this.$refs['digit_0'].focus();
+            });
+        },
+
+        startTimer() {
+            this.timer = 45;
+            if (this.timerInterval) clearInterval(this.timerInterval);
+            this.timerInterval = setInterval(() => {
+                if (this.timer > 0) {
+                    this.timer--;
+                } else {
+                    clearInterval(this.timerInterval);
+                }
+            }, 1000);
+        },
+
+        formatTimer() {
+            const m = Math.floor(this.timer / 60);
+            const s = this.timer % 60;
+            return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+        },
+
+        handleInput(e, index) {
+            const val = e.target.value.replace(/[^0-9]/g, '');
+            e.target.value = val;
+            this.digits[index] = val;
+            this.updateFullOtp();
+
+            if (val && index < 5) {
+                const next = this.$refs['digit_' + (index + 1)];
+                if (next) next.focus();
+            }
+        },
+
+        handleKeyDown(e, index) {
+            if (e.key === 'Backspace' && !e.target.value && index > 0) {
+                const prev = this.$refs['digit_' + (index - 1)];
+                if (prev) {
+                    prev.focus();
+                    prev.value = '';
+                    this.digits[index - 1] = '';
+                    this.updateFullOtp();
+                }
+            }
+        },
+
+        handlePaste(e) {
+            e.preventDefault();
+            const text = (e.clipboardData || window.clipboardData).getData('text').replace(/[^0-9]/g, '');
+            if (!text) return;
+
+            const chars = text.slice(0, 6).split('');
+            chars.forEach((ch, idx) => {
+                if (idx < 6) {
+                    this.digits[idx] = ch;
+                    const input = this.$refs['digit_' + idx];
+                    if (input) input.value = ch;
+                }
+            });
+            this.updateFullOtp();
+            const lastIdx = Math.min(chars.length, 5);
+            if (this.$refs['digit_' + lastIdx]) {
+                this.$refs['digit_' + lastIdx].focus();
+            }
+        },
+
+        updateFullOtp() {
+            this.fullOtp = this.digits.join('');
+        },
+
+        handleSubmit() {
+            this.updateFullOtp();
+            if (this.fullOtp.length === 6) {
+                this.isSubmitting = true;
+            }
+        },
+
+        async resendOtp() {
+            if (this.timer > 0 || this.isResending) return;
+            this.isResending = true;
+
+            const formData = new FormData();
+            formData.append('email', this.email);
+            formData.append('purpose', 'registration');
+
+            try {
+                const res = await fetch("{% url 'accounts:resend_otp' %}", {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': getCookie('csrftoken'),
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: formData
+                });
+                const data = await res.json();
+                if (data.status === 'success') {
+                    window.dispatchEvent(new CustomEvent('toast', { detail: { message: data.message, type: 'success' } }));
+                    this.startTimer();
+                } else {
+                    window.dispatchEvent(new CustomEvent('toast', { detail: { message: data.message, type: 'warning' } }));
+                }
+            } catch (err) {
+                console.error("Resend OTP error:", err);
+            } finally {
+                this.isResending = false;
+            }
+        }
+    };
+}
+</script>
+{% endblock %}

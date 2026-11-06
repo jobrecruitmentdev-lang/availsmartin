@@ -1,0 +1,265 @@
+{% extends 'dashboard/base.html' %}
+
+{% block header_title %}Product Catalog{% endblock %}
+
+{% block admin_content %}
+<div class="space-y-6" x-data="{ selectAll: false, selectedCount: 0 }">
+    
+    <!-- Header with CTAs -->
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+            <h2 class="text-xl font-bold text-emerald-dark">Products & Variants</h2>
+            <p class="text-xs text-textMuted">Manage products, multi-color image sets, and size inventories</p>
+        </div>
+
+        <div class="flex items-center gap-3">
+            <a href="{% url 'dashboard:product_add' %}" class="flex items-center gap-2 px-4 py-2 bg-emerald hover:bg-emerald-hover text-white rounded-xl text-xs font-bold transition shadow-sm active:scale-95 shrink-0">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
+                <span>Add Product</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- Filters & Search Bar Card -->
+    <div class="bg-white p-4 rounded-2xl border border-emerald-border/70 shadow-sm">
+        <form method="GET" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+            <!-- Search -->
+            <div class="lg:col-span-2 relative">
+                <input 
+                    type="text" 
+                    name="q" 
+                    value="{{ query }}" 
+                    placeholder="Search by product name, SKU, or tag..." 
+                    class="w-full pl-9 pr-4 py-2 bg-page border border-emerald-border rounded-xl text-xs text-textMain focus:outline-none focus:ring-2 focus:ring-emerald transition"
+                >
+                <div class="absolute left-3 top-2.5 text-textMuted">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                </div>
+            </div>
+
+            <!-- Category Filter -->
+            <div>
+                <select name="category" class="w-full px-3 py-2 bg-page border border-emerald-border rounded-xl text-xs text-textMain focus:outline-none focus:ring-2 focus:ring-emerald transition">
+                    <option value="">All Categories</option>
+                    {% for c in categories %}
+                        <option value="{{ c.id }}" {% if selected_category == c.id|stringformat:"s" %}selected{% endif %}>{{ c.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <!-- Brand Filter -->
+            <div>
+                <select name="brand" class="w-full px-3 py-2 bg-page border border-emerald-border rounded-xl text-xs text-textMain focus:outline-none focus:ring-2 focus:ring-emerald transition">
+                    <option value="">All Brands</option>
+                    {% for b in brands %}
+                        <option value="{{ b.id }}" {% if selected_brand == b.id|stringformat:"s" %}selected{% endif %}>{{ b.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <!-- Filter Buttons -->
+            <div class="flex items-center gap-2">
+                <button type="submit" class="flex-1 py-2 bg-emerald hover:bg-emerald-hover text-white rounded-xl text-xs font-bold transition shadow-sm">
+                    Filter
+                </button>
+                {% if query or selected_category or selected_brand or selected_status %}
+                    <a href="{% url 'dashboard:product_list' %}" class="px-3 py-2 border border-emerald-border hover:bg-page text-textMuted rounded-xl text-xs font-semibold transition" title="Clear Filters">
+                        Clear
+                    </a>
+                {% endif %}
+            </div>
+        </form>
+    </div>
+
+    <!-- Products Table with Bulk Actions -->
+    <form method="POST" action="{% url 'dashboard:product_bulk_action' %}" id="bulkForm">
+        {% csrf_token %}
+
+        <div class="bg-white rounded-2xl border border-emerald-border/70 shadow-sm overflow-hidden">
+            
+            <!-- Bulk Action Toolbar -->
+            <div class="px-4 py-3 bg-mint-tint/40 border-b border-emerald-border/60 flex flex-wrap items-center justify-between gap-3 text-xs">
+                <div class="flex items-center gap-3">
+                    <label class="flex items-center gap-2 cursor-pointer font-semibold text-emerald-dark">
+                        <input 
+                            type="checkbox" 
+                            x-model="selectAll" 
+                            @change="
+                                $el.closest('table, form').querySelectorAll('.product-select').forEach(el => el.checked = selectAll);
+                                selectedCount = selectAll ? document.querySelectorAll('.product-select').length : 0;
+                            "
+                            class="w-4 h-4 rounded border-emerald-border text-emerald focus:ring-emerald"
+                        >
+                        <span>Select All</span>
+                    </label>
+                    <span class="text-textMuted" x-text="selectedCount + ' items selected'"></span>
+                </div>
+
+                <div class="flex items-center gap-2">
+                    <select name="bulk_action" class="px-3 py-1.5 bg-white border border-emerald-border rounded-xl text-xs text-textMain focus:outline-none focus:ring-2 focus:ring-emerald">
+                        <option value="">-- Bulk Actions --</option>
+                        <option value="activate">Activate Selected</option>
+                        <option value="deactivate">Deactivate Selected</option>
+                        <option value="feature">Mark as Featured</option>
+                        <option value="delete">Delete Selected</option>
+                    </select>
+                    <button type="submit" onclick="return confirm('Execute bulk action on selected items?');" class="px-3 py-1.5 bg-emerald hover:bg-emerald-hover text-white font-bold rounded-xl text-xs shadow-sm transition">
+                        Apply
+                    </button>
+                </div>
+            </div>
+
+            <!-- Table -->
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-xs">
+                    <thead>
+                        <tr class="border-b border-emerald-border/60 text-textMuted uppercase tracking-wider bg-page/50">
+                            <th class="py-3 px-4 w-10"></th>
+                            <th class="py-3 px-4 font-semibold">Product</th>
+                            <th class="py-3 px-4 font-semibold">Category & Brand</th>
+                            <th class="py-3 px-4 font-semibold">Pricing</th>
+                            <th class="py-3 px-4 font-semibold">Colors & Stock</th>
+                            <th class="py-3 px-4 font-semibold">Status</th>
+                            <th class="py-3 px-4 font-semibold text-right">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-emerald-border/30">
+                        {% for product in page_obj %}
+                            <tr class="hover:bg-page transition">
+                                <!-- Checkbox -->
+                                <td class="py-3 px-4">
+                                    <input 
+                                        type="checkbox" 
+                                        name="selected_products[]" 
+                                        value="{{ product.id }}" 
+                                        class="product-select w-4 h-4 rounded border-emerald-border text-emerald focus:ring-emerald"
+                                        @change="selectedCount = document.querySelectorAll('.product-select:checked').length"
+                                    >
+                                </td>
+
+                                <!-- Product Thumbnail & Name -->
+                                <td class="py-3 px-4">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-12 h-12 rounded-xl bg-page border border-emerald-border/60 overflow-hidden flex items-center justify-center shrink-0">
+                                            {% with p_img=product.primary_image %}
+                                                {% if p_img %}
+                                                    <img src="{{ p_img.image.url }}" alt="{{ product.name }}" class="w-full h-full object-cover">
+                                                {% else %}
+                                                    <span class="text-xs text-textMuted">No Pic</span>
+                                                {% endif %}
+                                            {% endwith %}
+                                        </div>
+                                        <div>
+                                            <a href="{% url 'dashboard:product_edit' product.id %}" class="font-bold text-textMain text-sm hover:text-emerald line-clamp-1">
+                                                {{ product.name }}
+                                            </a>
+                                            <div class="flex items-center gap-2 text-[10px] text-textMuted font-mono mt-0.5">
+                                                <span>SKU: {{ product.sku }}</span>
+                                                {% if product.is_featured %}
+                                                    <span class="px-1.5 py-0.2 rounded bg-amber-100 text-accent-orange font-bold font-sans">Featured</span>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+
+                                <!-- Category & Brand -->
+                                <td class="py-3 px-4">
+                                    <p class="font-semibold text-textMain">{{ product.category.name }}</p>
+                                    <p class="text-[10px] text-textMuted">{{ product.brand.name|default:"Unbranded" }}</p>
+                                </td>
+
+                                <!-- Pricing -->
+                                <td class="py-3 px-4">
+                                    <div class="font-bold text-emerald-dark text-sm">₹{{ product.effective_price }}</div>
+                                    {% if product.has_discount %}
+                                        <div class="flex items-center gap-1.5 text-[10px]">
+                                            <span class="text-textMuted line-through">₹{{ product.base_price }}</span>
+                                            <span class="text-accent-orange font-bold">{{ product.discount_percent }}% OFF</span>
+                                        </div>
+                                    {% endif %}
+                                </td>
+
+                                <!-- Colors & Stock -->
+                                <td class="py-3 px-4">
+                                    <!-- Color dots -->
+                                    <div class="flex items-center gap-1 mb-1">
+                                        {% for col in product.colors.all|slice:":4" %}
+                                            <span class="w-3 h-3 rounded-full border border-black/10 shrink-0" style="background-color: {{ col.color_hex }};" title="{{ col.color_name }}"></span>
+                                        {% endfor %}
+                                        <span class="text-[10px] text-textMuted font-semibold">({{ product.colors.count }} colors)</span>
+                                    </div>
+                                    <!-- Stock badge -->
+                                    <span class="px-2 py-0.5 rounded-full text-[10px] font-bold {% if product.total_stock <= 5 %}bg-red-100 text-red-700{% elif product.total_stock <= 15 %}bg-amber-100 text-amber-800{% else %}bg-mint-soft text-emerald{% endif %}">
+                                        {{ product.total_stock }} units in stock
+                                    </span>
+                                </td>
+
+                                <!-- Status -->
+                                <td class="py-3 px-4">
+                                    {% if product.is_active %}
+                                        <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-mint-soft text-emerald">Active</span>
+                                    {% else %}
+                                        <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-gray-100 text-gray-600">Draft / Inactive</span>
+                                    {% endif %}
+                                </td>
+
+                                <!-- Action Buttons -->
+                                <td class="py-3 px-4 text-right">
+                                    <div class="flex items-center justify-end gap-1.5">
+                                        <a href="/catalog/{{ product.slug }}/" target="_blank" class="p-1.5 rounded-lg text-textMuted hover:text-emerald hover:bg-mint-tint transition" title="Preview on live site">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                                        </a>
+                                        <a href="{% url 'dashboard:product_edit' product.id %}" class="p-1.5 rounded-lg text-emerald hover:bg-mint-tint transition font-bold" title="Edit Product">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                                        </a>
+                                        <button 
+                                            type="button" 
+                                            onclick="if(confirm('Delete product {{ product.name }}?')) { document.getElementById('delete-prod-{{ product.id }}').submit(); }" 
+                                            class="p-1.5 rounded-lg text-red-600 hover:bg-red-50 transition" 
+                                            title="Delete"
+                                        >
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="7" class="py-12 text-center text-textMuted">
+                                    No products found matching query.
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination -->
+            {% if page_obj.has_other_pages %}
+                <div class="px-6 py-4 border-t border-emerald-border/60 flex items-center justify-between text-xs text-textMuted">
+                    <span>Showing {{ page_obj.start_index }} - {{ page_obj.end_index }} of {{ page_obj.paginator.count }} products</span>
+                    <div class="flex items-center gap-1">
+                        {% if page_obj.has_previous %}
+                            <a href="?page={{ page_obj.previous_page_number }}{% if query %}&q={{ query }}{% endif %}{% if selected_category %}&category={{ selected_category }}{% endif %}" class="px-3 py-1 rounded-lg border border-emerald-border hover:bg-mint-tint">Previous</a>
+                        {% endif %}
+                        <span class="px-3 py-1 bg-mint-tint font-bold text-emerald rounded-lg">{{ page_obj.number }}</span>
+                        {% if page_obj.has_next %}
+                            <a href="?page={{ page_obj.next_page_number }}{% if query %}&q={{ query }}{% endif %}{% if selected_category %}&category={{ selected_category }}{% endif %}" class="px-3 py-1 rounded-lg border border-emerald-border hover:bg-mint-tint">Next</a>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endif %}
+
+        </div>
+    </form>
+
+    <!-- Hidden Individual Delete Forms -->
+    {% for product in page_obj %}
+        <form id="delete-prod-{{ product.id }}" method="POST" action="{% url 'dashboard:product_delete' product.id %}" style="display: none;">
+            {% csrf_token %}
+        </form>
+    {% endfor %}
+
+</div>
+{% endblock %}

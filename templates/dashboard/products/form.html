@@ -1,0 +1,657 @@
+{% extends 'dashboard/base.html' %}
+
+{% block header_title %}{{ title }}{% endblock %}
+
+{% block admin_content %}
+<div 
+    class="max-w-6xl mx-auto space-y-8 pb-16"
+    x-data="productFormController()"
+    x-init="initData()"
+>
+    
+    <!-- Top Action Bar -->
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+            <h2 class="text-xl font-bold text-emerald-dark">{{ title }}</h2>
+            <p class="text-xs text-textMuted">Complete product details, dynamic specifications, multi-color sets & size variants</p>
+        </div>
+        <div class="flex items-center gap-3">
+            <a href="{% url 'dashboard:product_list' %}" class="px-4 py-2 rounded-full border border-emerald-border text-xs font-semibold text-textMuted hover:bg-page transition">
+                Cancel
+            </a>
+            <button 
+                type="button" 
+                @click="submitForm()"
+                class="px-6 py-2.5 rounded-full bg-emerald hover:bg-emerald-hover text-white text-xs font-bold shadow-md shadow-emerald/20 transition active:scale-95"
+            >
+                {% if product %}Update Product{% else %}Publish Product{% endif %}
+            </button>
+        </div>
+    </div>
+
+    <!-- Main Multi-Part Form -->
+    <form id="productMainForm" method="POST" enctype="multipart/form-data" class="space-y-8">
+        {% csrf_token %}
+
+        <!-- Hidden input for total colors count -->
+        <input type="hidden" name="color_count" :value="colors.length">
+
+        <!-- 1. General & Categorization Details Card -->
+        <div class="bg-white rounded-3xl border border-emerald-border/80 shadow-soft p-6 sm:p-8 space-y-6">
+            <div class="border-b border-emerald-border/60 pb-3 flex items-center justify-between">
+                <h3 class="text-sm font-bold uppercase tracking-wider text-emerald-dark flex items-center gap-2">
+                    <span class="w-6 h-6 rounded-lg bg-mint-tint text-emerald flex items-center justify-center text-xs">1</span>
+                    <span>General Information</span>
+                </h3>
+                <span class="text-xs text-textMuted">* Required fields</span>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                <!-- Name -->
+                <div class="md:col-span-2">
+                    <label class="block text-xs font-bold text-textMain uppercase tracking-wider mb-1.5">Product Title *</label>
+                    {{ form.name }}
+                    {% if form.name.errors %}<p class="text-xs text-red-600 mt-1">{{ form.name.errors.0 }}</p>{% endif %}
+                </div>
+
+                <!-- Category -->
+                <div>
+                    <label class="block text-xs font-bold text-textMain uppercase tracking-wider mb-1.5">Category *</label>
+                    {{ form.category }}
+                    {% if form.category.errors %}<p class="text-xs text-red-600 mt-1">{{ form.category.errors.0 }}</p>{% endif %}
+                </div>
+
+                <!-- Brand -->
+                <div>
+                    <label class="block text-xs font-bold text-textMain uppercase tracking-wider mb-1.5">Brand / Label</label>
+                    {{ form.brand }}
+                    {% if form.brand.errors %}<p class="text-xs text-red-600 mt-1">{{ form.brand.errors.0 }}</p>{% endif %}
+                </div>
+
+                <!-- Short Description -->
+                <div class="md:col-span-2">
+                    <label class="block text-xs font-bold text-textMain uppercase tracking-wider mb-1.5">Short Card Teaser</label>
+                    {{ form.short_description }}
+                    {% if form.short_description.errors %}<p class="text-xs text-red-600 mt-1">{{ form.short_description.errors.0 }}</p>{% endif %}
+                </div>
+
+                <!-- Full Description -->
+                <div class="md:col-span-2">
+                    <label class="block text-xs font-bold text-textMain uppercase tracking-wider mb-1.5">Full Detailed Description</label>
+                    {{ form.full_description }}
+                    {% if form.full_description.errors %}<p class="text-xs text-red-600 mt-1">{{ form.full_description.errors.0 }}</p>{% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. Pricing, SKU & Physical Dimensions Card -->
+        <div class="bg-white rounded-3xl border border-emerald-border/80 shadow-soft p-6 sm:p-8 space-y-6">
+            <div class="border-b border-emerald-border/60 pb-3 flex items-center justify-between">
+                <h3 class="text-sm font-bold uppercase tracking-wider text-emerald-dark flex items-center gap-2">
+                    <span class="w-6 h-6 rounded-lg bg-mint-tint text-emerald flex items-center justify-center text-xs">2</span>
+                    <span>Pricing & Inventory Logistics</span>
+                </h3>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-5">
+                <!-- Base Price -->
+                <div>
+                    <label class="block text-xs font-bold text-textMain uppercase tracking-wider mb-1.5">Base Price (MSRP / ₹) *</label>
+                    {{ form.base_price }}
+                    {% if form.base_price.errors %}<p class="text-xs text-red-600 mt-1">{{ form.base_price.errors.0 }}</p>{% endif %}
+                </div>
+
+                <!-- Discount Price -->
+                <div>
+                    <label class="block text-xs font-bold text-textMain uppercase tracking-wider mb-1.5">Discount Price (Selling / ₹)</label>
+                    {{ form.discount_price }}
+                    {% if form.discount_price.errors %}<p class="text-xs text-red-600 mt-1">{{ form.discount_price.errors.0 }}</p>{% endif %}
+                </div>
+
+                <!-- SKU -->
+                <div>
+                    <label class="block text-xs font-bold text-textMain uppercase tracking-wider mb-1.5">Master SKU *</label>
+                    {{ form.sku }}
+                    {% if form.sku.errors %}<p class="text-xs text-red-600 mt-1">{{ form.sku.errors.0 }}</p>{% endif %}
+                </div>
+
+                <!-- Weight -->
+                <div>
+                    <label class="block text-xs font-bold text-textMain uppercase tracking-wider mb-1.5">Weight</label>
+                    {{ form.weight }}
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-textMain uppercase tracking-wider mb-1.5">Weight Unit</label>
+                    {{ form.weight_unit }}
+                </div>
+
+                <!-- Material -->
+                <div>
+                    <label class="block text-xs font-bold text-textMain uppercase tracking-wider mb-1.5">Material Composition</label>
+                    {{ form.material }}
+                </div>
+
+                <!-- Dimensions -->
+                <div>
+                    <label class="block text-xs font-bold text-textMain uppercase tracking-wider mb-1.5">Length (cm)</label>
+                    {{ form.length }}
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-textMain uppercase tracking-wider mb-1.5">Width (cm)</label>
+                    {{ form.width }}
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-textMain uppercase tracking-wider mb-1.5">Height (cm)</label>
+                    {{ form.height }}
+                </div>
+
+                <!-- Tags -->
+                <div class="sm:col-span-3">
+                    <label class="block text-xs font-bold text-textMain uppercase tracking-wider mb-1.5">Search Keywords & Tags</label>
+                    {{ form.tags }}
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. Dynamic Specifications Card -->
+        <div class="bg-white rounded-3xl border border-emerald-border/80 shadow-soft p-6 sm:p-8 space-y-6">
+            <div class="border-b border-emerald-border/60 pb-3 flex items-center justify-between">
+                <div>
+                    <h3 class="text-sm font-bold uppercase tracking-wider text-emerald-dark flex items-center gap-2">
+                        <span class="w-6 h-6 rounded-lg bg-mint-tint text-emerald flex items-center justify-center text-xs">3</span>
+                        <span>Product Specifications</span>
+                    </h3>
+                    <p class="text-xs text-textMuted mt-0.5">Dynamic key-value pairs (e.g., Sole Material: Rubber, Battery: 5000mAh)</p>
+                </div>
+                <button 
+                    type="button" 
+                    @click="addSpec()" 
+                    class="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-mint-tint hover:bg-mint-soft text-emerald-dark font-bold text-xs border border-emerald-border transition"
+                >
+                    <svg class="w-3.5 h-3.5 text-emerald" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
+                    <span>+ Add Row</span>
+                </button>
+            </div>
+
+            <!-- Dynamic Spec Rows -->
+            <div class="space-y-3">
+                <template x-for="(spec, sIndex) in specs" :key="sIndex">
+                    <div class="flex items-center gap-3">
+                        <div class="flex-1">
+                            <input 
+                                type="text" 
+                                name="spec_keys[]" 
+                                x-model="spec.key" 
+                                placeholder="Specification Key (e.g. Fabric, Battery, Warranty)"
+                                class="w-full px-4 py-2 bg-page border border-emerald-border rounded-xl text-xs text-textMain focus:outline-none focus:ring-2 focus:ring-emerald"
+                            >
+                        </div>
+                        <div class="flex-1">
+                            <input 
+                                type="text" 
+                                name="spec_values[]" 
+                                x-model="spec.value" 
+                                placeholder="Specification Value (e.g. 100% Linen, 40 Hours, 2 Years)"
+                                class="w-full px-4 py-2 bg-page border border-emerald-border rounded-xl text-xs text-textMain focus:outline-none focus:ring-2 focus:ring-emerald"
+                            >
+                        </div>
+                        <button 
+                            type="button" 
+                            @click="removeSpec(sIndex)"
+                            class="p-2 text-textMuted hover:text-red-600 rounded-xl hover:bg-red-50 transition"
+                            title="Remove specification"
+                        >
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                        </button>
+                    </div>
+                </template>
+                <div x-show="specs.length === 0" class="text-xs text-textMuted py-3 text-center">
+                    No specifications added. Click "+ Add Row" above to add dynamic attributes.
+                </div>
+            </div>
+        </div>
+
+        <!-- 4. DYNAMIC MULTI-COLOR, MULTI-IMAGE & SIZE VARIANTS SECTION -->
+        <div class="bg-white rounded-3xl border border-emerald-border/80 shadow-soft p-6 sm:p-8 space-y-6">
+            <div class="border-b border-emerald-border/60 pb-3 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div>
+                    <h3 class="text-sm font-bold uppercase tracking-wider text-emerald-dark flex items-center gap-2">
+                        <span class="w-6 h-6 rounded-lg bg-mint-tint text-emerald flex items-center justify-center text-xs">4</span>
+                        <span>Product Colors, Image Gallery & Size Variants</span>
+                    </h3>
+                    <p class="text-xs text-textMuted mt-0.5">
+                        Each color has its own separate set of multiple images and size variants with inventory stock.
+                    </p>
+                </div>
+
+                <button 
+                    type="button" 
+                    @click="addColor()" 
+                    class="flex items-center gap-2 px-5 py-2.5 rounded-full bg-emerald hover:bg-emerald-hover text-white font-bold text-xs shadow-md shadow-emerald/20 transition active:scale-95 shrink-0"
+                >
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
+                    <span>+ Add Color Swatch</span>
+                </button>
+            </div>
+
+            <!-- Dynamic Color Cards Container -->
+            <div class="space-y-8">
+                <template x-for="(color, cIdx) in colors" :key="cIdx">
+                    <div class="p-6 rounded-2xl bg-page border border-emerald-border space-y-6 relative transition">
+                        
+                        <!-- Color Card Header -->
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-emerald-border/60 pb-4">
+                            <div class="flex items-center gap-3">
+                                <!-- Swatch Visual preview circle -->
+                                <div class="w-8 h-8 rounded-full border-2 border-white shadow-sm shrink-0" :style="'background-color: ' + color.hex"></div>
+                                <div>
+                                    <h4 class="text-sm font-bold text-emerald-dark" x-text="color.name ? color.name : 'Color #' + (cIdx + 1)"></h4>
+                                    <span class="text-[10px] text-textMuted font-mono" x-text="color.hex"></span>
+                                </div>
+                            </div>
+
+                            <!-- Color Inputs & Delete Button -->
+                            <div class="flex items-center gap-3">
+                                <!-- Hidden existing color id if editing -->
+                                <input type="hidden" :name="'color_id_' + cIdx" :value="color.id">
+
+                                <!-- Color Name -->
+                                <input 
+                                    type="text" 
+                                    :name="'color_name_' + cIdx" 
+                                    x-model="color.name" 
+                                    placeholder="Color Name (e.g. Emerald Green)"
+                                    class="px-3.5 py-1.5 bg-white border border-emerald-border rounded-xl text-xs text-textMain focus:outline-none focus:ring-2 focus:ring-emerald w-44"
+                                    required
+                                >
+
+                                <!-- Native Color Picker & Hex Text -->
+                                <div class="flex items-center gap-1.5 bg-white border border-emerald-border rounded-xl px-2 py-1">
+                                    <input 
+                                        type="color" 
+                                        x-model="color.hex" 
+                                        class="w-6 h-6 rounded cursor-pointer border-0 bg-transparent p-0"
+                                    >
+                                    <input 
+                                        type="text" 
+                                        :name="'color_hex_' + cIdx" 
+                                        x-model="color.hex" 
+                                        class="w-18 text-[11px] font-mono text-textMain focus:outline-none"
+                                    >
+                                </div>
+
+                                <!-- Remove Color Button -->
+                                <button 
+                                    type="button" 
+                                    @click="removeColor(cIdx)" 
+                                    x-show="colors.length > 1"
+                                    class="p-2 text-textMuted hover:text-red-600 rounded-xl hover:bg-red-50 transition" 
+                                    title="Delete this color"
+                                >
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- PART A: Images Uploader for THIS color -->
+                        <div class="space-y-3">
+                            <label class="block text-xs font-bold text-emerald-dark uppercase tracking-wider">
+                                Upload Multiple Photos for <span x-text="color.name ? color.name : 'this color'"></span>
+                            </label>
+
+                            <!-- Existing Saved Photos (if editing) -->
+                            <template x-if="color.existing_images && color.existing_images.length > 0">
+                                <div>
+                                    <p class="text-[11px] text-textMuted mb-2">Saved Images in Database (Click to set Primary or delete):</p>
+                                    <div class="flex flex-wrap gap-3">
+                                        <template x-for="img in color.existing_images" :key="img.id">
+                                            <div class="relative w-24 h-24 rounded-2xl bg-white border border-emerald-border/80 p-1 flex flex-col items-center justify-center overflow-hidden group shadow-sm">
+                                                <img :src="img.url" class="w-full h-full object-contain rounded-xl">
+                                                
+                                                <!-- Primary Badge -->
+                                                <template x-if="img.is_primary">
+                                                    <span class="absolute top-1.5 left-1.5 bg-emerald text-white text-[9px] font-bold px-1.5 py-0.5 rounded-md shadow-sm">
+                                                        Primary
+                                                    </span>
+                                                </template>
+
+                                                <!-- Action Overlay on Hover -->
+                                                <div class="absolute inset-0 bg-emerald-dark/80 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-1.5 p-1 text-white">
+                                                    <label class="flex items-center gap-1 text-[9px] cursor-pointer">
+                                                        <input 
+                                                            type="radio" 
+                                                            :name="'existing_primary_' + color.id" 
+                                                            :value="img.id" 
+                                                            :checked="img.is_primary"
+                                                            class="text-emerald"
+                                                        >
+                                                        <span>Set Primary</span>
+                                                    </label>
+
+                                                    <label class="flex items-center gap-1 text-[9px] text-red-300 cursor-pointer">
+                                                        <input type="checkbox" name="delete_images[]" :value="img.id">
+                                                        <span>Delete</span>
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </template>
+                                    </div>
+                                </div>
+                            </template>
+
+                            <!-- Multi-File Drag & Drop Zone -->
+                            <div class="border-2 border-dashed border-emerald-border/80 hover:border-emerald rounded-2xl p-4 bg-white text-center cursor-pointer transition">
+                                <input 
+                                    type="file" 
+                                    :name="'color_images_' + cIdx" 
+                                    multiple 
+                                    accept="image/*"
+                                    @change="previewImages($event, cIdx)"
+                                    class="w-full text-xs text-textMuted file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-mint-tint file:text-emerald hover:file:bg-mint-soft cursor-pointer"
+                                >
+                                <p class="text-[11px] text-textMuted mt-1">Select one or multiple photos (.webp, .jpg, .png). High-resolution photos auto-generate thumbnails.</p>
+                            </div>
+
+                            <!-- Client-Side Instant Previews of newly selected files -->
+                            <template x-if="color.new_previews && color.new_previews.length > 0">
+                                <div>
+                                    <p class="text-[11px] font-semibold text-emerald mt-2">New Photos Queued for Upload:</p>
+                                    <div class="flex flex-wrap gap-3 mt-1.5">
+                                        <template x-for="(prev, pIdx) in color.new_previews" :key="pIdx">
+                                            <div class="relative w-20 h-20 rounded-xl bg-white border border-emerald-border p-1 overflow-hidden shadow-sm">
+                                                <img :src="prev" class="w-full h-full object-contain rounded-lg">
+                                                <label class="absolute bottom-1 left-1 right-1 bg-black/60 text-white text-[8px] rounded px-1 py-0.5 text-center cursor-pointer flex items-center justify-center gap-1">
+                                                    <input type="radio" :name="'primary_image_' + cIdx" :value="pIdx" :checked="pIdx === 0">
+                                                    <span>Primary</span>
+                                                </label>
+                                            </div>
+                                        </template>
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
+
+                        <!-- PART B: Size Variants Table under THIS Color -->
+                        <div class="space-y-3 pt-3 border-t border-emerald-border/40">
+                            <div class="flex items-center justify-between">
+                                <label class="block text-xs font-bold text-emerald-dark uppercase tracking-wider">
+                                    Size Variants & Stock Quantities
+                                </label>
+                                <button 
+                                    type="button" 
+                                    @click="addVariant(cIdx)" 
+                                    class="text-xs text-emerald font-bold hover:underline flex items-center gap-1"
+                                >
+                                    <span>+ Add Size Variant</span>
+                                </button>
+                            </div>
+
+                            <div class="space-y-2">
+                                <template x-for="(variant, vIdx) in color.variants" :key="vIdx">
+                                    <div class="p-3 bg-white rounded-xl border border-emerald-border/70 flex flex-wrap sm:flex-nowrap items-center gap-3">
+                                        <!-- Hidden Variant ID if existing -->
+                                        <input type="hidden" :name="'variant_id_' + cIdx + '[]'" :value="variant.id">
+
+                                        <!-- Size (e.g. S, M, L, XL or 128GB) -->
+                                        <div class="w-full sm:w-32">
+                                            <label class="block text-[10px] text-textMuted uppercase font-bold mb-1">Size</label>
+                                            <input 
+                                                type="text" 
+                                                :name="'variant_size_' + cIdx + '[]'" 
+                                                x-model="variant.size" 
+                                                placeholder="e.g. M, L, 256GB"
+                                                class="w-full px-3 py-1.5 bg-page border border-emerald-border rounded-lg text-xs text-textMain focus:outline-none focus:ring-1 focus:ring-emerald"
+                                            >
+                                        </div>
+
+                                        <!-- Variant SKU -->
+                                        <div class="w-full sm:flex-1">
+                                            <label class="block text-[10px] text-textMuted uppercase font-bold mb-1">SKU</label>
+                                            <input 
+                                                type="text" 
+                                                :name="'variant_sku_' + cIdx + '[]'" 
+                                                x-model="variant.sku" 
+                                                placeholder="Auto-generated if empty"
+                                                class="w-full px-3 py-1.5 bg-page border border-emerald-border rounded-lg text-xs font-mono text-textMain focus:outline-none focus:ring-1 focus:ring-emerald"
+                                            >
+                                        </div>
+
+                                        <!-- Price Override -->
+                                        <div class="w-full sm:w-28">
+                                            <label class="block text-[10px] text-textMuted uppercase font-bold mb-1">Price (₹)</label>
+                                            <input 
+                                                type="number" 
+                                                step="0.01" 
+                                                :name="'variant_price_' + cIdx + '[]'" 
+                                                x-model="variant.price" 
+                                                placeholder="Base price"
+                                                class="w-full px-3 py-1.5 bg-page border border-emerald-border rounded-lg text-xs text-textMain focus:outline-none focus:ring-1 focus:ring-emerald"
+                                            >
+                                        </div>
+
+                                        <!-- Stock Quantity -->
+                                        <div class="w-full sm:w-24">
+                                            <label class="block text-[10px] text-textMuted uppercase font-bold mb-1">Stock</label>
+                                            <input 
+                                                type="number" 
+                                                min="0" 
+                                                :name="'variant_stock_' + cIdx + '[]'" 
+                                                x-model="variant.stock" 
+                                                class="w-full px-3 py-1.5 bg-page border border-emerald-border rounded-lg text-xs text-textMain focus:outline-none focus:ring-1 focus:ring-emerald"
+                                                required
+                                            >
+                                        </div>
+
+                                        <!-- Delete Variant Row Button -->
+                                        <div class="pt-5 shrink-0">
+                                            <button 
+                                                type="button" 
+                                                @click="removeVariant(cIdx, vIdx, variant.id)" 
+                                                x-show="color.variants.length > 1"
+                                                class="p-1.5 text-textMuted hover:text-red-600 rounded-lg hover:bg-red-50 transition" 
+                                                title="Delete variant"
+                                            >
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </template>
+                            </div>
+                        </div>
+
+                    </div>
+                </template>
+            </div>
+        </div>
+
+        <!-- 5. Visibility, Featured Toggle & SEO Metadata Card -->
+        <div class="bg-white rounded-3xl border border-emerald-border/80 shadow-soft p-6 sm:p-8 space-y-6">
+            <div class="border-b border-emerald-border/60 pb-3">
+                <h3 class="text-sm font-bold uppercase tracking-wider text-emerald-dark flex items-center gap-2">
+                    <span class="w-6 h-6 rounded-lg bg-mint-tint text-emerald flex items-center justify-center text-xs">5</span>
+                    <span>Marketplace Visibility & SEO Metadata</span>
+                </h3>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                <div class="flex items-center gap-4 p-4 rounded-2xl bg-page border border-emerald-border/70">
+                    {{ form.is_active }}
+                    <div>
+                        <span class="text-xs font-bold text-textMain block">Publish to Marketplace</span>
+                        <span class="text-[11px] text-textMuted">Make product immediately browsable and purchasable</span>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-4 p-4 rounded-2xl bg-page border border-emerald-border/70">
+                    {{ form.is_featured }}
+                    <div>
+                        <span class="text-xs font-bold text-textMain block">Feature on Homepage</span>
+                        <span class="text-[11px] text-textMuted">Spotlight this product on top carousel & trending grids</span>
+                    </div>
+                </div>
+
+                <div class="sm:col-span-2">
+                    <label class="block text-xs font-bold text-textMain uppercase tracking-wider mb-1.5">Meta Title</label>
+                    {{ form.meta_title }}
+                </div>
+
+                <div class="sm:col-span-2">
+                    <label class="block text-xs font-bold text-textMain uppercase tracking-wider mb-1.5">Meta Description</label>
+                    {{ form.meta_description }}
+                </div>
+            </div>
+        </div>
+
+        <!-- Sticky Bottom Submission Bar -->
+        <div class="sticky bottom-4 z-30 p-4 rounded-2xl bg-white/95 backdrop-blur-md border border-emerald-border shadow-elevated flex items-center justify-between gap-4">
+            <div class="text-xs text-textMuted hidden sm:block">
+                All changes are validated and saved into MySQL with automated image thumbnails.
+            </div>
+            <div class="flex items-center gap-3 ml-auto">
+                <a href="{% url 'dashboard:product_list' %}" class="px-5 py-2.5 rounded-full border border-emerald-border text-xs font-semibold text-textMuted hover:bg-page transition">
+                    Cancel
+                </a>
+                <button 
+                    type="button" 
+                    @click="submitForm()"
+                    class="px-8 py-2.5 rounded-full bg-emerald hover:bg-emerald-hover text-white text-xs font-bold shadow-md shadow-emerald/20 transition active:scale-95"
+                >
+                    {% if product %}Save & Update Product{% else %}Publish Product{% endif %}
+                </button>
+            </div>
+        </div>
+
+    </form>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    function productFormController() {
+        return {
+            specs: [],
+            colors: [],
+
+            initData() {
+                // Initialize Specs
+                {% if product %}
+                    {% for sp in product.specifications.all %}
+                        this.specs.push({ key: '{{ sp.key|escapejs }}', value: '{{ sp.value|escapejs }}' });
+                    {% endfor %}
+                {% else %}
+                    this.specs.push({ key: 'Material', value: 'Premium Grade' });
+                    this.specs.push({ key: 'Warranty', value: '1 Year Manufacturer' });
+                {% endif %}
+
+                // Initialize Colors & Variants
+                {% if product and product.colors.exists %}
+                    {% for c in product.colors.all %}
+                        this.colors.push({
+                            id: '{{ c.id }}',
+                            name: '{{ c.color_name|escapejs }}',
+                            hex: '{{ c.color_hex|escapejs }}',
+                            existing_images: [
+                                {% for img in c.images.all %}
+                                    { id: '{{ img.id }}', url: '{{ img.image.url }}', is_primary: {% if img.is_primary %}true{% else %}false{% endif %} },
+                                {% endfor %}
+                            ],
+                            new_previews: [],
+                            variants: [
+                                {% for v in c.variants.all %}
+                                    { id: '{{ v.id }}', size: '{{ v.size|escapejs }}', sku: '{{ v.sku|escapejs }}', price: '{{ v.price|default:"" }}', stock: '{{ v.stock_quantity }}' },
+                                {% endfor %}
+                            ]
+                        });
+                    {% endfor %}
+                {% else %}
+                    // Default Color
+                    this.colors.push({
+                        id: null,
+                        name: 'Emerald Green',
+                        hex: '#047857',
+                        existing_images: [],
+                        new_previews: [],
+                        variants: [
+                            { id: null, size: 'S', sku: '', price: '', stock: 25 },
+                            { id: null, size: 'M', sku: '', price: '', stock: 40 },
+                            { id: null, size: 'L', sku: '', price: '', stock: 30 }
+                        ]
+                    });
+                {% endif %}
+            },
+
+            addSpec() {
+                this.specs.push({ key: '', value: '' });
+            },
+
+            removeSpec(index) {
+                this.specs.splice(index, 1);
+            },
+
+            addColor() {
+                this.colors.push({
+                    id: null,
+                    name: 'New Color ' + (this.colors.length + 1),
+                    hex: '#064E3B',
+                    existing_images: [],
+                    new_previews: [],
+                    variants: [
+                        { id: null, size: 'Standard', sku: '', price: '', stock: 20 }
+                    ]
+                });
+            },
+
+            removeColor(cIdx) {
+                if (this.colors.length > 1) {
+                    this.colors.splice(cIdx, 1);
+                }
+            },
+
+            addVariant(cIdx) {
+                this.colors[cIdx].variants.push({
+                    id: null,
+                    size: '',
+                    sku: '',
+                    price: '',
+                    stock: 15
+                });
+            },
+
+            removeVariant(cIdx, vIdx, variantId) {
+                if (this.colors[cIdx].variants.length > 1) {
+                    if (variantId) {
+                        const hiddenInput = document.createElement('input');
+                        hiddenInput.type = 'hidden';
+                        hiddenInput.name = 'delete_variants[]';
+                        hiddenInput.value = variantId;
+                        document.getElementById('productMainForm').appendChild(hiddenInput);
+                    }
+                    this.colors[cIdx].variants.splice(vIdx, 1);
+                }
+            },
+
+            previewImages(event, cIdx) {
+                const files = event.target.files;
+                this.colors[cIdx].new_previews = [];
+                for (let i = 0; i < files.length; i++) {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        this.colors[cIdx].new_previews.push(e.target.result);
+                    };
+                    reader.readAsDataURL(files[i]);
+                }
+            },
+
+            submitForm() {
+                const form = document.getElementById('productMainForm');
+                if (!form.checkValidity()) {
+                    form.reportValidity();
+                    return;
+                }
+                form.submit();
+            }
+        };
+    }
+</script>
+{% endblock %}

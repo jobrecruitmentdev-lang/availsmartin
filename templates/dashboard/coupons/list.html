@@ -1,0 +1,108 @@
+{% extends 'dashboard/base.html' %}
+
+{% block header_title %}Promotional Coupons{% endblock %}
+
+{% block admin_content %}
+<div class="space-y-6">
+    
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+            <h2 class="text-xl font-bold text-emerald-dark">Discount Coupons</h2>
+            <p class="text-xs text-textMuted">Configure marketing coupons, percentage discounts, minimum thresholds, and expiry</p>
+        </div>
+
+        <a href="{% url 'dashboard:coupon_add' %}" class="flex items-center gap-2 px-4 py-2 bg-emerald hover:bg-emerald-hover text-white rounded-xl text-xs font-bold transition shadow-sm active:scale-95 shrink-0">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
+            <span>Create Coupon</span>
+        </a>
+    </div>
+
+    <!-- Coupons Table Card -->
+    <div class="bg-white rounded-2xl border border-emerald-border/70 shadow-sm overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs">
+                <thead>
+                    <tr class="bg-mint-tint/50 border-b border-emerald-border/60 text-textMuted uppercase tracking-wider">
+                        <th class="py-3.5 px-4 font-semibold">Coupon Code</th>
+                        <th class="py-3.5 px-4 font-semibold">Discount Type</th>
+                        <th class="py-3.5 px-4 font-semibold">Value</th>
+                        <th class="py-3.5 px-4 font-semibold">Min Order Requirement</th>
+                        <th class="py-3.5 px-4 font-semibold">Redemption Usage</th>
+                        <th class="py-3.5 px-4 font-semibold">Expiry Date</th>
+                        <th class="py-3.5 px-4 font-semibold">Status</th>
+                        <th class="py-3.5 px-4 font-semibold text-right">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-emerald-border/30">
+                    {% for c in page_obj %}
+                        <tr class="hover:bg-page transition">
+                            <td class="py-3.5 px-4">
+                                <span class="font-mono font-black text-sm text-emerald-dark bg-mint-tint px-2.5 py-1 rounded-lg border border-emerald-border">
+                                    {{ c.code }}
+                                </span>
+                            </td>
+                            <td class="py-3.5 px-4 capitalize font-semibold text-textMain">
+                                {{ c.get_discount_type_display }}
+                            </td>
+                            <td class="py-3.5 px-4 font-black text-emerald text-sm">
+                                {% if c.discount_type == 'percent' %}{{ c.value }}%{% else %}₹{{ c.value }}{% endif %}
+                            </td>
+                            <td class="py-3.5 px-4 text-textMuted font-semibold">
+                                ₹{{ c.min_order }}
+                            </td>
+                            <td class="py-3.5 px-4 text-textMuted">
+                                {{ c.used_count }} / {{ c.usage_limit }} uses
+                            </td>
+                            <td class="py-3.5 px-4 text-textMuted">
+                                {{ c.expiry|date:"M d, Y H:i" }}
+                            </td>
+                            <td class="py-3.5 px-4">
+                                {% if c.is_valid %}
+                                    <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-mint-soft text-emerald">Active</span>
+                                {% else %}
+                                    <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-red-100 text-red-700">Expired/Inactive</span>
+                                {% endif %}
+                            </td>
+                            <td class="py-3.5 px-4 text-right">
+                                <div class="flex items-center justify-end gap-2">
+                                    <a href="{% url 'dashboard:coupon_edit' c.id %}" class="px-2.5 py-1 rounded-lg text-emerald hover:bg-mint-tint font-bold transition">
+                                        Edit
+                                    </a>
+                                    <form method="POST" action="{% url 'dashboard:coupon_delete' c.id %}" onsubmit="return confirm('Delete coupon {{ c.code }}?');" class="inline">
+                                        {% csrf_token %}
+                                        <button type="submit" class="px-2.5 py-1 rounded-lg text-red-600 hover:bg-red-50 font-bold transition">
+                                            Delete
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="8" class="py-12 text-center text-textMuted">
+                                No promotional coupons configured.
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        {% if page_obj.has_other_pages %}
+            <div class="px-6 py-4 border-t border-emerald-border/60 flex items-center justify-between text-xs text-textMuted">
+                <span>Showing {{ page_obj.start_index }} - {{ page_obj.end_index }} of {{ page_obj.paginator.count }}</span>
+                <div class="flex items-center gap-1">
+                    {% if page_obj.has_previous %}
+                        <a href="?page={{ page_obj.previous_page_number }}" class="px-3 py-1 rounded-lg border border-emerald-border hover:bg-mint-tint">Previous</a>
+                    {% endif %}
+                    <span class="px-3 py-1 bg-mint-tint font-bold text-emerald rounded-lg">{{ page_obj.number }}</span>
+                    {% if page_obj.has_next %}
+                        <a href="?page={{ page_obj.next_page_number }}" class="px-3 py-1 rounded-lg border border-emerald-border hover:bg-mint-tint">Next</a>
+                    {% endif %}
+                </div>
+            </div>
+        {% endif %}
+    </div>
+
+</div>
+{% endblock %}

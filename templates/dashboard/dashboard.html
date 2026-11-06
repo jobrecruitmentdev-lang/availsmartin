@@ -1,0 +1,381 @@
+{% extends 'dashboard/base.html' %}
+
+{% block extra_head %}
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{% endblock %}
+
+{% block header_title %}Operations Overview{% endblock %}
+
+{% block admin_content %}
+<div class="max-w-[1600px] mx-auto w-full space-y-9 sm:space-y-11">
+    
+    <!-- Top Stat Cards Grid -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6 lg:gap-7">
+        
+        <!-- Total Sales Card -->
+        <div class="bg-white p-7 rounded-3xl border border-emerald-border/50 shadow-soft hover:shadow-card hover:-translate-y-0.5 transition-all duration-300 flex flex-col justify-between group">
+            <div class="flex items-start justify-between gap-4">
+                <div>
+                    <p class="text-[11px] font-bold text-textMuted uppercase tracking-wider">Total Sales</p>
+                    <h3 class="text-3xl font-black text-emerald-dark mt-2 tracking-tight">₹{{ total_sales|floatformat:2 }}</h3>
+                </div>
+                <div class="w-12 h-12 rounded-2xl bg-mint-tint/90 border border-emerald-border/40 text-emerald flex items-center justify-center shrink-0 shadow-xs group-hover:scale-105 transition-transform">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                </div>
+            </div>
+            <div class="mt-6 pt-3.5 border-t border-emerald-border/30 flex items-center justify-between text-xs text-textMuted">
+                <span>Completed orders</span>
+                <span class="inline-flex items-center gap-1.5 text-emerald font-bold">
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald"></span>
+                    Verified Revenue
+                </span>
+            </div>
+        </div>
+
+        <!-- Orders Today Card -->
+        <div class="bg-white p-7 rounded-3xl border border-emerald-border/50 shadow-soft hover:shadow-card hover:-translate-y-0.5 transition-all duration-300 flex flex-col justify-between group">
+            <div class="flex items-start justify-between gap-4">
+                <div>
+                    <p class="text-[11px] font-bold text-textMuted uppercase tracking-wider">Orders Today</p>
+                    <h3 class="text-3xl font-black text-emerald-dark mt-2 tracking-tight">{{ orders_today }}</h3>
+                </div>
+                <div class="w-12 h-12 rounded-2xl bg-mint-soft/80 border border-emerald-border/40 text-emerald flex items-center justify-center shrink-0 shadow-xs group-hover:scale-105 transition-transform">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg>
+                </div>
+            </div>
+            <div class="mt-6 pt-3.5 border-t border-emerald-border/30 flex items-center justify-between text-xs text-textMuted">
+                <span>Total all-time orders</span>
+                <span class="font-bold text-emerald-dark">{{ total_orders }}</span>
+            </div>
+        </div>
+
+        <!-- Active Products Card -->
+        <div class="bg-white p-7 rounded-3xl border border-emerald-border/50 shadow-soft hover:shadow-card hover:-translate-y-0.5 transition-all duration-300 flex flex-col justify-between group">
+            <div class="flex items-start justify-between gap-4">
+                <div>
+                    <p class="text-[11px] font-bold text-textMuted uppercase tracking-wider">Active Products</p>
+                    <h3 class="text-3xl font-black text-emerald-dark mt-2 tracking-tight">{{ total_products }}</h3>
+                </div>
+                <div class="w-12 h-12 rounded-2xl bg-mint-tint/90 border border-emerald-border/40 text-emerald flex items-center justify-center shrink-0 shadow-xs group-hover:scale-105 transition-transform">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
+                </div>
+            </div>
+            <div class="mt-6 pt-3.5 border-t border-emerald-border/30 flex items-center justify-between text-xs text-textMuted">
+                <span>In Catalog</span>
+                <a href="{% url 'dashboard:product_add' %}" class="text-emerald font-bold hover:underline inline-flex items-center gap-1">+ Add New</a>
+            </div>
+        </div>
+
+        <!-- Registered Customers Card -->
+        <div class="bg-white p-7 rounded-3xl border border-emerald-border/50 shadow-soft hover:shadow-card hover:-translate-y-0.5 transition-all duration-300 flex flex-col justify-between group">
+            <div class="flex items-start justify-between gap-4">
+                <div>
+                    <p class="text-[11px] font-bold text-textMuted uppercase tracking-wider">Registered Users</p>
+                    <h3 class="text-3xl font-black text-emerald-dark mt-2 tracking-tight">{{ total_users }}</h3>
+                </div>
+                <div class="w-12 h-12 rounded-2xl bg-amber-50 border border-amber-200/50 text-accent-orange flex items-center justify-center shrink-0 shadow-xs group-hover:scale-105 transition-transform">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+                </div>
+            </div>
+            <div class="mt-6 pt-3.5 border-t border-emerald-border/30 flex items-center justify-between text-xs text-textMuted">
+                <span>Pending Reviews</span>
+                <span class="font-bold text-accent-orange">{{ pending_reviews_count }}</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Interactive Sales & Order Trends Chart -->
+    <div class="bg-white p-7 sm:p-9 rounded-3xl border border-emerald-border/50 shadow-soft">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-7 pb-5 border-b border-emerald-border/30">
+            <div>
+                <h3 class="text-lg font-bold text-emerald-dark tracking-tight">Sales & Order Volume Analytics</h3>
+                <p class="text-xs text-textMuted mt-0.5">Visualizing revenue trajectory over the past 7 days</p>
+            </div>
+            <div class="flex items-center gap-3">
+                <span class="inline-flex items-center gap-2 text-xs text-emerald font-semibold px-3 py-1.5 rounded-xl bg-mint-tint border border-emerald-border/40">
+                    <span class="w-2.5 h-2.5 rounded-full bg-emerald"></span>
+                    <span>Revenue (₹)</span>
+                </span>
+                <span class="inline-flex items-center gap-2 text-xs text-textMuted font-semibold px-3 py-1.5 rounded-xl bg-page border border-emerald-border/40">
+                    <span class="w-2.5 h-2.5 rounded-full bg-emerald-border"></span>
+                    <span>Orders</span>
+                </span>
+            </div>
+        </div>
+        <div class="h-80 w-full">
+            <canvas id="salesTrendsChart"></canvas>
+        </div>
+    </div>
+
+    <!-- Quick Action Launchpad -->
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-5">
+        <a href="{% url 'dashboard:product_add' %}" class="p-5 rounded-3xl bg-white border border-emerald-border/50 hover:border-emerald/70 hover:shadow-card hover:-translate-y-0.5 transition-all duration-300 flex items-center gap-4 group">
+            <div class="w-12 h-12 rounded-2xl bg-mint-tint group-hover:bg-emerald group-hover:text-white text-emerald flex items-center justify-center transition-all duration-300 shrink-0 border border-emerald-border/30 group-hover:border-transparent">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+            </div>
+            <div>
+                <span class="text-sm font-bold text-emerald-dark group-hover:text-emerald transition-colors block">New Product</span>
+                <span class="text-[11px] text-textMuted mt-0.5 block">Add colors & variants</span>
+            </div>
+        </a>
+
+        <a href="{% url 'dashboard:category_add' %}" class="p-5 rounded-3xl bg-white border border-emerald-border/50 hover:border-emerald/70 hover:shadow-card hover:-translate-y-0.5 transition-all duration-300 flex items-center gap-4 group">
+            <div class="w-12 h-12 rounded-2xl bg-mint-tint group-hover:bg-emerald group-hover:text-white text-emerald flex items-center justify-center transition-all duration-300 shrink-0 border border-emerald-border/30 group-hover:border-transparent">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7"/></svg>
+            </div>
+            <div>
+                <span class="text-sm font-bold text-emerald-dark group-hover:text-emerald transition-colors block">New Category</span>
+                <span class="text-[11px] text-textMuted mt-0.5 block">Create taxonomy</span>
+            </div>
+        </a>
+
+        <a href="{% url 'dashboard:order_list' %}" class="p-5 rounded-3xl bg-white border border-emerald-border/50 hover:border-emerald/70 hover:shadow-card hover:-translate-y-0.5 transition-all duration-300 flex items-center gap-4 group">
+            <div class="w-12 h-12 rounded-2xl bg-mint-tint group-hover:bg-emerald group-hover:text-white text-emerald flex items-center justify-center transition-all duration-300 shrink-0 border border-emerald-border/30 group-hover:border-transparent">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+            </div>
+            <div>
+                <span class="text-sm font-bold text-emerald-dark group-hover:text-emerald transition-colors block">Dispatch Orders</span>
+                <span class="text-[11px] text-textMuted mt-0.5 block">Update tracking</span>
+            </div>
+        </a>
+
+        <a href="{% url 'dashboard:review_list' %}" class="p-5 rounded-3xl bg-white border border-emerald-border/50 hover:border-emerald/70 hover:shadow-card hover:-translate-y-0.5 transition-all duration-300 flex items-center gap-4 group">
+            <div class="w-12 h-12 rounded-2xl bg-mint-tint group-hover:bg-emerald group-hover:text-white text-emerald flex items-center justify-center transition-all duration-300 shrink-0 border border-emerald-border/30 group-hover:border-transparent">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/></svg>
+            </div>
+            <div>
+                <span class="text-sm font-bold text-emerald-dark group-hover:text-emerald transition-colors block">Approve Reviews</span>
+                <span class="text-[11px] text-accent-orange font-bold mt-0.5 block">{{ pending_reviews_count }} Pending</span>
+            </div>
+        </a>
+    </div>
+
+    <!-- Main Grid: Recent Orders & Low Stock Alerts -->
+    <div class="grid grid-cols-1 xl:grid-cols-3 gap-8">
+        
+        <!-- Left: Recent Orders (2 Cols) -->
+        <div class="xl:col-span-2 bg-white rounded-3xl border border-emerald-border/50 shadow-soft p-7 sm:p-9">
+            <div class="flex items-center justify-between mb-7 pb-5 border-b border-emerald-border/30">
+                <div>
+                    <h3 class="text-lg font-bold text-emerald-dark tracking-tight">Recent Customer Orders</h3>
+                    <p class="text-xs text-textMuted mt-0.5">Real-time orders across all product categories</p>
+                </div>
+                <a href="{% url 'dashboard:order_list' %}" class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-mint-tint hover:bg-mint-soft text-xs font-bold text-emerald-dark transition border border-emerald-border/40">
+                    <span>View All Orders</span>
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                </a>
+            </div>
+
+            {% if recent_orders %}
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs">
+                        <thead>
+                            <tr class="border-b border-emerald-border/40 text-textMuted uppercase tracking-wider text-[11px]">
+                                <th class="pb-3.5 font-bold">Order ID</th>
+                                <th class="pb-3.5 font-bold">Customer</th>
+                                <th class="pb-3.5 font-bold">Total Amount</th>
+                                <th class="pb-3.5 font-bold">Payment</th>
+                                <th class="pb-3.5 font-bold">Status</th>
+                                <th class="pb-3.5 font-bold text-right">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-emerald-border/25">
+                            {% for order in recent_orders %}
+                                <tr class="hover:bg-page transition">
+                                    <td class="py-4 font-bold text-emerald-dark">#{{ order.order_number }}</td>
+                                    <td class="py-4">
+                                        <p class="font-semibold text-textMain">{{ order.user.name }}</p>
+                                        <p class="text-[10px] text-textMuted">{{ order.user.email }}</p>
+                                    </td>
+                                    <td class="py-4 font-bold text-textMain">₹{{ order.total }}</td>
+                                    <td class="py-4">
+                                        <span class="px-2.5 py-1 rounded-full text-[10px] font-bold {% if order.payment_status == 'completed' %}bg-mint-soft text-emerald{% else %}bg-amber-100 text-amber-800{% endif %}">
+                                            {{ order.get_payment_status_display }}
+                                        </span>
+                                    </td>
+                                    <td class="py-4">
+                                        <span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-mint-tint text-emerald-dark border border-emerald-border">
+                                            {{ order.get_order_status_display }}
+                                        </span>
+                                    </td>
+                                    <td class="py-4 text-right space-x-2">
+                                        <a href="{% url 'dashboard:order_detail' order.id %}" class="text-emerald hover:underline font-semibold">Inspect</a>
+                                        <a href="{% url 'dashboard:order_invoice' order.id %}" target="_blank" class="text-textMuted hover:text-emerald font-semibold">Invoice</a>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="text-center py-14 text-textMuted">
+                    <div class="w-14 h-14 rounded-2xl bg-mint-tint border border-emerald-border/40 text-emerald flex items-center justify-center mx-auto mb-3.5 shadow-xs">
+                        <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg>
+                    </div>
+                    <p class="text-sm font-semibold text-emerald-dark">No orders logged in database yet</p>
+                    <p class="text-xs mt-1">Once checkout transactions complete, orders stream here in real time.</p>
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Right: Low Stock Alert Items (1 Col) -->
+        <div class="bg-white rounded-3xl border border-emerald-border/50 shadow-soft p-7 sm:p-9 flex flex-col justify-between">
+            <div>
+                <div class="flex items-center justify-between mb-2">
+                    <div class="flex items-center gap-2.5">
+                        <span class="relative flex h-2.5 w-2.5">
+                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-accent-orange opacity-75"></span>
+                            <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-accent-orange"></span>
+                        </span>
+                        <h3 class="text-lg font-bold text-emerald-dark tracking-tight">Low Stock Alerts</h3>
+                    </div>
+                    <span class="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-amber-50 text-amber-800 border border-amber-200/60">&le; 15 units</span>
+                </div>
+
+                <p class="text-xs text-textMuted mb-6">Color and size variants requiring restock purchase orders.</p>
+
+                <div class="overflow-y-auto space-y-3 max-h-[380px] pr-1">
+                    {% for variant in low_stock_variants %}
+                        <div class="p-3.5 rounded-2xl bg-page/70 hover:bg-page border border-emerald-border/40 hover:border-emerald-border/70 transition-all flex items-center justify-between">
+                            <div class="flex items-center gap-3">
+                                <span class="w-4 h-4 rounded-full border border-black/10 shrink-0 shadow-xs" style="background-color: {{ variant.product_color.color_hex }};"></span>
+                                <div>
+                                    <h5 class="text-xs font-bold text-textMain line-clamp-1">{{ variant.product.name }}</h5>
+                                    <p class="text-[10px] text-textMuted mt-0.5">{{ variant.product_color.color_name }} • Size: {{ variant.size|default:"Standard" }}</p>
+                                </div>
+                            </div>
+                            <div class="text-right shrink-0 pl-2">
+                                <span class="px-2.5 py-0.5 rounded-full text-[11px] font-bold {% if variant.stock_quantity <= 5 %}bg-red-100 text-red-700{% else %}bg-amber-100 text-amber-800{% endif %}">
+                                    {{ variant.stock_quantity }} left
+                                </span>
+                            </div>
+                        </div>
+                    {% empty %}
+                        <div class="text-center py-10 text-textMuted text-xs">
+                            Inventory levels are healthy across all variants.
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="mt-8 pt-5 border-t border-emerald-border/30">
+                <a href="{% url 'dashboard:product_list' %}" class="w-full flex items-center justify-center gap-2 py-3 bg-mint-tint hover:bg-mint-soft text-emerald-dark text-xs font-bold rounded-2xl transition border border-emerald-border/40 hover:border-emerald-border">
+                    <span>Manage All Inventory</span>
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                </a>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const ctx = document.getElementById('salesTrendsChart');
+        if (!ctx) return;
+
+        const labels = {{ chart_labels_json|safe }};
+        const salesData = {{ chart_sales_json|safe }};
+        const orderCounts = {{ chart_orders_json|safe }};
+
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [
+                    {
+                        label: 'Revenue (₹)',
+                        data: salesData,
+                        borderColor: '#047857',
+                        backgroundColor: 'rgba(4, 120, 87, 0.07)',
+                        borderWidth: 2.5,
+                        tension: 0.35,
+                        fill: true,
+                        pointBackgroundColor: '#047857',
+                        pointBorderColor: '#FFFFFF',
+                        pointBorderWidth: 2,
+                        pointRadius: 4,
+                        pointHoverRadius: 6,
+                        yAxisID: 'y'
+                    },
+                    {
+                        label: 'Orders Count',
+                        data: orderCounts,
+                        borderColor: '#A7F3D0',
+                        backgroundColor: '#10B981',
+                        type: 'bar',
+                        borderRadius: 8,
+                        barThickness: 24,
+                        maxBarThickness: 32,
+                        yAxisID: 'y1'
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                interaction: {
+                    mode: 'index',
+                    intersect: false,
+                },
+                scales: {
+                    y: {
+                        type: 'linear',
+                        display: true,
+                        position: 'left',
+                        beginAtZero: true,
+                        min: 0,
+                        suggestedMax: 1000,
+                        grid: { 
+                            color: 'rgba(217, 237, 227, 0.45)',
+                            drawBorder: false,
+                        },
+                        ticks: {
+                            maxTicksLimit: 5,
+                            precision: 0,
+                            callback: function(value) {
+                                if (value < 0) return '₹0';
+                                return '₹' + Number(value).toLocaleString('en-IN');
+                            },
+                            font: { family: 'Inter', size: 11 },
+                            color: '#66746D',
+                            padding: 8
+                        }
+                    },
+                    y1: {
+                        type: 'linear',
+                        display: false,
+                        position: 'right',
+                        beginAtZero: true,
+                        min: 0,
+                        grid: { drawOnChartArea: false },
+                        ticks: { precision: 0 }
+                    },
+                    x: {
+                        grid: { display: false },
+                        ticks: { 
+                            font: { family: 'Inter', size: 11 },
+                            color: '#66746D',
+                            padding: 8
+                        }
+                    }
+                },
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        backgroundColor: '#064E3B',
+                        titleFont: { family: 'Inter', size: 12, weight: 'bold' },
+                        bodyFont: { family: 'Inter', size: 11 },
+                        padding: 12,
+                        cornerRadius: 12,
+                    }
+                }
+            }
+        });
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,99 @@
+{% extends 'base.html' %}
+
+{% block title %}Saved Addresses | Crookeries by AvailSmart{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-[#FAF8F5] py-10 sm:py-14">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        
+        <!-- Header -->
+        <div class="mb-10 pb-6 border-b border-[#E8E4DC] flex flex-col sm:flex-row sm:items-baseline sm:justify-between gap-4">
+            <div>
+                <nav class="flex items-center gap-2 text-xs text-[#8A8477] tracking-wider uppercase mb-3">
+                    <a href="/" class="hover:text-[#14241B] transition">Home</a>
+                    <span class="text-[#D3CBBF]">/</span>
+                    <a href="{% url 'accounts:profile' %}" class="hover:text-[#14241B] transition">Account</a>
+                    <span class="text-[#D3CBBF]">/</span>
+                    <span class="font-medium text-[#14241B]">Address Ledger</span>
+                </nav>
+                <h1 class="text-3xl sm:text-4xl font-normal font-editorial text-[#14241B] tracking-tight">
+                    Shipping <span class="italic text-[#C2714F]">Destinations</span>
+                </h1>
+                <p class="text-xs text-[#5C564B] mt-1">Manage private residences and studio addresses for seamless fragile courier dispatch.</p>
+            </div>
+
+            <a 
+                href="{% url 'accounts:address_add' %}" 
+                class="px-6 py-3 rounded-full bg-[#14241B] hover:bg-[#C2714F] text-white text-xs uppercase tracking-widest font-medium transition shadow-sm active:scale-95 flex items-center gap-2 self-start sm:self-auto"
+            >
+                <span>+ Add Destination</span>
+            </a>
+        </div>
+
+        <!-- Address Cards Grid -->
+        {% if addresses %}
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {% for addr in addresses %}
+                    <div class="bg-white rounded-3xl border {% if addr.is_default %}border-[#14241B] ring-1 ring-[#14241B]{% else %}border-[#E8E4DC]{% endif %} p-6 flex flex-col justify-between shadow-sm">
+                        <div>
+                            <!-- Card Header -->
+                            <div class="flex items-center justify-between mb-4">
+                                <span class="px-2.5 py-0.5 rounded-full text-[10px] uppercase tracking-wider font-medium {% if addr.address_type == 'home' %}bg-[#FAF8F5] text-[#14241B] border border-[#E8E4DC]{% else %}bg-[#FAF8F5] text-[#C2714F] border border-[#E8E4DC]{% endif %}">
+                                    {{ addr.address_type }}
+                                </span>
+
+                                {% if addr.is_default %}
+                                    <span class="px-2.5 py-0.5 rounded-full text-[10px] uppercase tracking-wider font-medium bg-[#14241B] text-white">
+                                        Primary Destination
+                                    </span>
+                                {% else %}
+                                    <a href="{% url 'accounts:address_set_default' address_id=addr.id %}" class="text-[11px] font-medium text-[#C2714F] hover:underline">
+                                        Make Primary
+                                    </a>
+                                {% endif %}
+                            </div>
+
+                            <!-- Address Info -->
+                            <h3 class="text-base font-medium text-[#14241B]">{{ addr.full_name }}</h3>
+                            <p class="text-xs text-[#5C564B] mt-2 leading-relaxed">
+                                {{ addr.address_line1 }}{% if addr.address_line2 %}, {{ addr.address_line2 }}{% endif %}<br>
+                                {{ addr.city }}, {{ addr.state }} - <strong class="text-[#14241B] font-medium">{{ addr.pincode }}</strong><br>
+                                {{ addr.country }}
+                            </p>
+                            <p class="text-xs text-[#8A8477] mt-3">
+                                Contact: +91 {{ addr.phone }}
+                            </p>
+                        </div>
+
+                        <!-- Card Actions -->
+                        <div class="mt-6 pt-4 border-t border-[#E8E4DC] flex items-center justify-end gap-3 text-xs">
+                            <a href="{% url 'accounts:address_edit' address_id=addr.id %}" class="text-[#14241B] font-medium hover:text-[#C2714F] uppercase tracking-wider text-[11px]">
+                                Edit
+                            </a>
+                            <span class="text-[#D3CBBF]">&bull;</span>
+                            <a href="{% url 'accounts:address_delete' address_id=addr.id %}" onclick="return confirm('Are you sure you want to remove this delivery address?');" class="text-red-700 font-medium hover:underline uppercase tracking-wider text-[11px]">
+                                Remove
+                            </a>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <!-- Empty State -->
+            <div class="bg-white rounded-3xl border border-[#E8E4DC] p-12 text-center max-w-md mx-auto shadow-sm my-10">
+                <div class="w-16 h-16 rounded-full bg-[#FAF8F5] border border-[#E8E4DC] text-[#14241B] flex items-center justify-center mx-auto text-2xl mb-4 font-editorial">
+                    📍
+                </div>
+                <h3 class="text-xl font-editorial text-[#14241B]">No Destinations Recorded</h3>
+                <p class="text-xs text-[#5C564B] mt-2 leading-relaxed">
+                    Save your residence or gallery address to enjoy instant one-click reservations at checkout.
+                </p>
+                <a href="{% url 'accounts:address_add' %}" class="inline-block mt-6 px-7 py-3 rounded-full bg-[#14241B] hover:bg-[#C2714F] text-white text-xs uppercase tracking-widest font-medium transition shadow-sm active:scale-95">
+                    + Add New Destination
+                </a>
+            </div>
+        {% endif %}
+
+    </div>
+</div>
+{% endblock %}

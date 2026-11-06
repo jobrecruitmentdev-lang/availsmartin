@@ -1,0 +1,120 @@
+{% extends 'base.html' %}
+
+{% block title %}Studio Care Guide & FAQs | AvailSmart{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-14">
+    
+    <!-- Header -->
+    <div class="text-center mb-12">
+        <span class="text-[10px] font-bold uppercase tracking-widest text-clay block mb-2">Care & Knowledge</span>
+        <h1 class="font-editorial text-3xl sm:text-4xl lg:text-5xl font-bold text-forest-dark tracking-tight">
+            Studio Care Guide & Frequently Asked Questions
+        </h1>
+        <p class="text-xs sm:text-sm text-textMuted mt-3 max-w-xl mx-auto leading-relaxed">
+            Everything you need to know about caring for artisanal stoneware, linen maintenance, delivery timelines, and payment options.
+        </p>
+    </div>
+
+    <!-- Category Filter Tabs (Alpine) -->
+    <div x-data="{ section: 'ceramics' }" class="space-y-8">
+        
+        <!-- Tab Selector Pills -->
+        <div class="flex items-center justify-center gap-2 overflow-x-auto pb-2">
+            <button 
+                type="button" 
+                @click="section = 'ceramics'"
+                class="px-5 py-2.5 rounded-full text-xs font-semibold tracking-wider transition cursor-pointer"
+                :class="section === 'ceramics' ? 'bg-forest-dark text-white shadow-xs' : 'bg-white text-forest-dark border border-alabaster-border hover:bg-[#F5EFEB]'"
+            >
+                🏺 Stoneware & Tableware Care
+            </button>
+            <button 
+                type="button" 
+                @click="section = 'shipping'"
+                class="px-5 py-2.5 rounded-full text-xs font-semibold tracking-wider transition cursor-pointer"
+                :class="section === 'shipping' ? 'bg-forest-dark text-white shadow-xs' : 'bg-white text-forest-dark border border-alabaster-border hover:bg-[#F5EFEB]'"
+            >
+                🚚 Shipping & Packaging
+            </button>
+            <button 
+                type="button" 
+                @click="section = 'orders'"
+                class="px-5 py-2.5 rounded-full text-xs font-semibold tracking-wider transition cursor-pointer"
+                :class="section === 'orders' ? 'bg-forest-dark text-white shadow-xs' : 'bg-white text-forest-dark border border-alabaster-border hover:bg-[#F5EFEB]'"
+            >
+                💳 Orders & Payments
+            </button>
+        </div>
+
+        <!-- Section 1: Ceramics Care -->
+        <div x-show="section === 'ceramics'" class="space-y-4">
+            <div class="bg-white p-6 rounded-3xl border border-alabaster-border">
+                <h4 class="text-sm font-bold text-forest-dark mb-2">Is AvailSmart pottery dishwasher and microwave safe?</h4>
+                <p class="text-xs text-textMuted leading-relaxed">
+                    Yes. All of our ceramics are kiln-fired at high vitrification temperatures (above 1,200°C), making them resilient to both dishwashers and microwave heat. To prevent thermal shock, avoid plunging a steaming hot plate directly into cold ice water.
+                </p>
+            </div>
+
+            <div class="bg-white p-6 rounded-3xl border border-alabaster-border">
+                <h4 class="text-sm font-bold text-forest-dark mb-2">Will matte glazes get scratch marks from cutlery?</h4>
+                <p class="text-xs text-textMuted leading-relaxed">
+                    Matte glazes possess subtle tactile microscopic texture. Over months of heavy knife usage, soft metal residue from flatware may leave light gray pencil-like marks. These are not scratches on the ceramic itself and can be effortlessly polished away using a sponge with baking soda or Bar Keepers Friend.
+                </p>
+            </div>
+
+            <div class="bg-white p-6 rounded-3xl border border-alabaster-border">
+                <h4 class="text-sm font-bold text-forest-dark mb-2">Are your glazes food-safe and lead-free?</h4>
+                <p class="text-xs text-textMuted leading-relaxed">
+                    100%. All mineral glazes comply with rigorous international food contact standards (FDA and Indian FSSAI). They contain zero lead, cadmium, or chemical sealants.
+                </p>
+            </div>
+        </div>
+
+        <!-- Section 2: Shipping & Packaging -->
+        <div x-show="section === 'shipping'" class="space-y-4" style="display: none;">
+            <div class="bg-white p-6 rounded-3xl border border-alabaster-border">
+                <h4 class="text-sm font-bold text-forest-dark mb-2">How long does shipping take across India?</h4>
+                <p class="text-xs text-textMuted leading-relaxed">
+                    Metro cities (Mumbai, Delhi NCR, Bangalore, Chennai, Hyderabad) receive deliveries within 2 to 4 business days. Regional and tier-2/3 cities are delivered within 4 to 6 business days. Express tracking is sent via SMS & email upon dispatch.
+                </p>
+            </div>
+
+            <div class="bg-white p-6 rounded-3xl border border-alabaster-border">
+                <h4 class="text-sm font-bold text-forest-dark mb-2">How do you pack fragile ceramics safely?</h4>
+                <p class="text-xs text-textMuted leading-relaxed">
+                    We use custom die-cut unbleached Kraft cardboard, 3D expandable honeycomb paper, and starch-based biodegradable pellets. Each piece is cushioned from all 6 angles to withstand drops of up to 4 feet during courier transit.
+                </p>
+            </div>
+        </div>
+
+        <!-- Section 3: Orders & Payments -->
+        <div x-show="section === 'orders'" class="space-y-4" style="display: none;">
+            <div class="bg-white p-6 rounded-3xl border border-alabaster-border">
+                <h4 class="text-sm font-bold text-forest-dark mb-2">What payment methods do you accept?</h4>
+                <p class="text-xs text-textMuted leading-relaxed">
+                    We currently support Cash on Delivery (COD) across serviceable pin codes, with full UPI, Net Banking, Credit/Debit cards, and Razorpay gateway integration ready.
+                </p>
+            </div>
+
+            <div class="bg-white p-6 rounded-3xl border border-alabaster-border">
+                <h4 class="text-sm font-bold text-forest-dark mb-2">Can I cancel an order before it ships?</h4>
+                <p class="text-xs text-textMuted leading-relaxed">
+                    Yes. As long as your order status shows "Pending" or "Confirmed", you can cancel it with 1-click in your account dashboard. Full inventory and payment credits are instantly released.
+                </p>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Contact CTA -->
+    <div class="mt-14 p-8 bg-[#F5EFEB] rounded-4xl border border-alabaster-border text-center">
+        <h4 class="font-editorial text-xl font-bold text-forest-dark">Still have a question?</h4>
+        <p class="text-xs text-textMuted mt-1 mb-4">Our studio concierge team is available to assist you personally.</p>
+        <a href="{% url 'catalog:contact' %}" class="px-7 py-3 rounded-full bg-forest-dark hover:bg-forest text-white text-xs font-semibold tracking-wider transition inline-block">
+            Contact Concierge Desk &rarr;
+        </a>
+    </div>
+
+</div>
+{% endblock %}

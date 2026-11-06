@@ -1,0 +1,708 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    {% if selected_category %}{{ selected_category.name }} - {% endif %}Explore All Products | AvailSmart
+{% endblock %}
+
+{% block content %}
+<div 
+    x-data="catalogFilterApp()" 
+    x-init="initCatalog()"
+    class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8"
+>
+    
+    <!-- Top Breadcrumbs & Page Header (Editorial Luxury) -->
+    <div class="mb-8 flex flex-col md:flex-row md:items-end md:justify-between gap-4 border-b border-alabaster-border pb-6">
+        <div>
+            <!-- Breadcrumbs -->
+            <nav class="flex items-center gap-1.5 text-xs text-textMuted mb-2">
+                <a href="/" class="hover:text-forest transition">Home</a>
+                <span>/</span>
+                <a href="/catalog/" class="hover:text-forest transition">Catalog</a>
+                {% if selected_category %}
+                    <span>/</span>
+                    <span class="font-semibold text-forest-dark">{{ selected_category.name }}</span>
+                {% endif %}
+            </nav>
+
+            <h1 class="font-editorial text-3xl sm:text-4xl font-bold text-forest-dark tracking-tight">
+                {% if selected_category %}
+                    {{ selected_category.name }}
+                {% else %}
+                    All Curated Collections
+                {% endif %}
+            </h1>
+            <p class="text-xs text-textMuted mt-1">
+                Showing <span x-text="totalCount" class="font-semibold text-forest-dark">{{ total_count }}</span> intentional objects
+            </p>
+        </div>
+
+        <!-- Sorting & Mobile Filter Toggle -->
+        <div class="flex items-center gap-3">
+            
+            <!-- Mobile Filters Button -->
+            <button 
+                type="button"
+                @click="mobileFilterOpen = true"
+                class="lg:hidden flex items-center gap-2 px-4 py-2.5 rounded-full bg-white border border-alabaster-border text-xs font-semibold text-forest-dark hover:bg-[#F5EFEB] transition shadow-2xs"
+            >
+                <svg class="w-4 h-4 text-forest" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/></svg>
+                <span>Filter Studio</span>
+                <span x-show="activeFiltersCount > 0" x-text="activeFiltersCount" class="w-4 h-4 rounded-full bg-clay text-white text-[10px] font-bold flex items-center justify-center"></span>
+            </button>
+
+            <!-- Sort By Select -->
+            <div class="flex items-center gap-2">
+                <label class="text-[11px] font-bold text-textMuted uppercase tracking-widest hidden sm:block">Sort:</label>
+                <select 
+                    x-model="sort" 
+                    @change="fetchFilteredResults(1)"
+                    class="rounded-full bg-white border border-alabaster-border px-4 py-2 text-xs font-semibold text-forest-dark focus:outline-none focus:ring-2 focus:ring-forest-light/20 shadow-2xs cursor-pointer"
+                >
+                    <option value="newest">✦ Newest Releases</option>
+                    <option value="price_low">Price: Low to High</option>
+                    <option value="price_high">Price: High to Low</option>
+                    <option value="rating">★ Highest Customer Rating</option>
+                    <option value="popular">Most Desired</option>
+                    <option value="discount">Archive Deals</option>
+                </select>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Main Two-Column Layout -->
+    <div class="grid grid-cols-1 lg:grid-cols-4 gap-8 items-start">
+        
+        <!-- ============================================== -->
+        <!-- DESKTOP FILTER SIDEBAR -->
+        <!-- ============================================== -->
+        <aside class="hidden lg:block lg:col-span-1 bg-white rounded-3xl border border-emerald-border/80 p-6 shadow-soft space-y-6 sticky top-24 max-h-[85vh] overflow-y-auto">
+            
+            <div class="flex items-center justify-between border-b border-emerald-border/50 pb-3">
+                <h3 class="text-sm font-black text-emerald-dark uppercase tracking-wider flex items-center gap-2">
+                    <svg class="w-4 h-4 text-emerald" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"/></svg>
+                    <span>Filters</span>
+                </h3>
+                <button 
+                    type="button" 
+                    @click="clearAllFilters()" 
+                    class="text-[11px] font-bold text-accent-orange hover:underline"
+                >
+                    Clear All
+                </button>
+            </div>
+
+            <!-- Categories Accordion -->
+            <div>
+                <h4 class="text-xs font-bold text-textMain uppercase tracking-wider mb-2.5">Category</h4>
+                <div class="space-y-1 text-xs">
+                    <a 
+                        href="/catalog/" 
+                        @click.prevent="setCategory('')"
+                        class="block px-2.5 py-1.5 rounded-xl font-medium transition"
+                        :class="!category ? 'bg-mint-soft text-emerald font-bold' : 'text-textMuted hover:bg-mint-tint hover:text-emerald'"
+                    >
+                        All Categories
+                    </a>
+                    {% for cat in all_categories %}
+                        <div x-data="{ open: {% if selected_category and selected_category.slug == cat.slug or selected_category.parent.slug == cat.slug %}true{% else %}false{% endif %} }">
+                            <div class="flex items-center justify-between">
+                                <a 
+                                    href="/catalog/{{ cat.slug }}/" 
+                                    @click.prevent="setCategory('{{ cat.slug }}')"
+                                    class="flex-1 px-2.5 py-1.5 rounded-xl font-medium transition text-xs"
+                                    :class="category === '{{ cat.slug }}' ? 'bg-mint-soft text-emerald font-bold' : 'text-textMain hover:bg-mint-tint hover:text-emerald'"
+                                >
+                                    {{ cat.name }}
+                                </a>
+                                {% if cat.children.exists %}
+                                    <button @click="open = !open" class="p-1 text-textMuted hover:text-emerald text-xs">
+                                        <span x-text="open ? '−' : '+'"></span>
+                                    </button>
+                                {% endif %}
+                            </div>
+                            {% if cat.children.exists %}
+                                <div x-show="open" class="pl-4 space-y-1 mt-1 border-l-2 border-emerald-border/40 ml-2">
+                                    {% for sub in cat.children.all %}
+                                        <a 
+                                            href="/catalog/{{ sub.slug }}/" 
+                                            @click.prevent="setCategory('{{ sub.slug }}')"
+                                            class="block px-2 py-1 rounded-lg text-[11px] transition"
+                                            :class="category === '{{ sub.slug }}' ? 'bg-mint-soft text-emerald font-bold' : 'text-textMuted hover:text-emerald'"
+                                        >
+                                            {{ sub.name }}
+                                        </a>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Price Range Filter -->
+            <div class="pt-4 border-t border-emerald-border/40">
+                <div class="flex items-center justify-between mb-2">
+                    <h4 class="text-xs font-bold text-textMain uppercase tracking-wider">Price (₹)</h4>
+                    <span class="text-[11px] font-bold text-emerald" x-text="'₹' + minPrice + ' - ₹' + maxPrice"></span>
+                </div>
+                <div class="grid grid-cols-2 gap-2 mb-3">
+                    <div>
+                        <label class="text-[10px] text-textMuted font-semibold">Min</label>
+                        <input 
+                            type="number" 
+                            x-model.number="minPrice" 
+                            @change="fetchFilteredResults(1)"
+                            min="{{ catalog_min_price }}" 
+                            max="{{ catalog_max_price }}"
+                            class="w-full text-xs rounded-xl border border-emerald-border px-2.5 py-1.5 font-medium focus:ring-1 focus:ring-emerald focus:outline-none"
+                        >
+                    </div>
+                    <div>
+                        <label class="text-[10px] text-textMuted font-semibold">Max</label>
+                        <input 
+                            type="number" 
+                            x-model.number="maxPrice" 
+                            @change="fetchFilteredResults(1)"
+                            min="{{ catalog_min_price }}" 
+                            max="{{ catalog_max_price }}"
+                            class="w-full text-xs rounded-xl border border-emerald-border px-2.5 py-1.5 font-medium focus:ring-1 focus:ring-emerald focus:outline-none"
+                        >
+                    </div>
+                </div>
+                <input 
+                    type="range" 
+                    x-model.number="maxPrice" 
+                    @input="fetchFilteredResults(1)"
+                    min="{{ catalog_min_price }}" 
+                    max="{{ catalog_max_price }}" 
+                    step="100"
+                    class="w-full accent-emerald cursor-pointer"
+                >
+            </div>
+
+            <!-- Brand Filter -->
+            {% if available_brands %}
+                <div class="pt-4 border-t border-emerald-border/40">
+                    <h4 class="text-xs font-bold text-textMain uppercase tracking-wider mb-2.5">Brands</h4>
+                    <div class="space-y-1.5 max-h-44 overflow-y-auto pr-1 text-xs">
+                        {% for b in available_brands %}
+                            <label class="flex items-center justify-between p-1 rounded-lg hover:bg-mint-tint/50 cursor-pointer">
+                                <span class="flex items-center gap-2 text-textMain">
+                                    <input 
+                                        type="checkbox" 
+                                        value="{{ b.slug }}" 
+                                        x-model="brands" 
+                                        @change="fetchFilteredResults(1)"
+                                        class="rounded text-emerald focus:ring-emerald border-emerald-border cursor-pointer"
+                                    >
+                                    <span>{{ b.name }}</span>
+                                </span>
+                                <span class="text-[10px] text-textMuted font-semibold">({{ b.pcount }})</span>
+                            </label>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endif %}
+
+            <!-- Color Swatches Filter (Cleanly Deduplicated with Names & Counts) -->
+            {% if available_colors %}
+                <div class="pt-5 border-t border-alabaster-border">
+                    <div class="flex items-center justify-between mb-3">
+                        <h4 class="text-xs font-bold text-forest-dark uppercase tracking-wider">Colors & Glazes</h4>
+                        <span class="text-[10px] text-textMuted font-mono">({{ available_colors|length }})</span>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-2">
+                        {% for c in available_colors %}
+                            <button 
+                                type="button" 
+                                @click="toggleColor('{{ c.color_name }}')"
+                                :class="colors.includes('{{ c.color_name }}') ? 'border-forest-dark bg-[#F5EFEB] ring-1 ring-forest-dark font-bold text-forest-dark' : 'border-alabaster-border bg-white text-textMain hover:border-sand hover:bg-[#FAF8F5]'"
+                                class="flex items-center gap-2 p-2 rounded-xl border text-xs transition cursor-pointer text-left shadow-2xs group"
+                                title="{{ c.color_name }} ({{ c.pcount }} items)"
+                            >
+                                <span 
+                                    class="w-4 h-4 rounded-full border border-black/15 shrink-0 shadow-2xs relative flex items-center justify-center"
+                                    style="background-color: {{ c.color_hex }};"
+                                >
+                                    <span x-show="colors.includes('{{ c.color_name }}')" class="text-[8px] font-extrabold text-white drop-shadow">✓</span>
+                                </span>
+                                <div class="min-w-0 flex-1 truncate">
+                                    <span class="text-[11px] block truncate leading-tight">{{ c.color_name }}</span>
+                                    <span class="text-[9px] text-textMuted block">({{ c.pcount }})</span>
+                                </div>
+                            </button>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endif %}
+
+            <!-- Size Checkboxes Filter -->
+            {% if available_sizes %}
+                <div class="pt-4 border-t border-emerald-border/40">
+                    <h4 class="text-xs font-bold text-textMain uppercase tracking-wider mb-2.5">Size</h4>
+                    <div class="flex flex-wrap gap-1.5">
+                        {% for s in available_sizes %}
+                            <button 
+                                type="button" 
+                                @click="toggleSize('{{ s }}')"
+                                :class="sizes.includes('{{ s }}') ? 'bg-emerald text-white font-bold border-emerald' : 'bg-white text-textMain border-emerald-border hover:bg-mint-tint'"
+                                class="px-2.5 py-1 text-xs rounded-xl border transition shadow-2xs"
+                            >
+                                {{ s }}
+                            </button>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endif %}
+
+            <!-- Rating Filter -->
+            <div class="pt-4 border-t border-emerald-border/40">
+                <h4 class="text-xs font-bold text-textMain uppercase tracking-wider mb-2.5">Customer Rating</h4>
+                <div class="space-y-1 text-xs">
+                    <template x-for="r in [4, 3, 2, 1]" :key="r">
+                        <label class="flex items-center gap-2 p-1 rounded-lg hover:bg-mint-tint/50 cursor-pointer">
+                            <input 
+                                type="radio" 
+                                name="rating_filter" 
+                                :value="r" 
+                                x-model="rating" 
+                                @change="fetchFilteredResults(1)"
+                                class="text-emerald focus:ring-emerald border-emerald-border"
+                            >
+                            <span class="flex items-center gap-1 text-amber-500 font-bold">
+                                <span x-text="'★'.repeat(r)"></span>
+                                <span class="text-textMuted font-medium text-[11px]" x-text="'& Up'"></span>
+                            </span>
+                        </label>
+                    </template>
+                </div>
+            </div>
+
+            <!-- Discount Badges Filter -->
+            <div class="pt-4 border-t border-emerald-border/40">
+                <h4 class="text-xs font-bold text-textMain uppercase tracking-wider mb-2.5">Discount</h4>
+                <div class="space-y-1 text-xs">
+                    <template x-for="d in [50, 30, 20, 10]" :key="d">
+                        <label class="flex items-center gap-2 p-1 rounded-lg hover:bg-mint-tint/50 cursor-pointer">
+                            <input 
+                                type="radio" 
+                                name="discount_filter" 
+                                :value="d" 
+                                x-model="discount" 
+                                @change="fetchFilteredResults(1)"
+                                class="text-emerald focus:ring-emerald border-emerald-border"
+                            >
+                            <span class="text-textMain font-semibold" x-text="d + '% or more'"></span>
+                        </label>
+                    </template>
+                </div>
+            </div>
+
+            <!-- In-Stock Only Toggle -->
+            <div class="pt-4 border-t border-emerald-border/40 flex items-center justify-between">
+                <span class="text-xs font-bold text-textMain">In-Stock Only</span>
+                <label class="relative inline-flex items-center cursor-pointer">
+                    <input 
+                        type="checkbox" 
+                        x-model="inStock" 
+                        @change="fetchFilteredResults(1)"
+                        class="sr-only peer"
+                    >
+                    <div class="w-9 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-emerald"></div>
+                </label>
+            </div>
+
+        </aside>
+
+        <!-- ============================================== -->
+        <!-- PRODUCT RESULTS GRID AREA -->
+        <!-- ============================================== -->
+        <main class="lg:col-span-3">
+            
+            <!-- Loading Indicator Overlay -->
+            <div class="relative">
+                <div 
+                    x-show="loading" 
+                    x-transition:enter="transition ease-out duration-200"
+                    x-transition:enter-start="opacity-0"
+                    x-transition:enter-end="opacity-100"
+                    x-transition:leave="transition ease-in duration-150"
+                    x-transition:leave-start="opacity-100"
+                    x-transition:leave-end="opacity-0"
+                    class="absolute inset-0 bg-white/70 backdrop-blur-2xs z-30 flex items-center justify-center rounded-3xl"
+                    style="display: none;"
+                >
+                    <div class="flex flex-col items-center gap-2 p-4 bg-white rounded-2xl shadow-xl border border-emerald-border">
+                        <div class="w-8 h-8 border-3 border-emerald border-t-transparent rounded-full animate-spin"></div>
+                        <span class="text-xs font-bold text-emerald-dark">Updating Catalog...</span>
+                    </div>
+                </div>
+
+                <!-- Product Grid Container (updated via AJAX innerHTML) -->
+                <div id="productGridContainer">
+                    {% include 'catalog/partials/product_grid.html' with products=products active_filters=active_filters wishlist_ids=wishlist_ids %}
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- ============================================== -->
+    <!-- MOBILE BOTTOM SHEET FILTERS DRAWER -->
+    <!-- ============================================== -->
+    <div 
+        x-show="mobileFilterOpen" 
+        x-transition:enter="transition ease-out duration-300"
+        x-transition:enter-start="opacity-0"
+        x-transition:enter-end="opacity-100"
+        x-transition:leave="transition ease-in duration-200"
+        x-transition:leave-start="opacity-100"
+        x-transition:leave-end="opacity-0"
+        class="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex justify-end"
+        style="display: none;"
+    >
+        <div 
+            @click.away="mobileFilterOpen = false"
+            class="w-full max-w-sm bg-white h-full shadow-2xl flex flex-col justify-between overflow-hidden"
+        >
+            <div class="p-5 border-b border-emerald-border/60 flex items-center justify-between bg-mint-tint/30">
+                <h3 class="text-base font-bold text-emerald-dark flex items-center gap-2">
+                    <svg class="w-4 h-4 text-emerald" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/></svg>
+                    <span>Filter Products</span>
+                </h3>
+                <button @click="mobileFilterOpen = false" class="p-1 rounded-full hover:bg-gray-100 text-textMuted text-lg">&times;</button>
+            </div>
+
+            <!-- Scrollable Filter Body -->
+            <div class="p-6 overflow-y-auto flex-1 space-y-6">
+                <!-- Mobile Price Slider -->
+                <div>
+                    <h4 class="text-xs font-bold text-textMain uppercase mb-2">Price (₹{{ catalog_min_price }} - ₹<span x-text="maxPrice"></span>)</h4>
+                    <input 
+                        type="range" 
+                        x-model.number="maxPrice" 
+                        min="{{ catalog_min_price }}" 
+                        max="{{ catalog_max_price }}" 
+                        step="100"
+                        class="w-full accent-emerald"
+                    >
+                </div>
+
+                <!-- Mobile Brands -->
+                <div>
+                    <h4 class="text-xs font-bold text-textMain uppercase mb-2">Brands</h4>
+                    <div class="grid grid-cols-2 gap-2 text-xs">
+                        {% for b in available_brands %}
+                            <label class="flex items-center gap-2 p-1">
+                                <input type="checkbox" value="{{ b.slug }}" x-model="brands" class="rounded text-emerald">
+                                <span class="truncate">{{ b.name }}</span>
+                            </label>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- Mobile In Stock -->
+                <div class="flex items-center justify-between">
+                    <span class="text-xs font-bold text-textMain">In-Stock Only</span>
+                    <input type="checkbox" x-model="inStock" class="rounded text-emerald">
+                </div>
+            </div>
+
+            <!-- Footer Buttons -->
+            <div class="p-4 border-t border-emerald-border/60 flex items-center gap-3 bg-gray-50">
+                <button 
+                    type="button" 
+                    @click="clearAllFilters(); mobileFilterOpen = false;"
+                    class="flex-1 py-3 rounded-full border border-emerald-border bg-white text-xs font-bold text-textMuted hover:bg-gray-100 transition"
+                >
+                    Reset
+                </button>
+                <button 
+                    type="button" 
+                    @click="fetchFilteredResults(1); mobileFilterOpen = false;"
+                    class="flex-1 py-3 rounded-full bg-emerald hover:bg-emerald-hover text-white text-xs font-bold transition shadow-sm"
+                >
+                    Apply Filters
+                </button>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- Alpine.js Catalog Controller -->
+<script>
+function catalogFilterApp() {
+    return {
+        loading: false,
+        mobileFilterOpen: false,
+        totalCount: {{ total_count }},
+        category: '{{ selected_category.slug|default:"" }}',
+        brands: {{ selected_brands|safe }},
+        minPrice: {{ min_price }},
+        maxPrice: {{ max_price }},
+        colors: {{ selected_colors|safe }},
+        sizes: {{ selected_sizes|safe }},
+        rating: '{{ rating_filter|default:"" }}',
+        discount: '{{ discount_filter|default:"" }}',
+        inStock: {{ in_stock_only|yesno:"true,false" }},
+        sort: '{{ sort|default:"newest" }}',
+        page: {{ products.number|default:1 }},
+
+        get activeFiltersCount() {
+            let count = 0;
+            if (this.category) count++;
+            count += this.brands.length;
+            count += this.colors.length;
+            count += this.sizes.length;
+            if (this.rating) count++;
+            if (this.discount) count++;
+            if (this.inStock) count++;
+            return count;
+        },
+
+        initCatalog() {
+            // Listen for popstate (back/forward browser buttons)
+            window.addEventListener('popstate', (e) => {
+                if (e.state) {
+                    this.restoreState(e.state);
+                    this.fetchFilteredResults(this.page, false);
+                }
+            });
+        },
+
+        setCategory(slug) {
+            this.category = slug;
+            this.fetchFilteredResults(1);
+        },
+
+        toggleColor(colorName) {
+            const idx = this.colors.indexOf(colorName);
+            if (idx > -1) {
+                this.colors.splice(idx, 1);
+            } else {
+                this.colors.push(colorName);
+            }
+            this.fetchFilteredResults(1);
+        },
+
+        toggleSize(sizeVal) {
+            const idx = this.sizes.indexOf(sizeVal);
+            if (idx > -1) {
+                this.sizes.splice(idx, 1);
+            } else {
+                this.sizes.push(sizeVal);
+            }
+            this.fetchFilteredResults(1);
+        },
+
+        removeFilter(type, value) {
+            if (type === 'category') this.category = '';
+            else if (type === 'brand') this.brands = this.brands.filter(b => b !== value);
+            else if (type === 'color') this.colors = this.colors.filter(c => c !== value);
+            else if (type === 'size') this.sizes = this.sizes.filter(s => s !== value);
+            else if (type === 'rating') this.rating = '';
+            else if (type === 'discount') this.discount = '';
+            else if (type === 'in_stock') this.inStock = false;
+            else if (type === 'min_price') this.minPrice = {{ catalog_min_price }};
+            else if (type === 'max_price') this.maxPrice = {{ catalog_max_price }};
+            this.fetchFilteredResults(1);
+        },
+
+        clearAllFilters() {
+            this.category = '';
+            this.brands = [];
+            this.colors = [];
+            this.sizes = [];
+            this.rating = '';
+            this.discount = '';
+            this.inStock = false;
+            this.minPrice = {{ catalog_min_price }};
+            this.maxPrice = {{ catalog_max_price }};
+            this.sort = 'newest';
+            this.fetchFilteredResults(1);
+        },
+
+        goToPage(pageNum) {
+            this.page = pageNum;
+            this.fetchFilteredResults(pageNum);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        },
+
+        buildQueryParams(pageNum) {
+            const params = new URLSearchParams();
+            if (this.category) params.set('category', this.category);
+            this.brands.forEach(b => params.append('brand', b));
+            if (this.minPrice > {{ catalog_min_price }}) params.set('min_price', this.minPrice);
+            if (this.maxPrice < {{ catalog_max_price }}) params.set('max_price', this.maxPrice);
+            this.colors.forEach(c => params.append('color', c));
+            this.sizes.forEach(s => params.append('size', s));
+            if (this.rating) params.set('rating', this.rating);
+            if (this.discount) params.set('discount', this.discount);
+            if (this.inStock) params.set('in_stock', '1');
+            if (this.sort && this.sort !== 'newest') params.set('sort', this.sort);
+            if (pageNum && pageNum > 1) params.set('page', pageNum);
+            return params;
+        },
+
+        async fetchFilteredResults(pageNum = 1, pushToHistory = true) {
+            this.loading = true;
+            this.page = pageNum;
+            const params = this.buildQueryParams(pageNum);
+            const ajaxParams = new URLSearchParams(params);
+            ajaxParams.set('ajax', '1');
+
+            const fetchUrl = `/catalog/?${ajaxParams.toString()}`;
+            const displayUrl = `/catalog/?${params.toString()}`;
+
+            try {
+                const response = await fetch(fetchUrl, {
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                });
+                const data = await response.json();
+
+                if (data.status === 'success') {
+                    const container = document.getElementById('productGridContainer');
+                    if (container) {
+                        container.innerHTML = data.html;
+                    }
+                    this.totalCount = data.total_count;
+
+                    if (pushToHistory) {
+                        window.history.pushState(
+                            {
+                                category: this.category,
+                                brands: [...this.brands],
+                                minPrice: this.minPrice,
+                                maxPrice: this.maxPrice,
+                                colors: [...this.colors],
+                                sizes: [...this.sizes],
+                                rating: this.rating,
+                                discount: this.discount,
+                                inStock: this.inStock,
+                                sort: this.sort,
+                                page: this.page,
+                            },
+                            '',
+                            displayUrl
+                        );
+                    }
+                }
+            } catch (err) {
+                console.error("Error fetching filtered products:", err);
+            } finally {
+                this.loading = false;
+            }
+        },
+
+        restoreState(state) {
+            this.category = state.category || '';
+            this.brands = state.brands || [];
+            this.minPrice = state.minPrice || {{ catalog_min_price }};
+            this.maxPrice = state.maxPrice || {{ catalog_max_price }};
+            this.colors = state.colors || [];
+            this.sizes = state.sizes || [];
+            this.rating = state.rating || '';
+            this.discount = state.discount || '';
+            this.inStock = state.inStock || false;
+            this.sort = state.sort || 'newest';
+            this.page = state.page || 1;
+        }
+    };
+}
+
+// Global Quick Add to Cart & Wishlist Handlers
+async function quickAddToCart(e, productId) {
+    e.stopPropagation();
+    e.preventDefault();
+
+    const formData = new FormData();
+    formData.append('product_id', productId);
+    formData.append('quantity', 1);
+
+    try {
+        const res = await fetch('/cart/add/', {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': getCookie('csrftoken'),
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: formData
+        });
+
+        const data = await res.json();
+        if (res.status === 401 && data.redirect_url) {
+            window.location.href = data.redirect_url;
+            return;
+        }
+
+        if (data.status === 'success') {
+            window.dispatchEvent(new CustomEvent('toast', { detail: { message: data.message, type: 'success' } }));
+            // Trigger cart count badge update
+            const badge = document.getElementById('cartBadge');
+            if (badge) badge.innerText = data.cart_count;
+        } else {
+            window.dispatchEvent(new CustomEvent('toast', { detail: { message: data.message, type: 'warning' } }));
+        }
+    } catch (err) {
+        console.error("Add to cart error:", err);
+    }
+}
+
+async function toggleWishlist(e, productId) {
+    e.stopPropagation();
+    e.preventDefault();
+
+    try {
+        const res = await fetch(`/cart/wishlist/toggle/${productId}/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': getCookie('csrftoken'),
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        });
+
+        const data = await res.json();
+        if (res.status === 401 && data.redirect_url) {
+            window.location.href = data.redirect_url;
+            return;
+        }
+
+        if (data.status === 'success') {
+            window.dispatchEvent(new CustomEvent('toast', { detail: { message: data.message, type: 'success' } }));
+            
+            // Toggle heart icon fill
+            const btns = document.querySelectorAll(`.wishlist-btn-${productId}`);
+            btns.forEach(btn => {
+                if (data.is_wishlisted) {
+                    btn.innerHTML = '<svg class="w-4 h-4 text-red-500 fill-current" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>';
+                } else {
+                    btn.innerHTML = '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>';
+                }
+            });
+        }
+    } catch (err) {
+        console.error("Toggle wishlist error:", err);
+    }
+}
+
+// CSRF helper
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+</script>
+{% endblock %}

@@ -1,0 +1,153 @@
+{% extends 'base.html' %}
+
+{% block title %}Track Your Order | AvailSmart{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-14">
+    
+    <!-- Header -->
+    <div class="text-center mb-10">
+        <span class="text-[10px] font-bold uppercase tracking-widest text-clay block mb-2">Live Fulfillment</span>
+        <h1 class="font-editorial text-3xl sm:text-4xl font-bold text-forest-dark tracking-tight">
+            Track Your Studio Order
+        </h1>
+        <p class="text-xs sm:text-sm text-textMuted mt-2 max-w-md mx-auto">
+            Enter your AvailSmart Order Number (e.g. ORD-2026-...) and your email or phone to view live courier status.
+        </p>
+    </div>
+
+    <!-- Search Form Card -->
+    <div class="bg-white p-6 sm:p-8 rounded-4xl border border-alabaster-border shadow-card max-w-xl mx-auto mb-10">
+        <form method="GET" action="{% url 'orders:track_order' %}" class="space-y-4">
+            <div>
+                <label class="block text-[10px] font-bold uppercase tracking-widest text-textMuted mb-1.5">Order Number *</label>
+                <input 
+                    type="text" 
+                    name="order_number" 
+                    value="{{ query }}" 
+                    required 
+                    placeholder="e.g. ORD-2026-0001" 
+                    class="w-full px-4 py-3 rounded-2xl bg-[#FAF8F5] border border-alabaster-border text-xs text-forest-dark font-mono uppercase focus:outline-none focus:ring-2 focus:ring-forest-light/20 focus:border-forest transition"
+                >
+            </div>
+
+            <div>
+                <label class="block text-[10px] font-bold uppercase tracking-widest text-textMuted mb-1.5">Email or Phone Number (Optional)</label>
+                <input 
+                    type="text" 
+                    name="contact" 
+                    value="{{ contact }}" 
+                    placeholder="e.g. priya@example.com" 
+                    class="w-full px-4 py-3 rounded-2xl bg-[#FAF8F5] border border-alabaster-border text-xs text-forest-dark focus:outline-none focus:ring-2 focus:ring-forest-light/20 focus:border-forest transition"
+                >
+            </div>
+
+            <button 
+                type="submit" 
+                class="w-full py-3.5 rounded-full bg-forest-dark hover:bg-forest text-white text-xs font-semibold tracking-wider transition active:scale-95 shadow-sm"
+            >
+                Search Tracking Records &rarr;
+            </button>
+        </form>
+    </div>
+
+    <!-- Search Result Section -->
+    {% if searched %}
+        {% if order %}
+            <div class="bg-white rounded-4xl border border-alabaster-border p-8 shadow-card space-y-6">
+                <!-- Order Header -->
+                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-alabaster-border pb-6">
+                    <div>
+                        <span class="text-[10px] font-bold uppercase tracking-widest text-clay block">Verified Record</span>
+                        <h2 class="font-editorial text-2xl font-bold text-forest-dark">Order #{{ order.order_number }}</h2>
+                        <p class="text-xs text-textMuted mt-0.5">Placed on {{ order.created_at|date:"F d, Y \a\\t h:i A" }}</p>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider
+                            {% if order.order_status == 'delivered' %}bg-emerald-100 text-emerald-800
+                            {% elif order.order_status == 'cancelled' %}bg-red-100 text-red-800
+                            {% elif order.order_status == 'shipped' %}bg-blue-100 text-blue-800
+                            {% else %}bg-[#F5EFEB] text-forest-dark{% endif %}">
+                            {{ order.get_order_status_display }}
+                        </span>
+                        <a href="{% url 'orders:order_detail' order_number=order.order_number %}" class="px-4 py-1.5 rounded-full bg-forest-dark hover:bg-forest text-white text-xs font-semibold tracking-wider transition">
+                            Full Details &rarr;
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Live Progress Timeline -->
+                <div class="py-4">
+                    <h4 class="text-xs font-bold uppercase tracking-wider text-forest-dark mb-6">Delivery Timeline</h4>
+                    <div class="relative flex items-center justify-between">
+                        <!-- Horizontal Connecting Line -->
+                        <div class="absolute top-1/2 left-0 right-0 h-1 bg-[#F5EFEB] -translate-y-1/2 z-0"></div>
+                        <div class="absolute top-1/2 left-0 h-1 bg-forest -translate-y-1/2 z-0 transition-all duration-700"
+                            style="width: {% if order.order_status == 'pending' %}15%{% elif order.order_status == 'confirmed' %}40%{% elif order.order_status == 'shipped' %}75%{% elif order.order_status == 'delivered' %}100%{% else %}0%{% endif %};">
+                        </div>
+
+                        <!-- Step 1: Confirmed -->
+                        <div class="relative z-10 flex flex-col items-center">
+                            <div class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold {% if order.order_status != 'cancelled' %}bg-forest-dark text-white ring-4 ring-white{% else %}bg-gray-200 text-gray-500{% endif %}">
+                                ✓
+                            </div>
+                            <span class="text-[10px] font-bold mt-2 text-forest-dark uppercase tracking-wider">Confirmed</span>
+                        </div>
+
+                        <!-- Step 2: Packed -->
+                        <div class="relative z-10 flex flex-col items-center">
+                            <div class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold {% if order.order_status in 'packed,shipped,delivered' %}bg-forest-dark text-white ring-4 ring-white{% else %}bg-white border-2 border-alabaster-border text-textMuted{% endif %}">
+                                📦
+                            </div>
+                            <span class="text-[10px] font-bold mt-2 text-forest-dark uppercase tracking-wider">Studio Packed</span>
+                        </div>
+
+                        <!-- Step 3: Shipped -->
+                        <div class="relative z-10 flex flex-col items-center">
+                            <div class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold {% if order.order_status in 'shipped,delivered' %}bg-forest-dark text-white ring-4 ring-white{% else %}bg-white border-2 border-alabaster-border text-textMuted{% endif %}">
+                                🚚
+                            </div>
+                            <span class="text-[10px] font-bold mt-2 text-forest-dark uppercase tracking-wider">In Transit</span>
+                        </div>
+
+                        <!-- Step 4: Delivered -->
+                        <div class="relative z-10 flex flex-col items-center">
+                            <div class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold {% if order.order_status == 'delivered' %}bg-emerald text-white ring-4 ring-white{% else %}bg-white border-2 border-alabaster-border text-textMuted{% endif %}">
+                                🏠
+                            </div>
+                            <span class="text-[10px] font-bold mt-2 text-forest-dark uppercase tracking-wider">Delivered</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Items Preview -->
+                <div class="border-t border-alabaster-border pt-6">
+                    <h4 class="text-xs font-bold uppercase tracking-wider text-forest-dark mb-4">Objects in this Dispatch ({{ order.items.count }})</h4>
+                    <div class="space-y-3">
+                        {% for item in order.items.all %}
+                            <div class="flex items-center justify-between p-3 rounded-2xl bg-[#FAF8F5] border border-alabaster-border text-xs">
+                                <div>
+                                    <h5 class="font-semibold text-forest-dark">{{ item.product_name }}</h5>
+                                    <p class="text-[11px] text-textMuted mt-0.5">Color: {{ item.color }} {% if item.size %}• Size: {{ item.size }}{% endif %} • Qty: {{ item.quantity }}</p>
+                                </div>
+                                <span class="font-bold text-forest-dark">₹{{ item.total_price }}</span>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+            </div>
+        {% else %}
+            <!-- No Record Found -->
+            <div class="bg-white rounded-4xl border border-alabaster-border p-10 text-center max-w-md mx-auto shadow-card">
+                <span class="text-3xl block mb-3">🔍</span>
+                <h3 class="font-editorial text-lg font-bold text-forest-dark">No Order Found</h3>
+                <p class="text-xs text-textMuted mt-1 leading-relaxed">
+                    We could not locate any order with ID "<span class="font-mono text-forest-dark font-bold">{{ query }}</span>". Please verify the digits or check your confirmation email.
+                </p>
+            </div>
+        {% endif %}
+    {% endif %}
+
+</div>
+{% endblock %}

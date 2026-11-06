@@ -1,0 +1,83 @@
+{% extends 'base.html' %}
+
+{% block title %}7-Day Home Trial & Returns | AvailSmart{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-14">
+    
+    <!-- Header -->
+    <div class="text-center mb-12">
+        <span class="text-[10px] font-bold uppercase tracking-widest text-clay block mb-2">Confidence in Craft</span>
+        <h1 class="font-editorial text-3xl sm:text-4xl lg:text-5xl font-bold text-forest-dark tracking-tight">
+            7-Day In-Home Trial & Returns Policy
+        </h1>
+        <p class="text-xs sm:text-sm text-textMuted mt-3 max-w-xl mx-auto leading-relaxed">
+            We understand that homeware and tactile objects must feel right in your hands and on your dining table. If any piece does not fit your space, return it effortlessly.
+        </p>
+    </div>
+
+    <!-- 3 Step Process Box -->
+    <div class="bg-white rounded-4xl border border-alabaster-border p-8 sm:p-10 shadow-card mb-12">
+        <h3 class="font-editorial text-xl font-bold text-forest-dark mb-6 text-center">How Doorstep Returns Work</h3>
+        
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="p-5 bg-[#FAF8F5] rounded-3xl border border-alabaster-border text-center">
+                <span class="w-8 h-8 rounded-full bg-forest-dark text-white text-xs font-bold flex items-center justify-center mx-auto mb-3">1</span>
+                <h4 class="text-xs font-bold text-forest-dark uppercase tracking-wider">Inspect At Home</h4>
+                <p class="text-[11px] text-textMuted mt-1.5 leading-relaxed">You have a full 7 days from delivery to evaluate texture, size, and fit in your home.</p>
+            </div>
+
+            <div class="p-5 bg-[#FAF8F5] rounded-3xl border border-alabaster-border text-center">
+                <span class="w-8 h-8 rounded-full bg-clay text-white text-xs font-bold flex items-center justify-center mx-auto mb-3">2</span>
+                <h4 class="text-xs font-bold text-forest-dark uppercase tracking-wider">1-Click Pickup</h4>
+                <p class="text-[11px] text-textMuted mt-1.5 leading-relaxed">Log in to your orders dashboard or enter your order number below to request an express doorstep pickup.</p>
+            </div>
+
+            <div class="p-5 bg-[#FAF8F5] rounded-3xl border border-alabaster-border text-center">
+                <span class="w-8 h-8 rounded-full bg-emerald text-white text-xs font-bold flex items-center justify-center mx-auto mb-3">3</span>
+                <h4 class="text-xs font-bold text-forest-dark uppercase tracking-wider">Full Instant Refund</h4>
+                <p class="text-[11px] text-textMuted mt-1.5 leading-relaxed">Once picked up, your refund is credited directly to your original payment method or bank within 48 hours.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Return Guidelines Accordion/Points -->
+    <div class="space-y-4 mb-12">
+        <div class="bg-white p-6 rounded-3xl border border-alabaster-border">
+            <h4 class="text-sm font-bold text-forest-dark mb-2">What items are eligible for return?</h4>
+            <p class="text-xs text-textMuted leading-relaxed">
+                All tableware, dinner sets, carafes, apparel, and lifestyle accessories are eligible for returns within 7 calendar days of receipt. Items must be unwashed, unbroken, and returned with original protective box cushions.
+            </p>
+        </div>
+
+        <div class="bg-white p-6 rounded-3xl border border-alabaster-border">
+            <h4 class="text-sm font-bold text-forest-dark mb-2">What if a piece arrives damaged during transit?</h4>
+            <p class="text-xs text-textMuted leading-relaxed">
+                While our honeycomb packaging has a 99.7% safe arrival record, rough transit can rarely cause breakage. If an item arrives damaged, simply snap a photo and email concierge@availsmart.com or WhatsApp our desk. We dispatch an instant replacement the same day—no questions asked.
+            </p>
+        </div>
+
+        <div class="bg-white p-6 rounded-3xl border border-alabaster-border">
+            <h4 class="text-sm font-bold text-forest-dark mb-2">Are return pickup fees charged?</h4>
+            <p class="text-xs text-textMuted leading-relaxed">
+                No. Return pickups are 100% complimentary across India for all verified orders.
+            </p>
+        </div>
+    </div>
+
+    <!-- Quick Action Banner -->
+    <div class="bg-[#F5EFEB] p-8 rounded-4xl border border-alabaster-border text-center">
+        <h3 class="font-editorial text-2xl font-bold text-forest-dark">Ready to manage an existing order?</h3>
+        <p class="text-xs text-textMuted mt-1.5 mb-5">Access your order history or initiate a return directly.</p>
+        <div class="flex flex-wrap items-center justify-center gap-3">
+            <a href="{% url 'orders:my_orders' %}" class="px-7 py-3 rounded-full bg-forest-dark hover:bg-forest text-white text-xs font-semibold tracking-wider transition active:scale-95">
+                My Order History &rarr;
+            </a>
+            <a href="{% url 'orders:track_order' %}" class="px-6 py-3 rounded-full bg-white hover:bg-[#FAF8F5] text-forest-dark text-xs font-semibold border border-alabaster-border transition">
+                Track by Order Number
+            </a>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

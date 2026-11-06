@@ -1,0 +1,733 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ product.name }} | AvailSmart{% endblock %}
+
+{% block meta_description %}{{ product.short_description|default:product.full_description|truncatewords:25 }}{% endblock %}
+
+{% block og_title %}{{ product.name }} - Buy Online at AvailSmart{% endblock %}
+{% block og_description %}{{ product.short_description|default:product.name }}{% endblock %}
+{% block og_image %}{% with prim=product.primary_image %}{% if prim and prim.image %}{{ request.scheme }}://{{ request.get_host }}{{ prim.image.url }}{% endif %}{% endwith %}{% endblock %}
+
+{% block structured_data %}
+<script type="application/ld+json">
+{
+    "@context": "https://schema.org/",
+    "@type": "Product",
+    "name": "{{ product.name|escapejs }}",
+    "image": [
+        {% with prim=product.primary_image %}
+            {% if prim and prim.image %}"{{ request.scheme }}://{{ request.get_host }}{{ prim.image.url }}"{% endif %}
+        {% endwith %}
+    ],
+    "description": "{{ product.short_description|default:product.name|escapejs }}",
+    "sku": "{{ product.sku }}",
+    {% if product.brand %}
+    "brand": {
+        "@type": "Brand",
+        "name": "{{ product.brand.name|escapejs }}"
+    },
+    {% endif %}
+    "offers": {
+        "@type": "Offer",
+        "url": "{{ request.build_absolute_uri }}",
+        "priceCurrency": "INR",
+        "price": "{{ product.effective_price }}",
+        "availability": "{% if product.is_in_stock %}https://schema.org/InStock{% else %}https://schema.org/OutOfStock{% endif %}",
+        "itemCondition": "https://schema.org/NewCondition"
+    }
+    {% if product.rating_avg and product.rating_count > 0 %}
+    ,
+    "aggregateRating": {
+        "@type": "AggregateRating",
+        "ratingValue": "{{ product.rating_avg }}",
+        "reviewCount": "{{ product.rating_count }}"
+    }
+    {% endif %}
+}
+</script>
+{% endblock %}
+
+{% block content %}
+<div 
+    x-data="productDetailApp()" 
+    x-init="initDetail()"
+    class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8"
+>
+    
+    <!-- Top Breadcrumb Navigation (Crookeries Minimalist Tracked) -->
+    <nav class="flex items-center gap-2 text-xs text-textMuted mb-8 overflow-x-auto whitespace-nowrap pb-1">
+        <a href="/" class="hover:text-forest transition">Home</a>
+        <span class="text-alabaster-border">/</span>
+        <a href="/catalog/" class="hover:text-forest transition">Catalog</a>
+        <span class="text-alabaster-border">/</span>
+        {% if product.category.parent %}
+            <a href="/catalog/{{ product.category.parent.slug }}/" class="hover:text-forest transition">{{ product.category.parent.name }}</a>
+            <span class="text-alabaster-border">/</span>
+        {% endif %}
+        <a href="/catalog/{{ product.category.slug }}/" class="hover:text-forest transition">{{ product.category.name }}</a>
+        <span class="text-alabaster-border">/</span>
+        <span class="text-forest-dark font-semibold truncate max-w-xs">{{ product.name }}</span>
+    </nav>
+
+    <!-- Main Product Layout Grid (2 Columns: Left Gallery, Right Details) -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-14 mb-20 items-start">
+        
+        <!-- ============================================== -->
+        <!-- LEFT: DYNAMIC IMAGE GALLERY WITH ZOOM -->
+        <!-- ============================================== -->
+        <div class="lg:col-span-6 flex flex-col-reverse sm:flex-row gap-4 sticky top-28">
+            
+            <!-- Thumbnail Navigation Strip -->
+            <div class="flex sm:flex-col gap-3 overflow-x-auto sm:overflow-y-auto max-h-[500px] sm:w-20 shrink-0 pb-2 sm:pb-0">
+                <template x-for="(img, idx) in currentImages" :key="img.id || idx">
+                    <button 
+                        type="button" 
+                        @click="activeImage = img.url"
+                        class="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl border p-1 bg-white overflow-hidden transition-all shrink-0 cursor-pointer"
+                        :class="activeImage === img.url ? 'border-forest-dark shadow-sm ring-2 ring-forest-dark/20 scale-102' : 'border-alabaster-border hover:border-forest/40 opacity-70 hover:opacity-100'"
+                    >
+                        <img :src="img.thumb || img.url" :alt="img.alt" class="w-full h-full object-contain">
+                    </button>
+                </template>
+            </div>
+
+            <!-- Main High-Res Showcase Image with Interactive Lens Zoom -->
+            <div 
+                x-data="{ zoomActive: false, zoomX: '50%', zoomY: '50%' }"
+                @mousemove="
+                    const rect = $el.getBoundingClientRect();
+                    const x = (($event.clientX - rect.left) / rect.width) * 100;
+                    const y = (($event.clientY - rect.top) / rect.height) * 100;
+                    zoomX = x + '%';
+                    zoomY = y + '%';
+                "
+                @mouseenter="zoomActive = true"
+                @mouseleave="zoomActive = false"
+                class="relative flex-1 bg-[#FAF8F5] rounded-4xl border border-alabaster-border aspect-square overflow-hidden shadow-luxury flex items-center justify-center p-8 cursor-crosshair select-none"
+            >
+                <!-- Discount Pill on Top Left -->
+                {% if product.has_discount %}
+                    <span class="absolute top-4 left-4 z-20 px-3 py-1 rounded-full bg-clay text-white text-[10px] font-bold uppercase tracking-widest shadow-2xs">
+                        -{{ product.discount_percent }}% OFF
+                    </span>
+                {% endif %}
+
+                <!-- Wishlist Button on Top Right -->
+                <button 
+                    type="button"
+                    onclick="toggleWishlist(event, {{ product.id }})"
+                    class="wishlist-btn-{{ product.id }} absolute top-4 right-4 z-20 w-10 h-10 rounded-full bg-white/90 backdrop-blur-md text-textMuted hover:text-clay hover:bg-white flex items-center justify-center shadow-2xs transition active:scale-90 border border-alabaster-border"
+                    title="Save to Wishlist"
+                >
+                    {% if is_wishlisted %}
+                        <svg class="w-5 h-5 text-clay fill-current" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+                    {% else %}
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
+                    {% endif %}
+                </button>
+
+                <!-- Normal Main Image -->
+                <img 
+                    :src="activeImage" 
+                    alt="{{ product.name }}"
+                    class="w-full h-full object-contain transition-opacity duration-300"
+                    :class="zoomActive ? 'opacity-0' : 'opacity-100'"
+                >
+
+                <!-- Zoomed View when Hovering -->
+                <div 
+                    x-show="zoomActive" 
+                    class="absolute inset-0 bg-no-repeat pointer-events-none"
+                    :style="`background-image: url('${activeImage}'); background-position: ${zoomX} ${zoomY}; background-size: 200%;`"
+                    style="display: none;"
+                ></div>
+
+                <!-- Hover to Zoom Tooltip Prompt -->
+                <span class="absolute bottom-4 left-1/2 -translate-x-1/2 px-3.5 py-1 rounded-full bg-forest-dark/80 backdrop-blur-md text-white text-[10px] font-semibold tracking-wide pointer-events-none opacity-80">
+                    Hover to inspect craft & texture
+                </span>
+            </div>
+
+        </div>
+
+        <!-- ============================================== -->
+        <!-- RIGHT: PRODUCT PURCHASING PANEL -->
+        <!-- ============================================== -->
+        <div class="lg:col-span-6 space-y-7">
+            
+            <!-- Brand & Rating Badges -->
+            <div class="flex items-center justify-between">
+                {% if product.brand %}
+                    <a href="/catalog/?brand={{ product.brand.slug }}" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#F5EFEB] text-forest-dark text-[11px] font-semibold tracking-wide hover:bg-[#EAE5DE] transition">
+                        ✦ {{ product.brand.name }}
+                    </a>
+                {% else %}
+                    <span class="text-xs font-semibold text-textMuted tracking-wider uppercase">Studio Archive</span>
+                {% endif %}
+
+                <!-- Customer Rating -->
+                <div class="flex items-center gap-1.5 text-xs">
+                    <div class="flex items-center text-clay font-bold">
+                        <span>★</span>
+                        <span class="ml-0.5 text-forest-dark font-bold">{{ product.rating_avg|default:"4.8" }}</span>
+                    </div>
+                    <span class="text-textMuted">({{ total_reviews }} client notes)</span>
+                </div>
+            </div>
+
+            <!-- Title & SKU -->
+            <div>
+                <h1 class="font-editorial text-3xl sm:text-4xl font-bold text-forest-dark tracking-tight leading-tight">
+                    {{ product.name }}
+                </h1>
+                <p class="text-[11px] text-textMuted mt-1.5 uppercase tracking-widest font-semibold">
+                    Studio Identifier: <span x-text="currentVariant ? currentVariant.sku : '{{ product.sku }}'" class="font-mono text-forest-dark"></span>
+                </p>
+            </div>
+
+            <!-- Price & Discount Header (Warm Alabaster Surface) -->
+            <div class="p-5 rounded-3xl bg-[#F5EFEB] border border-alabaster-border flex items-baseline gap-3.5">
+                <span class="text-3xl font-bold text-forest-dark" x-text="'₹' + currentPrice">
+                    ₹{{ product.effective_price }}
+                </span>
+                {% if product.has_discount %}
+                    <span class="text-sm text-textMuted line-through">₹{{ product.base_price }}</span>
+                    <span class="text-xs font-bold text-white bg-clay px-3 py-0.5 rounded-full uppercase tracking-wider">
+                        Save {{ product.discount_percent }}%
+                    </span>
+                {% endif %}
+            </div>
+
+            <!-- Short Summary -->
+            {% if product.short_description %}
+                <p class="text-sm text-textMuted leading-relaxed font-normal">
+                    {{ product.short_description }}
+                </p>
+            {% endif %}
+
+            <div class="border-t border-alabaster-border"></div>
+
+            <!-- 1. COLOR SELECTION SWATCHES -->
+            <div>
+                <div class="flex items-center justify-between mb-2.5">
+                    <label class="text-xs font-bold uppercase tracking-wider text-textMain">
+                        Color: <span x-text="currentColorName" class="text-emerald font-semibold"></span>
+                    </label>
+                </div>
+                
+                <div class="flex flex-wrap items-center gap-3">
+                    <template x-for="c in colors" :key="c.id">
+                        <button 
+                            type="button" 
+                            @click="selectColor(c.id)"
+                            class="group relative flex items-center gap-2 px-3 py-1.5 rounded-full border transition cursor-pointer"
+                            :class="selectedColorId === c.id ? 'border-emerald bg-mint-tint/60 ring-2 ring-emerald/20 font-bold' : 'border-emerald-border/80 bg-white hover:bg-mint-tint/30 text-textMain'"
+                        >
+                            <span 
+                                class="w-4 h-4 rounded-full border border-black/20 shrink-0 shadow-2xs" 
+                                :style="`background-color: ${c.hex};`"
+                            ></span>
+                            <span class="text-xs" x-text="c.name"></span>
+                        </button>
+                    </template>
+                </div>
+            </div>
+
+            <!-- 2. SIZE VARIANT SELECTOR -->
+            <div x-show="availableSizes.length > 0">
+                <div class="flex items-center justify-between mb-2.5">
+                    <label class="text-xs font-bold uppercase tracking-wider text-textMain">
+                        Size: <span x-text="selectedSize || 'Choose Size'" class="text-emerald font-semibold"></span>
+                    </label>
+                    <span 
+                        class="text-xs font-bold"
+                        :class="currentStock > 5 ? 'text-emerald' : (currentStock > 0 ? 'text-accent-orange' : 'text-red-500')"
+                        x-text="currentStock > 5 ? '✓ In Stock' : (currentStock > 0 ? `⚠️ Only ${currentStock} left!` : '✕ Out of Stock')"
+                    ></span>
+                </div>
+
+                <div class="flex flex-wrap gap-2">
+                    <template x-for="v in availableSizes" :key="v.id">
+                        <button 
+                            type="button" 
+                            @click="selectVariant(v)"
+                            :disabled="!v.is_in_stock"
+                            class="px-4 py-2 text-xs font-bold rounded-2xl border transition flex items-center gap-1.5 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+                            :class="selectedVariantId === v.id ? 'bg-emerald text-white border-emerald shadow-sm' : 'bg-white text-textMain border-emerald-border hover:bg-mint-tint'"
+                        >
+                            <span x-text="v.size || 'Standard'"></span>
+                            <span x-show="v.price !== currentPrice" class="text-[10px] opacity-80" x-text="`₹${v.price}`"></span>
+                        </button>
+                    </template>
+                </div>
+            </div>
+
+            <!-- 3. QUANTITY & CALL TO ACTIONS -->
+            <div class="pt-4 border-t border-emerald-border/60 space-y-4">
+                
+                <div class="flex items-center gap-4">
+                    <!-- Quantity Stepper -->
+                    <div class="flex items-center rounded-full border border-emerald-border bg-white shadow-2xs p-1">
+                        <button 
+                            type="button" 
+                            @click="decrementQty()" 
+                            class="w-8 h-8 rounded-full hover:bg-mint-tint text-emerald-dark font-bold flex items-center justify-center transition"
+                        >
+                            &minus;
+                        </button>
+                        <span x-text="quantity" class="w-10 text-center font-bold text-sm text-textMain"></span>
+                        <button 
+                            type="button" 
+                            @click="incrementQty()" 
+                            class="w-8 h-8 rounded-full hover:bg-mint-tint text-emerald-dark font-bold flex items-center justify-center transition"
+                        >
+                            +
+                        </button>
+                    </div>
+
+                    <!-- Add to Bag CTA (Crookeries Deep Forest Pill) -->
+                    <button 
+                        type="button" 
+                        @click="handleAddToCart(false)"
+                        :disabled="!canAddToCart"
+                        class="flex-1 py-3.5 px-7 rounded-full bg-forest-dark hover:bg-forest text-white text-xs font-semibold tracking-wider shadow-sm transition active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                    >
+                        <svg class="w-4 h-4 text-emerald-tint" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg>
+                        <span>Add to Bag</span>
+                    </button>
+                </div>
+
+                <!-- Buy Now Button (Terracotta Clay Pill) -->
+                <button 
+                    type="button" 
+                    @click="handleAddToCart(true)"
+                    :disabled="!canAddToCart"
+                    class="w-full py-3.5 px-6 rounded-full bg-clay hover:bg-clay-hover text-white text-xs font-bold tracking-wider shadow-sm transition active:scale-95 disabled:opacity-50 flex items-center justify-center gap-2"
+                >
+                    <span>Instant Studio Checkout</span>
+                </button>
+
+            </div>
+
+            <!-- Trust Badges Strip (Warm Alabaster Box) -->
+            <div class="p-4 rounded-3xl bg-white border border-alabaster-border grid grid-cols-3 gap-2 text-center text-[11px] font-semibold text-textMuted shadow-2xs">
+                <div class="flex flex-col items-center gap-1">
+                    <span class="text-base">🚚</span>
+                    <span>Express Delivery</span>
+                </div>
+                <div class="flex flex-col items-center gap-1 border-x border-alabaster-border">
+                    <span class="text-base">🔄</span>
+                    <span>7-Day Home Trial</span>
+                </div>
+                <div class="flex flex-col items-center gap-1">
+                    <span class="text-base">🌿</span>
+                    <span>Natural Materials</span>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- ============================================== -->
+    <!-- LOWER SECTION: TABS (Description, Specs, Reviews) -->
+    <!-- ============================================== -->
+    <div x-data="{ activeTab: 'description' }" class="mb-20">
+        
+        <!-- Tab Headers -->
+        <div class="flex items-center gap-2 border-b border-alabaster-border pb-px mb-8 overflow-x-auto">
+            <button 
+                type="button" 
+                @click="activeTab = 'description'"
+                class="px-7 py-3 font-semibold text-xs tracking-wider uppercase rounded-t-2xl transition border-b-2"
+                :class="activeTab === 'description' ? 'border-forest-dark text-forest-dark bg-[#F5EFEB]/50' : 'border-transparent text-textMuted hover:text-forest-dark'"
+            >
+                The Story & Description
+            </button>
+            <button 
+                type="button" 
+                @click="activeTab = 'specs'"
+                class="px-7 py-3 font-semibold text-xs tracking-wider uppercase rounded-t-2xl transition border-b-2"
+                :class="activeTab === 'specs' ? 'border-forest-dark text-forest-dark bg-[#F5EFEB]/50' : 'border-transparent text-textMuted hover:text-forest-dark'"
+            >
+                Craft & Specifications
+            </button>
+            <button 
+                type="button" 
+                @click="activeTab = 'reviews'"
+                class="px-7 py-3 font-semibold text-xs tracking-wider uppercase rounded-t-2xl transition border-b-2 flex items-center gap-1.5"
+                :class="activeTab === 'reviews' ? 'border-forest-dark text-forest-dark bg-[#F5EFEB]/50' : 'border-transparent text-textMuted hover:text-forest-dark'"
+            >
+                <span>Client Impressions</span>
+                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold" :class="activeTab === 'reviews' ? 'bg-forest-dark text-white' : 'bg-[#EAE5DE] text-forest-dark'">{{ total_reviews }}</span>
+            </button>
+        </div>
+
+        <!-- Tab 1: Description -->
+        <div x-show="activeTab === 'description'" class="bg-white p-8 rounded-3xl border border-emerald-border/80 shadow-soft">
+            <h3 class="text-lg font-bold text-emerald-dark mb-4">About this product</h3>
+            <div class="prose prose-emerald max-w-none text-sm text-textMain leading-relaxed space-y-4">
+                {{ product.full_description|linebreaks }}
+            </div>
+
+            <!-- Material & Dimensions Highlights -->
+            {% if product.material or product.length %}
+                <div class="mt-8 pt-6 border-t border-emerald-border/40 grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
+                    {% if product.material %}
+                        <div class="p-3 bg-mint-tint/40 rounded-2xl">
+                            <span class="block text-textMuted font-medium uppercase text-[10px]">Material</span>
+                            <span class="font-bold text-emerald-dark text-sm">{{ product.material }}</span>
+                        </div>
+                    {% endif %}
+                    {% if product.length %}
+                        <div class="p-3 bg-mint-tint/40 rounded-2xl">
+                            <span class="block text-textMuted font-medium uppercase text-[10px]">Dimensions (L × W × H)</span>
+                            <span class="font-bold text-emerald-dark text-sm">{{ product.length }} × {{ product.width }} × {{ product.height }} cm</span>
+                        </div>
+                    {% endif %}
+                    {% if product.weight %}
+                        <div class="p-3 bg-mint-tint/40 rounded-2xl">
+                            <span class="block text-textMuted font-medium uppercase text-[10px]">Weight</span>
+                            <span class="font-bold text-emerald-dark text-sm">{{ product.weight }} {{ product.weight_unit }}</span>
+                        </div>
+                    {% endif %}
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Tab 2: Specifications -->
+        <div x-show="activeTab === 'specs'" class="bg-white p-8 rounded-3xl border border-emerald-border/80 shadow-soft" style="display: none;">
+            <h3 class="text-lg font-bold text-emerald-dark mb-4">Technical Specifications</h3>
+            
+            {% if product.specifications.exists %}
+                <div class="border border-emerald-border/60 rounded-2xl overflow-hidden divide-y divide-emerald-border/40">
+                    {% for spec in product.specifications.all %}
+                        <div class="grid grid-cols-1 sm:grid-cols-3 p-3.5 text-xs {% cycle 'bg-white' 'bg-mint-tint/20' %}">
+                            <span class="font-bold text-textMain">{{ spec.key }}</span>
+                            <span class="sm:col-span-2 text-textMuted font-medium mt-1 sm:mt-0">{{ spec.value }}</span>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p class="text-sm text-textMuted italic">Standard specifications apply to this category.</p>
+            {% endif %}
+        </div>
+
+        <!-- Tab 3: Customer Reviews -->
+        <div x-show="activeTab === 'reviews'" class="bg-white p-8 rounded-3xl border border-emerald-border/80 shadow-soft space-y-8" style="display: none;">
+            
+            <!-- Rating Breakdown Header -->
+            <div class="grid grid-cols-1 md:grid-cols-12 gap-8 items-center border-b border-emerald-border/60 pb-8">
+                <!-- Left Summary -->
+                <div class="md:col-span-4 text-center md:text-left">
+                    <span class="text-5xl font-black text-emerald-dark">{{ product.rating_avg|default:"4.5" }}</span>
+                    <div class="flex items-center justify-center md:justify-start gap-1 text-amber-500 my-1 text-lg">
+                        <span>★</span><span>★</span><span>★</span><span>★</span><span>★</span>
+                    </div>
+                    <p class="text-xs text-textMuted">Based on {{ total_reviews }} verified reviews</p>
+                </div>
+
+                <!-- Right Percentage Bars -->
+                <div class="md:col-span-8 space-y-2">
+                    {% for star in "54321" %}
+                        <div class="flex items-center gap-3 text-xs">
+                            <span class="w-8 font-bold text-textMain text-right">{{ star }}★</span>
+                            <div class="flex-1 bg-page rounded-full h-2.5 overflow-hidden border border-emerald-border/40">
+                                <div class="bg-emerald h-full rounded-full" style="width: 80%;"></div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Write a Review Form -->
+            <div class="p-6 rounded-2xl bg-mint-tint/40 border border-emerald-border/60">
+                <h4 class="text-sm font-bold text-emerald-dark uppercase tracking-wider mb-2">Write a Review</h4>
+                
+                {% if request.user.is_authenticated %}
+                    {% if user_has_reviewed %}
+                        <p class="text-xs text-textMuted font-medium">You have already submitted a review for this product. Thank you!</p>
+                    {% else %}
+                        <form method="POST" action="{% url 'catalog:add_review' slug=product.slug %}" class="space-y-4">
+                            {% csrf_token %}
+                            <div>
+                                <label class="block text-xs font-bold text-textMain mb-1">Your Rating</label>
+                                <select name="rating" class="rounded-xl border border-emerald-border text-xs px-3 py-2 bg-white font-medium focus:ring-1 focus:ring-emerald">
+                                    <option value="5">⭐⭐⭐⭐⭐ (5 Stars - Excellent)</option>
+                                    <option value="4">⭐⭐⭐⭐ (4 Stars - Good)</option>
+                                    <option value="3">⭐⭐⭐ (3 Stars - Average)</option>
+                                    <option value="2">⭐⭐ (2 Stars - Poor)</option>
+                                    <option value="1">⭐ (1 Star - Very Poor)</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-textMain mb-1">Your Feedback</label>
+                                <textarea name="comment" rows="3" required placeholder="Share your experience with this product..." class="w-full rounded-2xl border border-emerald-border text-xs p-3 font-medium focus:ring-1 focus:ring-emerald bg-white"></textarea>
+                            </div>
+                            <button type="submit" class="px-5 py-2.5 rounded-full bg-emerald hover:bg-emerald-hover text-white text-xs font-bold shadow-sm transition active:scale-95">
+                                Submit Review
+                            </button>
+                        </form>
+                    {% endif %}
+                {% else %}
+                    <p class="text-xs text-textMuted">
+                        Please <a href="{% url 'accounts:login' %}?next={{ request.path }}" class="font-bold text-emerald hover:underline">sign in</a> to submit a customer review.
+                    </p>
+                {% endif %}
+            </div>
+
+            <!-- Approved Reviews List -->
+            <div class="space-y-4">
+                <h4 class="text-sm font-bold text-emerald-dark uppercase tracking-wider">Customer Feedback ({{ total_reviews }})</h4>
+                
+                {% if reviews %}
+                    <div class="space-y-4">
+                        {% for rev in reviews %}
+                            <div class="p-4 rounded-2xl bg-page border border-emerald-border/60 space-y-2">
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center gap-2">
+                                        <div class="w-7 h-7 rounded-full bg-emerald text-white text-xs font-bold flex items-center justify-center uppercase">
+                                            {{ rev.user.name|slice:":1"|default:"U" }}
+                                        </div>
+                                        <div>
+                                            <span class="text-xs font-bold text-textMain block">{{ rev.user.name }}</span>
+                                            <span class="text-[10px] text-textMuted">{{ rev.created_at|date:"M d, Y" }}</span>
+                                        </div>
+                                    </div>
+                                    <div class="text-amber-500 text-xs font-bold">
+                                        ★ {{ rev.rating }}.0
+                                    </div>
+                                </div>
+                                <p class="text-xs text-textMuted leading-relaxed pl-9">
+                                    {{ rev.comment }}
+                                </p>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="text-xs text-textMuted italic">No reviews yet for this product. Be the first to review it!</p>
+                {% endif %}
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- ============================================== -->
+    <!-- RELATED PRODUCTS CAROUSEL / GRID -->
+    <!-- ============================================== -->
+    {% if related_products %}
+        <div class="mt-16 pt-12 border-t border-emerald-border/60">
+            <div class="flex items-center justify-between mb-6">
+                <div>
+                    <span class="text-xs font-extrabold uppercase tracking-wider text-accent-orange">You May Also Like</span>
+                    <h2 class="text-2xl font-black text-emerald-dark tracking-tight">Related Products</h2>
+                </div>
+                <a href="/catalog/{{ product.category.slug }}/" class="text-xs font-bold text-emerald hover:underline">
+                    View More in {{ product.category.name }} &rarr;
+                </a>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                {% for r_prod in related_products %}
+                    {% include 'catalog/partials/product_card.html' with prod=r_prod wishlist_ids=wishlist_ids %}
+                {% endfor %}
+            </div>
+        </div>
+    {% endif %}
+
+</div>
+
+<!-- Alpine.js Product Detail Controller -->
+<script>
+function productDetailApp() {
+    return {
+        colors: {{ colors_json|safe }},
+        variants: {{ variants_json|safe }},
+        selectedColorId: null,
+        selectedVariantId: null,
+        selectedSize: '',
+        activeImage: '',
+        quantity: 1,
+
+        initDetail() {
+            if (this.colors && this.colors.length > 0) {
+                this.selectColor(this.colors[0].id);
+            } else if (this.variants && this.variants.length > 0) {
+                this.selectVariant(this.variants[0]);
+            }
+        },
+
+        get currentColor() {
+            return this.colors.find(c => c.id === this.selectedColorId) || null;
+        },
+
+        get currentColorName() {
+            return this.currentColor ? this.currentColor.name : '';
+        },
+
+        get currentImages() {
+            if (this.currentColor && this.currentColor.images.length > 0) {
+                return this.currentColor.images;
+            }
+            return [{ url: '{% if product.primary_image and product.primary_image.image %}{{ product.primary_image.image.url }}{% endif %}', thumb: '', alt: '{{ product.name|escapejs }}' }];
+        },
+
+        get availableSizes() {
+            if (!this.selectedColorId) return this.variants;
+            return this.variants.filter(v => v.color_id === this.selectedColorId);
+        },
+
+        get currentVariant() {
+            return this.variants.find(v => v.id === this.selectedVariantId) || null;
+        },
+
+        get currentPrice() {
+            if (this.currentVariant && this.currentVariant.price) {
+                return this.currentVariant.price;
+            }
+            return '{{ product.effective_price }}';
+        },
+
+        get currentStock() {
+            if (this.currentVariant) {
+                return this.currentVariant.stock;
+            }
+            return {{ product.total_stock }};
+        },
+
+        get canAddToCart() {
+            return this.currentStock > 0 && this.selectedVariantId !== null;
+        },
+
+        selectColor(colorId) {
+            this.selectedColorId = colorId;
+            const images = this.currentImages;
+            if (images.length > 0) {
+                this.activeImage = images[0].url;
+            }
+
+            // Automatically pick first available size variant under this color
+            const sizes = this.availableSizes;
+            if (sizes.length > 0) {
+                // If current size exists in new color, keep it; else pick first in-stock
+                const match = sizes.find(s => s.size === this.selectedSize && s.is_in_stock) || sizes[0];
+                this.selectVariant(match);
+            }
+        },
+
+        selectVariant(variant) {
+            this.selectedVariantId = variant.id;
+            this.selectedSize = variant.size;
+        },
+
+        incrementQty() {
+            if (this.quantity < this.currentStock) {
+                this.quantity++;
+            }
+        },
+
+        decrementQty() {
+            if (this.quantity > 1) {
+                this.quantity--;
+            }
+        },
+
+        async handleAddToCart(buyNow = false) {
+            if (!this.selectedVariantId) {
+                window.dispatchEvent(new CustomEvent('toast', { detail: { message: 'Please select a size.', type: 'warning' } }));
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('quantity', this.quantity);
+
+            try {
+                const res = await fetch(`/cart/add/${this.selectedVariantId}/`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': getCookie('csrftoken'),
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: formData
+                });
+
+                const data = await res.json();
+                if (res.status === 401 && data.redirect_url) {
+                    window.location.href = data.redirect_url;
+                    return;
+                }
+
+                if (data.status === 'success') {
+                    window.dispatchEvent(new CustomEvent('toast', { detail: { message: data.message, type: 'success' } }));
+                    
+                    const badge = document.getElementById('cartBadge');
+                    if (badge) badge.innerText = data.cart_count;
+
+                    if (buyNow) {
+                        window.location.href = '/cart/';
+                    } else {
+                        // Open cart drawer
+                        window.dispatchEvent(new CustomEvent('open-cart'));
+                    }
+                } else {
+                    window.dispatchEvent(new CustomEvent('toast', { detail: { message: data.message, type: 'warning' } }));
+                }
+            } catch (err) {
+                console.error("Add to cart error:", err);
+            }
+        }
+    };
+}
+
+async function toggleWishlist(e, productId) {
+    e.stopPropagation();
+    e.preventDefault();
+
+    try {
+        const res = await fetch(`/cart/wishlist/toggle/${productId}/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': getCookie('csrftoken'),
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        });
+
+        const data = await res.json();
+        if (res.status === 401 && data.redirect_url) {
+            window.location.href = data.redirect_url;
+            return;
+        }
+
+        if (data.status === 'success') {
+            window.dispatchEvent(new CustomEvent('toast', { detail: { message: data.message, type: 'success' } }));
+            const btns = document.querySelectorAll(`.wishlist-btn-${productId}`);
+            btns.forEach(btn => {
+                if (data.is_wishlisted) {
+                    btn.innerHTML = '<svg class="w-5 h-5 text-red-500 fill-current" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>';
+                } else {
+                    btn.innerHTML = '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>';
+                }
+            });
+        }
+    } catch (err) {
+        console.error("Toggle wishlist error:", err);
+    }
+}
+
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+</script>
+{% endblock %}

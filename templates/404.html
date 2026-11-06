@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+
+{% block title %}Piece Not Found (404) | Crookeries by AvailSmart{% endblock %}
+
+{% block content %}
+<div class="min-h-[75vh] bg-[#FAF8F5] flex items-center justify-center py-16 px-4">
+    <div class="max-w-md w-full text-center">
+        <!-- Ceramic Icon -->
+        <div class="w-20 h-20 rounded-full bg-white border border-[#E8E4DC] text-[#14241B] flex items-center justify-center mx-auto mb-6 shadow-sm">
+            <span class="text-2xl font-editorial">🏺</span>
+        </div>
+        <span class="text-[11px] uppercase tracking-widest text-[#C2714F] font-medium block mb-2">404 &bull; Missing Silhouette</span>
+        <h1 class="text-3xl font-normal font-editorial text-[#14241B] tracking-tight mb-3">
+            The Piece Has <span class="italic text-[#C2714F]">Shifted</span>
+        </h1>
+        <p class="text-xs text-[#5C564B] mb-8 leading-relaxed max-w-sm mx-auto">
+            The artisanal item or studio archive you sought may have been retired, renamed, or relocated within our collection.
+        </p>
+        <div class="flex flex-col sm:flex-row items-center justify-center gap-3">
+            <a href="/" class="w-full sm:w-auto px-7 py-3.5 rounded-full bg-[#14241B] hover:bg-[#C2714F] text-white text-xs uppercase tracking-widest font-medium transition shadow-sm active:scale-95">
+                Return to Studio
+            </a>
+            <a href="/catalog/" class="w-full sm:w-auto px-7 py-3.5 rounded-full bg-white hover:bg-[#FAF8F5] text-[#14241B] text-xs uppercase tracking-widest font-medium border border-[#E8E4DC] transition">
+                Explore Gallery
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

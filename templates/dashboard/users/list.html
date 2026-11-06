@@ -1,0 +1,128 @@
+{% extends 'dashboard/base.html' %}
+
+{% block header_title %}Customer Accounts{% endblock %}
+
+{% block admin_content %}
+<div class="space-y-6">
+    
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+            <h2 class="text-xl font-bold text-emerald-dark">Registered Users</h2>
+            <p class="text-xs text-textMuted">View customer portfolios, saved addresses, and manage account statuses</p>
+        </div>
+
+        <form method="GET" class="relative">
+            <input 
+                type="text" 
+                name="q" 
+                value="{{ query }}" 
+                placeholder="Search name, email, phone..." 
+                class="pl-9 pr-4 py-2 bg-white border border-emerald-border rounded-xl text-xs text-textMain focus:outline-none focus:ring-2 focus:ring-emerald transition w-48 sm:w-64"
+            >
+            <div class="absolute left-3 top-2.5 text-textMuted">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+            </div>
+        </form>
+    </div>
+
+    <!-- Users Table Card -->
+    <div class="bg-white rounded-2xl border border-emerald-border/70 shadow-sm overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs">
+                <thead>
+                    <tr class="bg-mint-tint/50 border-b border-emerald-border/60 text-textMuted uppercase tracking-wider">
+                        <th class="py-3.5 px-4 font-semibold">User</th>
+                        <th class="py-3.5 px-4 font-semibold">Phone</th>
+                        <th class="py-3.5 px-4 font-semibold">Registered On</th>
+                        <th class="py-3.5 px-4 font-semibold">Total Orders</th>
+                        <th class="py-3.5 px-4 font-semibold">Account Role</th>
+                        <th class="py-3.5 px-4 font-semibold">Status</th>
+                        <th class="py-3.5 px-4 font-semibold text-right">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-emerald-border/30">
+                    {% for u in page_obj %}
+                        <tr class="hover:bg-page transition">
+                            <td class="py-3.5 px-4">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-9 h-9 rounded-full bg-emerald text-white font-bold flex items-center justify-center uppercase shrink-0">
+                                        {{ u.name|slice:":1"|default:u.email|slice:":1" }}
+                                    </div>
+                                    <div>
+                                        <a href="{% url 'dashboard:user_detail' u.id %}" class="font-bold text-textMain text-sm hover:text-emerald">
+                                            {{ u.name|default:u.email }}
+                                        </a>
+                                        <span class="block text-[10px] text-textMuted">{{ u.email }}</span>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="py-3.5 px-4 text-textMuted">
+                                {{ u.phone|default:"—" }}
+                            </td>
+                            <td class="py-3.5 px-4 text-textMuted">
+                                {{ u.date_joined|date:"M d, Y" }}
+                            </td>
+                            <td class="py-3.5 px-4 font-semibold text-emerald-dark">
+                                {{ u.order_count }} orders
+                            </td>
+                            <td class="py-3.5 px-4">
+                                {% if u.is_superuser %}
+                                    <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-purple-100 text-purple-800">Super Admin</span>
+                                {% elif u.is_staff %}
+                                    <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-blue-100 text-blue-800">Staff</span>
+                                {% else %}
+                                    <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-page text-textMuted border border-emerald-border">Customer</span>
+                                {% endif %}
+                            </td>
+                            <td class="py-3.5 px-4">
+                                {% if u.is_active %}
+                                    <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-mint-soft text-emerald">Active</span>
+                                {% else %}
+                                    <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-red-100 text-red-700">Deactivated</span>
+                                {% endif %}
+                            </td>
+                            <td class="py-3.5 px-4 text-right">
+                                <div class="flex items-center justify-end gap-2">
+                                    <a href="{% url 'dashboard:user_detail' u.id %}" class="px-2.5 py-1 rounded-lg text-emerald hover:bg-mint-tint font-bold transition">
+                                        View
+                                    </a>
+                                    {% if not u.is_superuser %}
+                                        <form method="POST" action="{% url 'dashboard:user_toggle_status' u.id %}" class="inline">
+                                            {% csrf_token %}
+                                            <button type="submit" class="px-2.5 py-1 rounded-lg text-xs font-semibold {% if u.is_active %}text-red-600 hover:bg-red-50{% else %}text-emerald hover:bg-mint-tint{% endif %} transition">
+                                                {% if u.is_active %}Deactivate{% else %}Activate{% endif %}
+                                            </button>
+                                        </form>
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="7" class="py-12 text-center text-textMuted">
+                                No registered users found.
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        {% if page_obj.has_other_pages %}
+            <div class="px-6 py-4 border-t border-emerald-border/60 flex items-center justify-between text-xs text-textMuted">
+                <span>Showing {{ page_obj.start_index }} - {{ page_obj.end_index }} of {{ page_obj.paginator.count }}</span>
+                <div class="flex items-center gap-1">
+                    {% if page_obj.has_previous %}
+                        <a href="?page={{ page_obj.previous_page_number }}{% if query %}&q={{ query }}{% endif %}" class="px-3 py-1 rounded-lg border border-emerald-border hover:bg-mint-tint">Previous</a>
+                    {% endif %}
+                    <span class="px-3 py-1 bg-mint-tint font-bold text-emerald rounded-lg">{{ page_obj.number }}</span>
+                    {% if page_obj.has_next %}
+                        <a href="?page={{ page_obj.next_page_number }}{% if query %}&q={{ query }}{% endif %}" class="px-3 py-1 rounded-lg border border-emerald-border hover:bg-mint-tint">Next</a>
+                    {% endif %}
+                </div>
+            </div>
+        {% endif %}
+    </div>
+
+</div>
+{% endblock %}

@@ -1,0 +1,107 @@
+{% extends 'base.html' %}
+
+{% block title %}Sign In | Crookeries by AvailSmart{% endblock %}
+
+{% block content %}
+<div class="min-h-[80vh] bg-[#FAF8F5] flex items-center justify-center py-14 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-md w-full bg-white p-8 sm:p-10 rounded-3xl border border-[#E8E4DC] shadow-sm">
+        
+        <!-- Header -->
+        <div class="text-center mb-8">
+            <span class="inline-block text-[11px] uppercase tracking-widest text-[#C2714F] font-medium mb-2">
+                Member Concierge
+            </span>
+            <h1 class="text-3xl font-normal font-editorial text-[#14241B] tracking-tight">
+                Welcome <span class="italic text-[#C2714F]">Back</span>
+            </h1>
+            <p class="text-xs text-[#5C564B] mt-2 leading-relaxed">
+                Sign in to manage your tableware collections, delivery addresses, and studio dispatches.
+            </p>
+        </div>
+
+        <!-- Lockout Notice -->
+        {% if is_locked %}
+            <div class="mb-6 p-4 rounded-2xl bg-red-50 border border-red-200 text-xs text-red-700 flex items-center gap-2.5">
+                <svg class="w-4 h-4 shrink-0 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                <span>Login temporarily paused for security. Please try again in {{ remaining }} seconds.</span>
+            </div>
+        {% endif %}
+
+        <!-- Form Errors -->
+        {% if form.non_field_errors %}
+            <div class="mb-6 p-4 rounded-2xl bg-red-50 border border-red-200 text-xs text-red-700 space-y-1">
+                {% for err in form.non_field_errors %}
+                    <p>{{ err }}</p>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <!-- Login Form -->
+        <form method="POST" action="{% url 'accounts:login' %}{% if request.GET.next %}?next={{ request.GET.next }}{% endif %}" class="space-y-4">
+            {% csrf_token %}
+
+            <!-- Email Address -->
+            <div>
+                <label class="block text-xs uppercase tracking-wider text-[#5C564B] font-medium mb-1.5">Email Address</label>
+                {{ form.email }}
+                {% if form.email.errors %}
+                    <p class="text-xs text-red-600 mt-1 pl-1">{{ form.email.errors.0 }}</p>
+                {% endif %}
+            </div>
+
+            <!-- Password -->
+            <div>
+                <div class="flex items-center justify-between mb-1.5">
+                    <label class="block text-xs uppercase tracking-wider text-[#5C564B] font-medium">Password</label>
+                    <a href="{% url 'accounts:forgot_password' %}" class="text-xs text-[#C2714F] hover:underline">
+                        Forgot Password?
+                    </a>
+                </div>
+                {{ form.password }}
+                {% if form.password.errors %}
+                    <p class="text-xs text-red-600 mt-1 pl-1">{{ form.password.errors.0 }}</p>
+                {% endif %}
+            </div>
+
+            <!-- Remember Me -->
+            <div class="flex items-center pt-1">
+                <label class="flex items-center gap-2.5 text-xs text-[#5C564B] cursor-pointer select-none">
+                    {{ form.remember_me }}
+                    <span>Keep me signed in on this device</span>
+                </label>
+            </div>
+
+            <!-- Submit Button -->
+            <div class="pt-3">
+                <button 
+                    type="submit" 
+                    {% if is_locked %}disabled{% endif %}
+                    class="w-full py-4 px-6 rounded-full bg-[#14241B] hover:bg-[#C2714F] text-white text-xs uppercase tracking-widest font-medium transition duration-200 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
+                >
+                    Enter Studio
+                </button>
+            </div>
+        </form>
+
+        <!-- Demo Credentials Helper Card -->
+        <div class="mt-6 p-4 rounded-2xl bg-[#FAF8F5] border border-[#E8E4DC] text-xs text-[#5C564B]">
+            <span class="font-medium text-[#14241B] block mb-1 uppercase tracking-wider text-[10px]">Instant Demo Credentials:</span>
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between text-[11px] gap-1">
+                <span>Email: <code class="bg-white px-2 py-0.5 rounded border border-[#E8E4DC] text-[#14241B]">rohit.sharma@example.com</code></span>
+                <span>Pass: <code class="bg-white px-2 py-0.5 rounded border border-[#E8E4DC] text-[#14241B]">Customer@123</code></span>
+            </div>
+        </div>
+
+        <!-- Divider -->
+        <div class="mt-8 pt-6 border-t border-[#E8E4DC] text-center">
+            <p class="text-xs text-[#5C564B]">
+                New to Crookeries? 
+                <a href="{% url 'accounts:register' %}{% if request.GET.next %}?next={{ request.GET.next }}{% endif %}" class="text-[#14241B] font-medium hover:text-[#C2714F] underline underline-offset-4 ml-1">
+                    Create your collector account
+                </a>
+            </p>
+        </div>
+
+    </div>
+</div>
+{% endblock %}

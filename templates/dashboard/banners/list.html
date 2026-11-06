@@ -1,0 +1,102 @@
+{% extends 'dashboard/base.html' %}
+
+{% block header_title %}Homepage Hero Banners{% endblock %}
+
+{% block admin_content %}
+<div class="space-y-6">
+    
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+            <h2 class="text-xl font-bold text-emerald-dark">Homepage Spotlight Banners</h2>
+            <p class="text-xs text-textMuted">Upload graphics, set pricing badges, and configure hero spotlight carousel</p>
+        </div>
+
+        <div class="flex items-center gap-2.5 shrink-0">
+            <a href="/" target="_blank" class="flex items-center gap-1.5 px-4 py-2 bg-white border border-emerald-border text-emerald-dark hover:bg-emerald-tint rounded-xl text-xs font-bold transition shadow-2xs">
+                <span>View Live Site</span>
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+            </a>
+            <a href="{% url 'dashboard:banner_add' %}" class="flex items-center gap-2 px-4 py-2 bg-emerald hover:bg-emerald-hover text-white rounded-xl text-xs font-bold transition shadow-sm active:scale-95">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
+                <span>Add Banner</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- Banners Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {% for b in banners %}
+            <div class="bg-white rounded-3xl border border-emerald-border/80 shadow-soft overflow-hidden flex flex-col justify-between group hover:shadow-luxury transition-all">
+                <div>
+                    <!-- Banner Image & Floating Badge Preview -->
+                    <div class="aspect-[16/10] bg-[#FAF8F5] relative overflow-hidden border-b border-emerald-border/60 p-3 flex items-center justify-center">
+                        {% if b.image %}
+                            <img src="{{ b.image.url }}" alt="{{ b.title }}" class="w-full h-full object-contain filter drop-shadow-sm group-hover:scale-105 transition-transform duration-500">
+                        {% else %}
+                            <div class="w-full h-full flex items-center justify-center text-xs text-textMuted">No Image Uploaded</div>
+                        {% endif %}
+
+                        <!-- Active / Inactive Badge -->
+                        <div class="absolute top-3 right-3 z-10">
+                            {% if b.is_active %}
+                                <span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald text-white shadow-sm flex items-center gap-1">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-white animate-pulse"></span>
+                                    <span>Active</span>
+                                </span>
+                            {% else %}
+                                <span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-gray-500 text-white shadow-sm">
+                                    Draft / Inactive
+                                </span>
+                            {% endif %}
+                        </div>
+
+                        <!-- Mini Floating Badge Simulation -->
+                        <div class="absolute bottom-3 left-3 z-10 bg-white/95 backdrop-blur-xs px-2.5 py-1.5 rounded-xl border border-emerald-border/80 shadow-xs max-w-[200px]">
+                            <span class="text-[8px] font-bold uppercase tracking-wider text-textMuted block truncate">{{ b.badge_text|default:"Artisan Series" }}</span>
+                            <p class="text-[10px] font-bold text-forest-dark truncate">{{ b.product_tag|default:"Featured Piece" }}</p>
+                            <span class="text-[10px] font-extrabold text-clay">{{ b.price_text|default:"From ₹1,299" }}</span>
+                        </div>
+                    </div>
+
+                    <!-- Banner Details -->
+                    <div class="p-5 space-y-2">
+                        <div class="flex items-center justify-between text-[10px] text-textMuted font-bold uppercase tracking-wider">
+                            <span>Order: #{{ b.sort_order }}</span>
+                            <span>{{ b.updated_at|date:"M d, Y" }}</span>
+                        </div>
+                        <h4 class="text-sm font-bold text-textMain line-clamp-1">{{ b.title }}</h4>
+                        <p class="text-xs text-textMuted line-clamp-2 leading-relaxed">{{ b.subtitle|default:"No description provided." }}</p>
+                        
+                        <div class="pt-2 flex items-center justify-between text-[11px] text-textMuted border-t border-emerald-border/40">
+                            <span class="font-medium text-emerald truncate max-w-[180px]">🔗 {{ b.link }}</span>
+                            <span class="font-semibold text-forest-dark shrink-0">Button: {{ b.button_text }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Footer Actions -->
+                <div class="px-5 py-3.5 bg-page border-t border-emerald-border/60 flex items-center justify-between">
+                    <a href="{% url 'dashboard:banner_edit' b.id %}" class="flex items-center gap-1.5 text-xs font-bold text-emerald hover:text-emerald-hover transition">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                        <span>Edit Creative</span>
+                    </a>
+                    <form method="POST" action="{% url 'dashboard:banner_delete' b.id %}" onsubmit="return confirm('Are you sure you want to delete this hero banner?');" class="inline">
+                        {% csrf_token %}
+                        <button type="submit" class="flex items-center gap-1 text-xs font-bold text-red-600 hover:text-red-700 transition">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                            <span>Delete</span>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        {% empty %}
+            <div class="col-span-3 text-center py-16 bg-white rounded-3xl border border-emerald-border/70 text-textMuted text-xs space-y-3">
+                <span class="text-4xl block">🎨</span>
+                <p class="font-bold text-forest-dark text-sm">No hero banners configured yet.</p>
+                <p>Click "+ Add Banner" above to upload your first custom hero spotlight image and pricing badge.</p>
+            </div>
+        {% endfor %}
+    </div>
+
+</div>
+{% endblock %}

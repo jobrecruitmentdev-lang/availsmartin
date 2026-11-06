@@ -1,0 +1,128 @@
+{% extends 'base.html' %}
+
+{% block title %}My Wishlist | AvailSmart{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    
+    <!-- Header (Crookeries Minimalist) -->
+    <div class="mb-8 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 border-b border-alabaster-border pb-6">
+        <div>
+            <nav class="flex items-center gap-1.5 text-xs text-textMuted mb-2">
+                <a href="/" class="hover:text-forest transition">Home</a>
+                <span>/</span>
+                <span class="font-semibold text-forest-dark">Saved Pieces</span>
+            </nav>
+            <h1 class="font-editorial text-3xl sm:text-4xl font-bold text-forest-dark tracking-tight">Saved Wishlist</h1>
+            <p class="text-xs text-textMuted mt-1">Curated objects bookmarked for your future space.</p>
+        </div>
+        <a href="/catalog/" class="text-xs font-semibold text-forest hover:text-emerald transition">
+            Continue Exploring &rarr;
+        </a>
+    </div>
+
+    <!-- Wishlist Items Grid -->
+    {% if wishlist_items %}
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {% for item in wishlist_items %}
+                {% include 'catalog/partials/product_card.html' with prod=item.product wishlist_ids=wishlist_ids %}
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="bg-white rounded-4xl border border-alabaster-border p-12 sm:p-16 text-center max-w-md mx-auto shadow-card my-12">
+            <div class="w-16 h-16 rounded-3xl bg-[#F5EFEB] text-forest flex items-center justify-center mx-auto text-3xl mb-4">
+                🏺
+            </div>
+            <h3 class="font-editorial text-xl font-bold text-forest-dark">Your Wishlist is Empty</h3>
+            <p class="text-xs text-textMuted mt-2 leading-relaxed">
+                Save pieces you love by tapping the heart icon on any studio card while exploring our catalog.
+            </p>
+            <a href="/catalog/" class="inline-block mt-6 px-7 py-3 rounded-full bg-forest-dark hover:bg-forest text-white text-xs font-semibold tracking-wider transition shadow-sm active:scale-95">
+                Discover Objects
+            </a>
+        </div>
+    {% endif %}
+
+</div>
+
+<!-- Quick Add to Cart & Wishlist scripts -->
+<script>
+async function quickAddToCart(e, productId) {
+    e.stopPropagation();
+    e.preventDefault();
+
+    const formData = new FormData();
+    formData.append('product_id', productId);
+    formData.append('quantity', 1);
+
+    try {
+        const res = await fetch('/cart/add/', {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': getCookie('csrftoken'),
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: formData
+        });
+
+        const data = await res.json();
+        if (res.status === 401 && data.redirect_url) {
+            window.location.href = data.redirect_url;
+            return;
+        }
+
+        if (data.status === 'success') {
+            window.dispatchEvent(new CustomEvent('toast', { detail: { message: data.message, type: 'success' } }));
+            const badge = document.getElementById('cartBadge');
+            if (badge) badge.innerText = data.cart_count;
+        } else {
+            window.dispatchEvent(new CustomEvent('toast', { detail: { message: data.message, type: 'warning' } }));
+        }
+    } catch (err) {
+        console.error("Add to cart error:", err);
+    }
+}
+
+async function toggleWishlist(e, productId) {
+    e.stopPropagation();
+    e.preventDefault();
+
+    try {
+        const res = await fetch(`/cart/wishlist/toggle/${productId}/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': getCookie('csrftoken'),
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        });
+
+        const data = await res.json();
+        if (res.status === 401 && data.redirect_url) {
+            window.location.href = data.redirect_url;
+            return;
+        }
+
+        if (data.status === 'success') {
+            window.location.reload(); // Reload wishlist page to remove item
+        }
+    } catch (err) {
+        console.error("Toggle wishlist error:", err);
+    }
+}
+
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+</script>
+{% endblock %}

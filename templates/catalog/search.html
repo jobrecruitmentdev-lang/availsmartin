@@ -1,0 +1,163 @@
+{% extends 'base.html' %}
+
+{% block title %}Search results for "{{ query }}" | AvailSmart{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    
+    <!-- Search Query Banner (Crookeries Minimalist Style) -->
+    <div class="mb-8 p-6 sm:p-8 rounded-3xl bg-[#F5EFEB] border border-alabaster-border shadow-card">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div>
+                <span class="text-[10px] font-bold uppercase tracking-widest text-clay">Studio Search</span>
+                <h1 class="font-editorial text-2xl sm:text-3xl font-bold text-forest-dark tracking-tight mt-1">
+                    {% if query %}
+                        Objects for "<span class="text-forest">{{ query }}</span>"
+                    {% else %}
+                        All Studio Results
+                    {% endif %}
+                </h1>
+                <p class="text-xs text-textMuted mt-1">Found {{ total_count }} matching pieces in catalog</p>
+            </div>
+            
+            <a href="/catalog/" class="px-6 py-3 rounded-full bg-white hover:bg-[#FAF8F5] border border-alabaster-border text-forest-dark text-xs font-semibold tracking-wider transition shadow-2xs self-start sm:self-center">
+                Browse Entire Catalog &rarr;
+            </a>
+        </div>
+    </div>
+
+    <!-- Results Grid -->
+    {% if products %}
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {% for prod in products %}
+                {% include 'catalog/partials/product_card.html' with prod=prod wishlist_ids=wishlist_ids %}
+            {% endfor %}
+        </div>
+
+        <!-- Pagination -->
+        {% if products.has_other_pages %}
+            <div class="mt-14 flex items-center justify-center gap-3">
+                {% if products.has_previous %}
+                    <a href="?q={{ query }}&page={{ products.previous_page_number }}" class="px-5 py-2.5 rounded-full border border-[#E8E4DC] bg-white hover:bg-[#FAF8F5] text-[#14241B] text-xs uppercase tracking-widest font-medium transition shadow-sm">
+                        &larr; Previous
+                    </a>
+                {% endif %}
+                <span class="text-xs uppercase tracking-wider text-[#8A8477]">Page {{ products.number }} of {{ products.paginator.num_pages }}</span>
+                {% if products.has_next %}
+                    <a href="?q={{ query }}&page={{ products.next_page_number }}" class="px-5 py-2.5 rounded-full border border-[#E8E4DC] bg-white hover:bg-[#FAF8F5] text-[#14241B] text-xs uppercase tracking-widest font-medium transition shadow-sm">
+                        Next &rarr;
+                    </a>
+                {% endif %}
+            </div>
+        {% endif %}
+
+    {% else %}
+        <!-- No Search Results Found -->
+        <div class="bg-white rounded-3xl border border-[#E8E4DC] p-12 text-center max-w-lg mx-auto shadow-sm my-10">
+            <div class="w-16 h-16 rounded-full bg-[#FAF8F5] border border-[#E8E4DC] text-[#14241B] flex items-center justify-center mx-auto text-2xl mb-4 font-editorial">
+                🔍
+            </div>
+            <h3 class="text-2xl font-editorial text-[#14241B]">No Ceramic Objects Matched "{{ query }}"</h3>
+            <p class="text-xs text-[#5C564B] mt-2 leading-relaxed">
+                Check for typos or try searching for artisanal stoneware terms like <em>dinnerware</em>, <em>bowls</em>, <em>plates</em>, <em>matte</em>, or <em>stoneware</em>.
+            </p>
+            <div class="mt-6 flex flex-wrap items-center justify-center gap-3">
+                <a href="/catalog/" class="px-7 py-3 rounded-full bg-[#14241B] hover:bg-[#C2714F] text-white text-xs uppercase tracking-widest font-medium transition shadow-sm">
+                    Explore Studio Gallery
+                </a>
+                <a href="/" class="px-7 py-3 rounded-full bg-white hover:bg-[#FAF8F5] border border-[#E8E4DC] text-[#14241B] text-xs uppercase tracking-widest font-medium transition">
+                    Return Home
+                </a>
+            </div>
+        </div>
+    {% endif %}
+
+</div>
+
+<!-- Quick Add to Cart & Wishlist scripts -->
+<script>
+async function quickAddToCart(e, productId) {
+    e.stopPropagation();
+    e.preventDefault();
+
+    const formData = new FormData();
+    formData.append('product_id', productId);
+    formData.append('quantity', 1);
+
+    try {
+        const res = await fetch('/cart/add/', {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': getCookie('csrftoken'),
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: formData
+        });
+
+        const data = await res.json();
+        if (res.status === 401 && data.redirect_url) {
+            window.location.href = data.redirect_url;
+            return;
+        }
+
+        if (data.status === 'success') {
+            window.dispatchEvent(new CustomEvent('toast', { detail: { message: data.message, type: 'success' } }));
+        } else {
+            window.dispatchEvent(new CustomEvent('toast', { detail: { message: data.message, type: 'warning' } }));
+        }
+    } catch (err) {
+        console.error("Add to cart error:", err);
+    }
+}
+
+async function toggleWishlist(e, productId) {
+    e.stopPropagation();
+    e.preventDefault();
+
+    try {
+        const res = await fetch(`/cart/wishlist/toggle/${productId}/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': getCookie('csrftoken'),
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        });
+
+        const data = await res.json();
+        if (res.status === 401 && data.redirect_url) {
+            window.location.href = data.redirect_url;
+            return;
+        }
+
+        if (data.status === 'success') {
+            window.dispatchEvent(new CustomEvent('toast', { detail: { message: data.message, type: 'success' } }));
+            const btns = document.querySelectorAll(`.wishlist-btn-${productId}`);
+            btns.forEach(btn => {
+                if (data.is_wishlisted) {
+                    btn.innerHTML = '<svg class="w-4 h-4 text-red-500 fill-current" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>';
+                } else {
+                    btn.innerHTML = '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>';
+                }
+            });
+        }
+    } catch (err) {
+        console.error("Toggle wishlist error:", err);
+    }
+}
+
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+</script>
+{% endblock %}

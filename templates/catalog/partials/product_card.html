@@ -1,0 +1,127 @@
+{% comment %}
+Reusable Product Card Component - Crookeries Editorial Edition (4:5 Aspect Ratio)
+Context expected: prod (Product model instance), wishlist_ids (set of product IDs, optional)
+{% endcomment %}
+
+<div class="group bg-white rounded-3xl border border-alabaster-border overflow-hidden card-crookeries flex flex-col justify-between">
+    
+    <!-- Top Image Container (4:5 Portrait Ratio) -->
+    <div class="relative bg-[#FAF8F5] aspect-[4/5] overflow-hidden flex items-center justify-center p-4">
+        
+        <!-- Discount Badge (Terracotta Clay Pill) -->
+        {% if prod.has_discount %}
+            <span class="absolute top-3.5 left-3.5 z-10 px-2.5 py-1 rounded-full bg-clay text-white text-[9px] font-bold uppercase tracking-widest shadow-2xs">
+                -{{ prod.discount_percent }}%
+            </span>
+        {% endif %}
+
+        <!-- Wishlist Button (Frosted Circle) -->
+        <button 
+            type="button"
+            onclick="toggleWishlist(event, {{ prod.id }})"
+            data-wishlist-id="{{ prod.id }}"
+            class="wishlist-btn-{{ prod.id }} absolute top-3.5 right-3.5 z-10 w-9 h-9 rounded-full bg-white/90 backdrop-blur-md text-textMuted hover:text-clay hover:bg-white flex items-center justify-center shadow-2xs transition active:scale-90 border border-alabaster-border/80"
+            title="Save to Wishlist"
+        >
+            {% if prod.id in wishlist_ids %}
+                <svg class="w-4 h-4 text-clay fill-current" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+            {% else %}
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
+            {% endif %}
+        </button>
+
+        <!-- Product Main & Hover Secondary Image -->
+        <a href="{% url 'catalog:product_detail' slug=prod.slug %}" class="w-full h-full flex items-center justify-center relative">
+            {% with prim_img=prod.primary_image sec_img=prod.secondary_image %}
+                {% if prim_img and prim_img.image %}
+                    <img 
+                        src="{{ prim_img.image.url }}" 
+                        alt="{{ prim_img.alt_text|default:prod.name }}" 
+                        class="w-full h-full object-contain transition-all duration-500 {% if sec_img and sec_img.image %}group-hover:opacity-0 group-hover:scale-95{% else %}group-hover:scale-105{% endif %}"
+                        loading="lazy"
+                    >
+                    {% if sec_img and sec_img.image %}
+                        <img 
+                            src="{{ sec_img.image.url }}" 
+                            alt="{{ sec_img.alt_text|default:prod.name }}" 
+                            class="w-full h-full object-contain absolute inset-0 opacity-0 group-hover:opacity-100 group-hover:scale-105 transition-all duration-500"
+                            loading="lazy"
+                        >
+                    {% endif %}
+                {% else %}
+                    <div class="w-full h-full flex items-center justify-center text-textMuted text-xs font-semibold">
+                        No Studio Photo
+                    </div>
+                {% endif %}
+            {% endwith %}
+        </a>
+
+        <!-- Floating Quick Add Pill on Hover (Crookeries Signature) -->
+        <button 
+            type="button"
+            onclick="quickAddToCart(event, {{ prod.id }})"
+            class="absolute bottom-3 left-4 right-4 z-10 py-2.5 px-4 rounded-full bg-forest-dark/95 backdrop-blur-md hover:bg-forest text-white text-xs font-semibold tracking-wider flex items-center justify-center gap-2 opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300 shadow-md active:scale-95"
+            title="Quick Add to Bag"
+        >
+            <svg class="w-3.5 h-3.5 text-emerald-tint" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg>
+            <span>Add to Bag</span>
+        </button>
+    </div>
+
+    <!-- Product Body Details -->
+    <div class="p-5 flex-1 flex flex-col justify-between">
+        <div>
+            <!-- Brand & Rating Header -->
+            <div class="flex items-center justify-between text-xs text-textMuted mb-1.5">
+                <span class="font-semibold uppercase tracking-widest text-[10px] text-textMuted truncate max-w-[120px]">{{ prod.brand.name|default:"Studio Craft" }}</span>
+                <div class="flex items-center gap-1 text-clay font-bold text-xs">
+                    <span>★</span>
+                    <span class="text-forest-dark font-medium">{{ prod.rating_avg|default:"4.8" }}</span>
+                    {% if prod.rating_count %}
+                        <span class="text-[10px] text-textMuted font-normal">({{ prod.rating_count }})</span>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Title -->
+            <h3 class="text-sm font-semibold text-forest-dark line-clamp-1 leading-snug group-hover:text-emerald transition tracking-tight">
+                <a href="{% url 'catalog:product_detail' slug=prod.slug %}">
+                    {{ prod.name }}
+                </a>
+            </h3>
+
+            <!-- Color Swatch Dots -->
+            <div class="flex items-center gap-1.5 mt-2.5">
+                {% for col in prod.colors.all|slice:":4" %}
+                    <span 
+                        class="w-3.5 h-3.5 rounded-full border border-black/15 shrink-0 shadow-2xs hover:scale-110 transition-transform cursor-pointer" 
+                        style="background-color: {{ col.color_hex }};" 
+                        title="{{ col.color_name }}"
+                    ></span>
+                {% endfor %}
+                {% if prod.colors.count > 4 %}
+                    <span class="text-[10px] text-textMuted font-bold tracking-wide">+{{ prod.colors.count|add:"-4" }}</span>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Price & Details Row -->
+        <div class="mt-4 pt-3.5 border-t border-alabaster-border flex items-center justify-between">
+            <div class="flex items-baseline gap-1.5">
+                <span class="text-base font-bold text-forest-dark">₹{{ prod.effective_price }}</span>
+                {% if prod.has_discount %}
+                    <span class="text-xs text-textMuted line-through">₹{{ prod.base_price }}</span>
+                {% endif %}
+            </div>
+
+            <a 
+                href="{% url 'catalog:product_detail' slug=prod.slug %}"
+                class="text-[11px] font-semibold text-forest hover:text-emerald transition flex items-center gap-0.5 tracking-wide"
+            >
+                <span>View</span>
+                <span>&rarr;</span>
+            </a>
+        </div>
+    </div>
+
+</div>

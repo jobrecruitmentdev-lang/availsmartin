@@ -1,0 +1,63 @@
+{% extends 'dashboard/base.html' %}
+
+{% block header_title %}{{ title }}{% endblock %}
+
+{% block admin_content %}
+<div class="max-w-xl mx-auto space-y-6">
+    
+    <div class="flex items-center justify-between">
+        <div>
+            <h2 class="text-xl font-bold text-emerald-dark">{{ title }}</h2>
+            <p class="text-xs text-textMuted">Configure brand name, logo graphic, and visibility</p>
+        </div>
+        <a href="{% url 'dashboard:brand_list' %}" class="text-xs font-semibold text-textMuted hover:text-emerald">
+            ← Back to Brands
+        </a>
+    </div>
+
+    <div class="bg-white rounded-3xl border border-emerald-border/80 shadow-soft p-6 sm:p-8">
+        <form method="POST" enctype="multipart/form-data" class="space-y-5">
+            {% csrf_token %}
+
+            <div>
+                <label class="block text-xs font-bold text-textMain uppercase tracking-wider mb-1.5">Brand Name</label>
+                {{ form.name }}
+                {% if form.name.errors %}
+                    <p class="text-xs text-red-600 mt-1 font-medium">{{ form.name.errors.0 }}</p>
+                {% endif %}
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold text-textMain uppercase tracking-wider mb-1.5">Brand Logo Graphic</label>
+                {{ form.logo }}
+                {% if brand.logo %}
+                    <div class="mt-2 flex items-center gap-3">
+                        <img src="{{ brand.logo.url }}" alt="Preview" class="w-12 h-12 rounded-xl object-contain border border-emerald-border p-1 bg-page">
+                        <span class="text-xs text-textMuted">Current logo</span>
+                    </div>
+                {% endif %}
+                {% if form.logo.errors %}
+                    <p class="text-xs text-red-600 mt-1 font-medium">{{ form.logo.errors.0 }}</p>
+                {% endif %}
+            </div>
+
+            <div class="pt-2">
+                <label class="flex items-center gap-2.5 text-xs font-bold text-textMain cursor-pointer select-none">
+                    {{ form.is_active }}
+                    <span>Active Brand Partner</span>
+                </label>
+            </div>
+
+            <div class="pt-4 border-t border-emerald-border/60 flex items-center justify-end gap-3">
+                <a href="{% url 'dashboard:brand_list' %}" class="px-5 py-2.5 rounded-full border border-emerald-border text-xs font-semibold text-textMuted hover:bg-page transition">
+                    Cancel
+                </a>
+                <button type="submit" class="px-6 py-2.5 rounded-full bg-emerald hover:bg-emerald-hover text-white text-xs font-bold shadow-md shadow-emerald/20 transition active:scale-95">
+                    Save Brand
+                </button>
+            </div>
+        </form>
+    </div>
+
+</div>
+{% endblock %}

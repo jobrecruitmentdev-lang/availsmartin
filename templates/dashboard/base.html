@@ -1,0 +1,223 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}AvailSmart Control Center - Staff Admin Portal{% endblock %}</title>
+
+    <!-- Google Font: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Tailwind CSS with Custom Config -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        emerald: {
+                            DEFAULT: '#047857',
+                            hover: '#065F46',
+                            dark: '#064E3B',
+                            tint: '#ECFDF5',
+                            soft: '#D1FAE5',
+                            border: '#D9EDE3',
+                        },
+                        mint: {
+                            tint: '#ECFDF5',
+                            soft: '#D1FAE5',
+                            border: '#D9EDE3',
+                        },
+                        accent: {
+                            orange: '#F97316',
+                        },
+                        page: '#F8FAF9',
+                        surface: '#FFFFFF',
+                        textMain: '#0F1F1A',
+                        textMuted: '#4B6358',
+                        statusSuccess: '#15803D',
+                        statusError: '#DC2626',
+                        statusWarning: '#F59E0B',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    borderRadius: {
+                        '2xl': '16px',
+                        '3xl': '24px',
+                    },
+                    boxShadow: {
+                        'soft': '0 4px 20px -2px rgba(6, 78, 59, 0.04), 0 2px 6px -1px rgba(0, 0, 0, 0.02)',
+                        'card': '0 12px 32px -4px rgba(6, 78, 59, 0.07), 0 4px 12px -2px rgba(0, 0, 0, 0.02)',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Alpine.js -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{% static 'css/custom.css' %}">
+
+    {% block extra_head %}{% endblock %}
+</head>
+<body class="bg-[#F8FAF9] text-textMain font-sans antialiased h-full flex overflow-hidden" x-data="{ sidebarOpen: false }">
+
+    <!-- Toast Notifications -->
+    {% include 'includes/toasts.html' %}
+
+    <!-- Mobile Sidebar Backdrop -->
+    <div 
+        x-show="sidebarOpen" 
+        @click="sidebarOpen = false"
+        x-transition:enter="transition-opacity ease-out duration-300"
+        x-transition:enter-start="opacity-0"
+        x-transition:enter-end="opacity-100"
+        x-transition:leave="transition-opacity ease-in duration-200"
+        x-transition:leave-start="opacity-100"
+        x-transition:leave-end="opacity-0"
+        class="fixed inset-0 z-40 bg-black/50 lg:hidden"
+        style="display: none;"
+    ></div>
+
+    <!-- Dark Emerald Sidebar -->
+    <aside 
+        class="fixed inset-y-0 left-0 z-50 w-64 bg-emerald-dark text-white flex flex-col transition-transform duration-300 ease-in-out lg:static lg:translate-x-0 shrink-0"
+        :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'"
+    >
+        <!-- Sidebar Brand Header (Height aligned with Top Bar: h-20 / 80px) -->
+        <div class="h-20 px-5 flex items-center justify-between border-b border-emerald/25 shrink-0">
+            <a href="{% url 'dashboard:index' %}" class="flex items-center gap-2.5">
+                <div class="w-9 h-9 rounded-xl bg-emerald flex items-center justify-center text-white shadow-sm shrink-0">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg>
+                </div>
+                <div>
+                    <span class="text-base font-bold tracking-tight text-white leading-none block">Avail<span class="text-mint-soft">Admin</span></span>
+                    <span class="text-[10px] text-mint-soft/70 uppercase tracking-widest font-semibold block mt-1">Staff Control</span>
+                </div>
+            </a>
+            <button @click="sidebarOpen = false" class="lg:hidden text-mint-soft/80 hover:text-white p-1">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
+        </div>
+
+        <!-- Sidebar Navigation Menu -->
+        <div class="flex-1 overflow-y-auto px-3.5 py-3.5 space-y-1">
+            <!-- Dashboard Link -->
+            <a href="{% url 'dashboard:index' %}" class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold transition {% if active_menu == 'dashboard' %}bg-emerald text-white shadow-sm{% else %}text-mint-soft/80 hover:bg-emerald/30 hover:text-white{% endif %}">
+                <svg class="w-5 h-5 text-mint-soft shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+                <span>Dashboard</span>
+            </a>
+
+            <!-- Catalog Management Section -->
+            <p class="px-3 pt-3.5 pb-1 text-[10px] font-bold uppercase tracking-wider text-mint-soft/50">Catalog Management</p>
+
+            <a href="{% url 'dashboard:product_list' %}" class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold transition {% if active_menu == 'products' %}bg-emerald text-white shadow-sm{% else %}text-mint-soft/80 hover:bg-emerald/30 hover:text-white{% endif %}">
+                <svg class="w-5 h-5 text-mint-soft shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
+                <span>Products & Colors</span>
+            </a>
+
+            <a href="{% url 'dashboard:category_list' %}" class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold transition {% if active_menu == 'categories' %}bg-emerald text-white shadow-sm{% else %}text-mint-soft/80 hover:bg-emerald/30 hover:text-white{% endif %}">
+                <svg class="w-5 h-5 text-mint-soft shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7"/></svg>
+                <span>Categories</span>
+            </a>
+
+            <a href="{% url 'dashboard:brand_list' %}" class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold transition {% if active_menu == 'brands' %}bg-emerald text-white shadow-sm{% else %}text-mint-soft/80 hover:bg-emerald/30 hover:text-white{% endif %}">
+                <svg class="w-5 h-5 text-mint-soft shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+                <span>Brands</span>
+            </a>
+
+            <!-- Sales & Operations Section -->
+            <p class="px-3 pt-3.5 pb-1 text-[10px] font-bold uppercase tracking-wider text-mint-soft/50">Sales & Operations</p>
+
+            <a href="{% url 'dashboard:order_list' %}" class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold transition {% if active_menu == 'orders' %}bg-emerald text-white shadow-sm{% else %}text-mint-soft/80 hover:bg-emerald/30 hover:text-white{% endif %}">
+                <svg class="w-5 h-5 text-mint-soft shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+                <span>Orders & Invoices</span>
+            </a>
+
+            <a href="{% url 'dashboard:user_list' %}" class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold transition {% if active_menu == 'users' %}bg-emerald text-white shadow-sm{% else %}text-mint-soft/80 hover:bg-emerald/30 hover:text-white{% endif %}">
+                <svg class="w-5 h-5 text-mint-soft shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+                <span>Customers</span>
+            </a>
+
+            <a href="{% url 'dashboard:review_list' %}" class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold transition {% if active_menu == 'reviews' %}bg-emerald text-white shadow-sm{% else %}text-mint-soft/80 hover:bg-emerald/30 hover:text-white{% endif %}">
+                <svg class="w-5 h-5 text-mint-soft shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/></svg>
+                <span>Customer Reviews</span>
+            </a>
+
+            <!-- Marketing Section -->
+            <p class="px-3 pt-3.5 pb-1 text-[10px] font-bold uppercase tracking-wider text-mint-soft/50">Marketing</p>
+
+            <a href="{% url 'dashboard:coupon_list' %}" class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold transition {% if active_menu == 'coupons' %}bg-emerald text-white shadow-sm{% else %}text-mint-soft/80 hover:bg-emerald/30 hover:text-white{% endif %}">
+                <svg class="w-5 h-5 text-mint-soft shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/></svg>
+                <span>Coupons</span>
+            </a>
+
+            <a href="{% url 'dashboard:banner_list' %}" class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold transition {% if active_menu == 'banners' %}bg-emerald text-white shadow-sm{% else %}text-mint-soft/80 hover:bg-emerald/30 hover:text-white{% endif %}">
+                <svg class="w-5 h-5 text-mint-soft shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                <span>Home Banners</span>
+            </a>
+        </div>
+
+        <!-- Sidebar Footer Action Links -->
+        <div class="p-3.5 border-t border-emerald/25 bg-black/15 space-y-1.5 shrink-0">
+            <a href="/" target="_blank" class="flex items-center justify-between px-3.5 py-2 rounded-xl text-xs font-semibold text-mint-soft hover:bg-emerald/30 hover:text-white transition">
+                <span class="flex items-center gap-2">
+                    <svg class="w-4 h-4 text-emerald-soft shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+                    <span>View Public Store</span>
+                </span>
+                <span class="text-[10px] bg-emerald/60 px-2 py-0.5 rounded-full font-bold">Live</span>
+            </a>
+            
+            <a href="{% url 'dashboard:logout' %}" class="flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold text-red-300 hover:bg-red-500/20 hover:text-white transition">
+                <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+                <span>Sign Out Admin</span>
+            </a>
+        </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <div class="flex-1 flex flex-col h-full overflow-hidden">
+        
+        <!-- Top Admin Header Bar -->
+        <header class="h-20 bg-white/95 backdrop-blur-md border-b border-emerald-border/50 flex items-center justify-between px-6 lg:px-10 shrink-0 shadow-xs">
+            <div class="flex items-center gap-3">
+                <button @click="sidebarOpen = true" class="lg:hidden text-textMuted hover:text-emerald p-2 -ml-2 rounded-lg">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+                </button>
+                <div>
+                    <h1 class="text-xl font-bold text-emerald-dark leading-tight tracking-tight">{% block header_title %}Control Center{% endblock %}</h1>
+                    <p class="text-xs text-textMuted hidden sm:block mt-0.5">AvailSmart Multi-Category E-Commerce Management</p>
+                </div>
+            </div>
+
+            <!-- Admin Profile Indicator -->
+            <div class="flex items-center gap-4">
+                <div class="flex items-center gap-3.5 pl-5 border-l border-emerald-border/50">
+                    <div class="w-10 h-10 rounded-full bg-emerald-dark text-white font-bold text-xs flex items-center justify-center uppercase shadow-sm ring-2 ring-emerald-soft/50">
+                        {{ request.user.name|slice:":1"|default:request.user.email|slice:":1" }}
+                    </div>
+                    <div class="hidden sm:block text-right">
+                        <span class="text-sm font-bold text-textMain block leading-tight">{{ request.user.name|default:request.user.email }}</span>
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-mint-tint text-emerald border border-emerald-border/60 mt-1">
+                            {% if request.user.is_superuser %}Super Administrator{% else %}Staff Admin{% endif %}
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Admin Body Scrollable Content -->
+        <main class="flex-1 overflow-y-auto p-6 md:p-8 lg:p-10 bg-[#F8FAF9]">
+            {% block admin_content %}{% endblock %}
+        </main>
+    </div>
+
+    {% block extra_scripts %}{% endblock %}
+</body>
+</html>

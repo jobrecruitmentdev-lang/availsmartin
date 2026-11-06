@@ -1,0 +1,114 @@
+{% extends 'base.html' %}
+
+{% block title %}Create Account | Crookeries by AvailSmart{% endblock %}
+
+{% block content %}
+<div class="min-h-[85vh] bg-[#FAF8F5] flex items-center justify-center py-14 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-md w-full bg-white p-8 sm:p-10 rounded-3xl border border-[#E8E4DC] shadow-sm">
+        
+        <!-- Header -->
+        <div class="text-center mb-8">
+            <span class="inline-block text-[11px] uppercase tracking-widest text-[#C2714F] font-medium mb-2">
+                Join The Collector Circle
+            </span>
+            <h1 class="text-3xl font-normal font-editorial text-[#14241B] tracking-tight">
+                Create an <span class="italic text-[#C2714F]">Account</span>
+            </h1>
+            <p class="text-xs text-[#5C564B] mt-2 leading-relaxed">
+                Receive private kiln release previews, complimentary doorstep trials, and artisan care notes.
+            </p>
+        </div>
+
+        <!-- Form Error Summary -->
+        {% if form.non_field_errors %}
+            <div class="mb-6 p-4 rounded-2xl bg-red-50 border border-red-200 text-xs text-red-700 space-y-1">
+                {% for err in form.non_field_errors %}
+                    <p>{{ err }}</p>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <!-- Registration Form -->
+        <form method="POST" action="{% url 'accounts:register' %}{% if request.GET.next %}?next={{ request.GET.next }}{% endif %}" class="space-y-4">
+            {% csrf_token %}
+
+            <!-- Full Name -->
+            <div>
+                <label class="block text-xs uppercase tracking-wider text-[#5C564B] font-medium mb-1.5">Full Name</label>
+                {{ form.name }}
+                {% if form.name.errors %}
+                    <p class="text-xs text-red-600 mt-1 pl-1">{{ form.name.errors.0 }}</p>
+                {% endif %}
+            </div>
+
+            <!-- Email Address -->
+            <div>
+                <label class="block text-xs uppercase tracking-wider text-[#5C564B] font-medium mb-1.5">Email Address</label>
+                {{ form.email }}
+                {% if form.email.errors %}
+                    <p class="text-xs text-red-600 mt-1 pl-1">{{ form.email.errors.0 }}</p>
+                {% endif %}
+            </div>
+
+            <!-- Phone Number -->
+            <div>
+                <label class="block text-xs uppercase tracking-wider text-[#5C564B] font-medium mb-1.5">Phone Number (Optional)</label>
+                {{ form.phone }}
+                {% if form.phone.errors %}
+                    <p class="text-xs text-red-600 mt-1 pl-1">{{ form.phone.errors.0 }}</p>
+                {% endif %}
+            </div>
+
+            <!-- Password -->
+            <div>
+                <label class="block text-xs uppercase tracking-wider text-[#5C564B] font-medium mb-1.5">Password</label>
+                {{ form.password }}
+                {% if form.password.errors %}
+                    <p class="text-xs text-red-600 mt-1 pl-1">{{ form.password.errors.0 }}</p>
+                {% endif %}
+            </div>
+
+            <!-- Confirm Password -->
+            <div>
+                <label class="block text-xs uppercase tracking-wider text-[#5C564B] font-medium mb-1.5">Confirm Password</label>
+                {{ form.confirm_password }}
+                {% if form.confirm_password.errors %}
+                    <p class="text-xs text-red-600 mt-1 pl-1">{{ form.confirm_password.errors.0 }}</p>
+                {% endif %}
+            </div>
+
+            <!-- Terms & Privacy -->
+            <div class="pt-2">
+                <label class="flex items-start gap-2.5 text-xs text-[#5C564B] cursor-pointer">
+                    <input type="checkbox" name="terms" required class="w-4 h-4 mt-0.5 rounded border-[#D3CBBF] text-[#14241B] focus:ring-[#14241B]">
+                    <span>I agree to Crookeries' <a href="{% url 'catalog:terms' %}" class="text-[#14241B] font-medium hover:underline">Terms of Craft</a> and <a href="{% url 'catalog:privacy' %}" class="text-[#14241B] font-medium hover:underline">Privacy Charter</a>.</span>
+                </label>
+                {% if form.terms.errors %}
+                    <p class="text-xs text-red-600 mt-1 pl-1">{{ form.terms.errors.0 }}</p>
+                {% endif %}
+            </div>
+
+            <!-- Submit Button -->
+            <div class="pt-3">
+                <button 
+                    type="submit" 
+                    class="w-full py-4 px-6 rounded-full bg-[#14241B] hover:bg-[#C2714F] text-white text-xs uppercase tracking-widest font-medium transition duration-200 active:scale-[0.98] shadow-sm"
+                >
+                    Create Collector Account
+                </button>
+            </div>
+        </form>
+
+        <!-- Divider -->
+        <div class="mt-8 pt-6 border-t border-[#E8E4DC] text-center">
+            <p class="text-xs text-[#5C564B]">
+                Already have an account? 
+                <a href="{% url 'accounts:login' %}{% if request.GET.next %}?next={{ request.GET.next }}{% endif %}" class="text-[#14241B] font-medium hover:text-[#C2714F] underline underline-offset-4 ml-1">
+                    Sign in here
+                </a>
+            </p>
+        </div>
+
+    </div>
+</div>
+{% endblock %}

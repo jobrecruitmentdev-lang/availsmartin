@@ -1,0 +1,157 @@
+{% extends 'dashboard/base.html' %}
+
+{% block header_title %}{{ title }}{% endblock %}
+
+{% block admin_content %}
+<div class="max-w-2xl mx-auto space-y-6">
+    
+    <div class="flex items-center justify-between">
+        <div>
+            <h2 class="text-xl font-bold text-emerald-dark">{{ title }}</h2>
+            <p class="text-xs text-textMuted">Configure headline, product spotlight graphic, pricing tag, and redirect destination</p>
+        </div>
+        <a href="{% url 'dashboard:banner_list' %}" class="text-xs font-semibold text-textMuted hover:text-emerald flex items-center gap-1">
+            <span>&larr; Back to Banners</span>
+        </a>
+    </div>
+
+    <div class="bg-white rounded-3xl border border-emerald-border/80 shadow-soft p-6 sm:p-8">
+        <form method="POST" enctype="multipart/form-data" class="space-y-5">
+            {% csrf_token %}
+
+            <!-- Headline Title -->
+            <div>
+                <label class="block text-xs font-bold text-textMain uppercase tracking-wider mb-1.5">Hero Headline Title *</label>
+                {{ form.title }}
+                <p class="text-[11px] text-textMuted mt-1">e.g. Thoughtfully Formed Objects for Living.</p>
+                {% if form.title.errors %}<p class="text-xs text-red-600 mt-1">{{ form.title.errors.0 }}</p>{% endif %}
+            </div>
+
+            <!-- Subtitle -->
+            <div>
+                <label class="block text-xs font-bold text-textMain uppercase tracking-wider mb-1.5">Subtitle / Description</label>
+                {{ form.subtitle }}
+                <p class="text-[11px] text-textMuted mt-1">e.g. Discover hand-poured ceramics, organic textiles, and curated objects.</p>
+                {% if form.subtitle.errors %}<p class="text-xs text-red-600 mt-1">{{ form.subtitle.errors.0 }}</p>{% endif %}
+            </div>
+
+            <!-- Banner Graphic Image with Live Preview -->
+            <div>
+                <label class="block text-xs font-bold text-textMain uppercase tracking-wider mb-1.5">Spotlight Banner Image *</label>
+                
+                <div class="p-4 rounded-2xl bg-[#FAF8F5] border-2 border-dashed border-emerald-border/80 text-center space-y-3">
+                    <!-- Current / Live Preview Container -->
+                    <div id="imagePreviewContainer" class="{% if not banner.image %}hidden{% endif %} max-w-sm mx-auto">
+                        <img 
+                            id="livePreviewImg" 
+                            src="{% if banner.image %}{{ banner.image.url }}{% endif %}" 
+                            alt="Preview" 
+                            class="w-full h-44 rounded-2xl object-contain bg-white border border-emerald-border p-2 shadow-xs"
+                        >
+                        <span class="text-[10px] text-textMuted font-semibold mt-1 block">Selected Studio Image</span>
+                    </div>
+
+                    <div class="flex items-center justify-center">
+                        <label class="cursor-pointer px-4 py-2 rounded-full bg-white border border-emerald-border text-xs font-bold text-emerald hover:bg-emerald-tint transition shadow-2xs">
+                            <span>Browse & Upload New File</span>
+                            <input 
+                                type="file" 
+                                name="image" 
+                                id="bannerImageInput" 
+                                accept="image/*" 
+                                class="hidden"
+                                onchange="handleBannerImagePreview(this)"
+                            >
+                        </label>
+                    </div>
+                    <p class="text-[11px] text-textMuted">Supports JPG, PNG, WEBP. High quality product or editorial photography recommended.</p>
+                </div>
+                {% if form.image.errors %}<p class="text-xs text-red-600 mt-1 font-semibold">{{ form.image.errors.0 }}</p>{% endif %}
+            </div>
+
+            <!-- Floating Badge Details (Spotlight Product Box) -->
+            <div class="p-4 rounded-2xl bg-[#F5EFEB]/50 border border-emerald-border/60 space-y-4">
+                <div class="flex items-center gap-2">
+                    <span class="text-xs font-bold uppercase tracking-wider text-emerald-dark">Floating Spotlight Badge</span>
+                    <span class="text-[10px] px-2 py-0.5 rounded-full bg-white font-semibold text-textMuted border border-emerald-border/60">Bottom-Left Overlay</span>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div>
+                        <label class="block text-[11px] font-bold text-textMain uppercase tracking-wider mb-1">Badge Tag</label>
+                        {{ form.badge_text }}
+                        <span class="text-[10px] text-textMuted">e.g. 01 ARTISAN SERIES</span>
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-bold text-textMain uppercase tracking-wider mb-1">Product Title</label>
+                        {{ form.product_tag }}
+                        <span class="text-[10px] text-textMuted">e.g. Ceramic Mug</span>
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-bold text-textMain uppercase tracking-wider mb-1">Price Tag</label>
+                        {{ form.price_text }}
+                        <span class="text-[10px] text-textMuted">e.g. From ₹1,299</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CTA Button & Redirect Link -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs font-bold text-textMain uppercase tracking-wider mb-1.5">Button CTA Text</label>
+                    {{ form.button_text }}
+                    <span class="text-[10px] text-textMuted">e.g. Explore Collection</span>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-textMain uppercase tracking-wider mb-1.5">Redirect URL / Destination</label>
+                    {{ form.link }}
+                    <span class="text-[10px] text-textMuted">e.g. /catalog/ or /catalog/vases/</span>
+                </div>
+            </div>
+
+            <!-- Ordering & Status -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
+                <div>
+                    <label class="block text-xs font-bold text-textMain uppercase tracking-wider mb-1.5">Display Sort Order</label>
+                    {{ form.sort_order }}
+                    <span class="text-[10px] text-textMuted">Lower numbers display first (0, 1, 2...)</span>
+                </div>
+                <div class="flex items-center pt-6">
+                    <label class="flex items-center gap-2.5 text-xs font-bold text-textMain cursor-pointer select-none">
+                        {{ form.is_active }}
+                        <span>Active on Homepage Hero</span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="pt-4 border-t border-emerald-border/60 flex items-center justify-end gap-3">
+                <a href="{% url 'dashboard:banner_list' %}" class="px-5 py-2.5 rounded-full border border-emerald-border text-xs font-semibold text-textMuted hover:bg-page transition">
+                    Cancel
+                </a>
+                <button type="submit" class="px-6 py-2.5 rounded-full bg-emerald hover:bg-emerald-hover text-white text-xs font-bold shadow-md shadow-emerald/20 transition active:scale-95">
+                    Save Banner
+                </button>
+            </div>
+        </form>
+    </div>
+
+</div>
+
+<!-- Live Image Preview Script -->
+<script>
+function handleBannerImagePreview(input) {
+    if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const previewContainer = document.getElementById('imagePreviewContainer');
+            const previewImg = document.getElementById('livePreviewImg');
+            if (previewContainer && previewImg) {
+                previewImg.src = e.target.result;
+                previewContainer.classList.remove('hidden');
+            }
+        };
+        reader.readAsDataURL(input.files[0]);
+    }
+}
+</script>
+{% endblock %}

@@ -1,0 +1,133 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AvailSmart Admin Portal | Secure Staff Sign In</title>
+
+    <!-- Google Font: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Tailwind CSS with Custom Config -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        emerald: {
+                            DEFAULT: '#047857',
+                            hover: '#065F46',
+                            dark: '#064E3B',
+                            tint: '#ECFDF5',
+                            soft: '#D1FAE5',
+                            border: '#D9EDE3',
+                        },
+                        textMain: '#0F1F1A',
+                        textMuted: '#4B6358',
+                    },
+                    borderRadius: {
+                        '2xl': '16px',
+                        '3xl': '24px',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{% static 'css/custom.css' %}">
+</head>
+<body class="bg-gradient-to-br from-[#064E3B] via-[#047857] to-[#065F46] min-h-full flex items-center justify-center p-4">
+
+    <!-- Include Toast Container -->
+    {% include 'includes/toasts.html' %}
+
+    <div class="max-w-md w-full bg-white/95 backdrop-blur-xl p-8 sm:p-10 rounded-3xl shadow-2xl border border-white/20">
+        
+        <!-- Header -->
+        <div class="text-center mb-8">
+            <div class="w-14 h-14 rounded-2xl bg-emerald-dark text-white flex items-center justify-center mx-auto shadow-lg mb-3">
+                <svg class="w-8 h-8 text-mint-soft" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+                </svg>
+            </div>
+            <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-dark/10 text-emerald-dark text-xs font-bold uppercase tracking-wider mb-2">
+                <span class="w-2 h-2 rounded-full bg-emerald animate-pulse"></span>
+                <span>Restricted Access</span>
+            </div>
+            <h2 class="text-2xl font-black tracking-tight text-emerald-dark">AvailSmart Control Center</h2>
+            <p class="text-xs text-textMuted mt-1">Authorized staff & administrator authentication portal</p>
+        </div>
+
+        <!-- Lockout Notice -->
+        {% if is_locked %}
+            <div class="mb-6 p-4 rounded-2xl bg-red-50 border border-red-200 text-xs text-red-700 flex items-center gap-2">
+                <svg class="w-5 h-5 shrink-0 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                <span>Portal locked due to multiple failed attempts. Please retry in {{ remaining }} seconds.</span>
+            </div>
+        {% endif %}
+
+        <!-- Form Errors -->
+        {% if form.non_field_errors %}
+            <div class="mb-6 p-4 rounded-2xl bg-red-50 border border-red-200 text-xs text-red-700">
+                {% for err in form.non_field_errors %}
+                    <p>{{ err }}</p>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <!-- Admin Login Form -->
+        <form method="POST" action="{% url 'dashboard:login' %}{% if request.GET.next %}?next={{ request.GET.next }}{% endif %}" class="space-y-4">
+            {% csrf_token %}
+
+            <div>
+                <label class="block text-xs font-bold text-textMain uppercase tracking-wider mb-1.5">Staff Email Address</label>
+                {{ form.email }}
+                {% if form.email.errors %}
+                    <p class="text-xs text-red-600 mt-1 pl-3 font-medium">{{ form.email.errors.0 }}</p>
+                {% endif %}
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold text-textMain uppercase tracking-wider mb-1.5">Admin Security Password</label>
+                {{ form.password }}
+                {% if form.password.errors %}
+                    <p class="text-xs text-red-600 mt-1 pl-3 font-medium">{{ form.password.errors.0 }}</p>
+                {% endif %}
+            </div>
+
+            <div class="pt-3">
+                <button 
+                    type="submit" 
+                    {% if is_locked %}disabled{% endif %}
+                    class="w-full py-3.5 px-6 rounded-full bg-emerald-dark hover:bg-emerald text-white text-sm font-bold tracking-wide shadow-lg shadow-emerald-dark/30 transition active:scale-95 disabled:opacity-50"
+                >
+                    Authenticate Admin Access
+                </button>
+            </div>
+        </form>
+
+        <!-- Credentials Helper Pill -->
+        <div class="mt-6 p-3.5 rounded-2xl bg-mint-tint border border-emerald-border text-xs text-emerald-dark">
+            <span class="font-bold block mb-1">Default Super Admin Credentials:</span>
+            <div class="flex items-center justify-between text-[11px]">
+                <span>Email: <code class="bg-white px-1.5 py-0.5 rounded border">admin@availsmart.com</code></span>
+                <span>Pass: <code class="bg-white px-1.5 py-0.5 rounded border">Admin@123</code></span>
+            </div>
+        </div>
+
+        <div class="mt-6 text-center">
+            <a href="/" class="text-xs font-semibold text-emerald hover:underline flex items-center justify-center gap-1.5">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+                <span>Return to Public Marketplace</span>
+            </a>
+        </div>
+
+    </div>
+
+</body>
+</html>

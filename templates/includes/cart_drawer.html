@@ -1,0 +1,141 @@
+<!-- AvailSmart Slide-In Mini Cart Drawer -->
+<div 
+    x-data="{ 
+        open: false,
+        loading: false,
+        cartData: { items: [], subtotal: '0.00', cart_count: 0, is_empty: true },
+        async fetchDrawerData() {
+            this.loading = true;
+            try {
+                const res = await fetch('/cart/drawer/');
+                this.cartData = await res.json();
+            } catch (err) {
+                console.error('Drawer error:', err);
+            } finally {
+                this.loading = false;
+            }
+        }
+    }" 
+    @open-cart.window="open = true; fetchDrawerData();" 
+    @keydown.escape.window="open = false"
+    class="relative z-50"
+>
+    <!-- Backdrop Overlay -->
+    <div 
+        x-cloak
+        x-show="open" 
+        x-transition:enter="transition-opacity ease-out duration-300"
+        x-transition:enter-start="opacity-0"
+        x-transition:enter-end="opacity-100"
+        x-transition:leave="transition-opacity ease-in duration-200"
+        x-transition:leave-start="opacity-100"
+        x-transition:leave-end="opacity-0"
+        @click="open = false"
+        class="fixed inset-0 bg-textMain/40 backdrop-blur-xs"
+        style="display: none;"
+    ></div>
+
+    <!-- Drawer Panel -->
+    <div 
+        x-cloak
+        x-show="open" 
+        x-transition:enter="transition ease-out duration-300 transform"
+        x-transition:enter-start="translate-x-full"
+        x-transition:enter-end="translate-x-0"
+        x-transition:leave="transition ease-in duration-200 transform"
+        x-transition:leave-start="translate-x-0"
+        x-transition:leave-end="translate-x-full"
+        class="fixed inset-y-0 right-0 max-w-md w-full bg-white shadow-2xl flex flex-col z-50 border-l border-emerald-border/60"
+        style="display: none;"
+    >
+        <!-- Drawer Header (Crookeries Warm Alabaster) -->
+        <div class="px-6 py-5 border-b border-alabaster-border flex items-center justify-between bg-[#F5EFEB]">
+            <div class="flex items-center gap-3">
+                <div class="w-9 h-9 rounded-2xl bg-forest-dark text-white flex items-center justify-center shadow-xs">
+                    <svg class="w-4 h-4 text-emerald-tint" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg>
+                </div>
+                <div>
+                    <h3 class="font-editorial text-lg font-bold text-forest-dark">Your Curated Bag</h3>
+                    <p class="text-[11px] text-textMuted uppercase tracking-wider font-semibold"><span x-text="cartData.cart_count">0</span> Objects selected</p>
+                </div>
+            </div>
+            <button 
+                @click="open = false" 
+                class="w-8 h-8 rounded-full flex items-center justify-center text-textMuted hover:text-forest-dark hover:bg-[#EAE5DE] transition"
+            >
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
+        </div>
+
+        <!-- Drawer Content Body -->
+        <div class="flex-1 overflow-y-auto p-6 relative">
+            
+            <!-- Loading Indicator -->
+            <div x-show="loading" class="py-12 flex flex-col items-center justify-center">
+                <div class="w-8 h-8 border-3 border-forest-dark border-t-transparent rounded-full animate-spin mb-2"></div>
+                <span class="text-xs text-textMuted font-semibold tracking-wide">Syncing bag...</span>
+            </div>
+
+            <!-- Items List -->
+            <div x-show="!loading && !cartData.is_empty" class="space-y-3.5">
+                <template x-for="item in cartData.items" :key="item.id">
+                    <div class="flex items-center gap-3.5 p-3.5 rounded-2xl bg-[#FAF8F5] border border-alabaster-border">
+                        <div class="w-14 h-14 bg-white rounded-xl border border-alabaster-border p-1 shrink-0 flex items-center justify-center overflow-hidden">
+                            <img :src="item.thumbnail" :alt="item.name" class="w-full h-full object-contain">
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <h4 class="text-xs font-semibold text-forest-dark truncate" x-text="item.name"></h4>
+                            <p class="text-[11px] text-textMuted">
+                                <span x-text="item.color"></span>
+                                <span x-show="item.size" x-text="' / ' + item.size"></span>
+                            </p>
+                            <span class="text-xs font-bold text-forest-dark" x-text="'₹' + item.total_price"></span>
+                        </div>
+                        <div class="text-right shrink-0">
+                            <span class="text-[11px] font-semibold px-2 py-0.5 bg-[#F5EFEB] rounded-full text-forest-dark" x-text="'Qty: ' + item.quantity"></span>
+                        </div>
+                    </div>
+                </template>
+            </div>
+
+            <!-- Empty State -->
+            <div x-show="!loading && cartData.is_empty" class="h-full flex flex-col items-center justify-center text-center py-12">
+                <div class="w-16 h-16 rounded-3xl bg-[#F5EFEB] flex items-center justify-center text-forest mb-3">
+                    <span class="text-2xl">🏺</span>
+                </div>
+                <h4 class="font-editorial text-lg font-bold text-forest-dark mb-1">Your bag is empty</h4>
+                <p class="text-xs text-textMuted max-w-xs mb-5 leading-relaxed">Discover handcrafted ceramics, fine textiles, and curated lifestyle objects.</p>
+                <a 
+                    href="/catalog/" 
+                    @click="open = false"
+                    class="px-6 py-2.5 bg-forest-dark hover:bg-forest text-white rounded-full text-xs font-semibold tracking-wider shadow-sm transition active:scale-95"
+                >
+                    Explore Studio
+                </a>
+            </div>
+
+        </div>
+
+        <!-- Drawer Footer -->
+        <div x-show="!cartData.is_empty" class="p-6 border-t border-alabaster-border bg-[#F5EFEB] space-y-3.5">
+            <div class="flex items-center justify-between text-xs font-semibold">
+                <span class="text-textMuted uppercase tracking-wider text-[10px]">Estimated Total</span>
+                <span class="text-base font-bold text-forest-dark" x-text="'₹' + cartData.subtotal"></span>
+            </div>
+            <div class="grid grid-cols-2 gap-2.5">
+                <a 
+                    href="/cart/" 
+                    class="py-3 px-4 rounded-full border border-alabaster-border bg-white text-forest-dark font-semibold text-xs tracking-wider text-center hover:bg-[#FAF8F5] transition"
+                >
+                    View Bag
+                </a>
+                <a 
+                    href="/orders/checkout/" 
+                    class="py-3 px-4 rounded-full bg-forest-dark hover:bg-forest text-white font-semibold text-xs tracking-wider text-center shadow-sm transition active:scale-95"
+                >
+                    Checkout &rarr;
+                </a>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+
+{% block title %}Studio Technical Interruption (500) | Crookeries by AvailSmart{% endblock %}
+
+{% block content %}
+<div class="min-h-[75vh] bg-[#FAF8F5] flex items-center justify-center py-16 px-4">
+    <div class="max-w-md w-full text-center">
+        <!-- Ceramic Icon -->
+        <div class="w-20 h-20 rounded-full bg-white border border-[#E8E4DC] text-[#C2714F] flex items-center justify-center mx-auto mb-6 shadow-sm">
+            <span class="text-2xl font-editorial">⚙</span>
+        </div>
+        <span class="text-[11px] uppercase tracking-widest text-[#C2714F] font-medium block mb-2">500 &bull; Studio Calibration</span>
+        <h1 class="text-3xl font-normal font-editorial text-[#14241B] tracking-tight mb-3">
+            Temporary <span class="italic text-[#C2714F]">Kiln Delay</span>
+        </h1>
+        <p class="text-xs text-[#5C564B] mb-8 leading-relaxed max-w-sm mx-auto">
+            Our digital studio encountered an unexpected hiccup. Our curators have been alerted and are resolving the temperature.
+        </p>
+        <div class="flex flex-col sm:flex-row items-center justify-center gap-3">
+            <a href="/" class="w-full sm:w-auto px-7 py-3.5 rounded-full bg-[#14241B] hover:bg-[#C2714F] text-white text-xs uppercase tracking-widest font-medium transition shadow-sm active:scale-95">
+                Return to Studio
+            </a>
+            <a href="javascript:location.reload()" class="w-full sm:w-auto px-7 py-3.5 rounded-full bg-white hover:bg-[#FAF8F5] text-[#14241B] text-xs uppercase tracking-widest font-medium border border-[#E8E4DC] transition">
+                Refresh Page
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

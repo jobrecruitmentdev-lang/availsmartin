@@ -1,0 +1,221 @@
+{% extends 'base.html' %}
+
+{% block title %}Member Studio Profile | Crookeries by AvailSmart{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-[#FAF8F5] py-10 sm:py-14" x-data="{ activeTab: 'details' }">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        
+        <!-- Header -->
+        <div class="mb-10 pb-6 border-b border-[#E8E4DC] flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
+            <div class="flex items-center gap-4">
+                <div class="w-16 h-16 rounded-full bg-[#14241B] text-white font-editorial text-2xl flex items-center justify-center uppercase shadow-sm">
+                    {{ request.user.name|slice:":1"|default:"C" }}
+                </div>
+                <div>
+                    <span class="text-[11px] uppercase tracking-widest text-[#C2714F] font-medium block">Verified Collector</span>
+                    <h1 class="text-3xl font-normal font-editorial text-[#14241B] tracking-tight">{{ request.user.name }}</h1>
+                    <p class="text-xs text-[#8A8477] mt-0.5">{{ request.user.email }} &bull; Member since {{ request.user.date_joined|date:"M Y" }}</p>
+                </div>
+            </div>
+
+            <div class="flex flex-wrap items-center gap-3">
+                <a href="{% url 'accounts:addresses' %}" class="px-5 py-2.5 rounded-full border border-[#E8E4DC] bg-white hover:bg-[#FAF8F5] text-[#14241B] text-xs uppercase tracking-widest font-medium transition">
+                    Address Ledger
+                </a>
+                <a href="{% url 'orders:my_orders' %}" class="px-5 py-2.5 rounded-full bg-[#14241B] hover:bg-[#C2714F] text-white text-xs uppercase tracking-widest font-medium transition shadow-sm">
+                    Acquisition History
+                </a>
+            </div>
+        </div>
+
+        <!-- Metric Cards Row -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-10">
+            <div class="bg-white p-6 rounded-3xl border border-[#E8E4DC] shadow-sm flex items-center gap-4">
+                <div class="w-12 h-12 rounded-2xl bg-[#FAF8F5] border border-[#E8E4DC] flex items-center justify-center text-xl shrink-0 font-editorial">
+                    🏺
+                </div>
+                <div>
+                    <span class="text-[10px] text-[#8A8477] uppercase tracking-wider font-medium">Acquisitions</span>
+                    <span class="block text-2xl font-editorial font-normal text-[#14241B] mt-0.5">{{ request.user.orders.count }}</span>
+                </div>
+            </div>
+
+            <div class="bg-white p-6 rounded-3xl border border-[#E8E4DC] shadow-sm flex items-center gap-4">
+                <div class="w-12 h-12 rounded-2xl bg-[#FAF8F5] border border-[#E8E4DC] flex items-center justify-center text-xl shrink-0 font-editorial text-[#C2714F]">
+                    ♥
+                </div>
+                <div>
+                    <span class="text-[10px] text-[#8A8477] uppercase tracking-wider font-medium">Curated Wishlist</span>
+                    <span class="block text-2xl font-editorial font-normal text-[#14241B] mt-0.5">{{ wishlist_count }} piece{{ wishlist_count|pluralize }}</span>
+                </div>
+            </div>
+
+            <div class="bg-white p-6 rounded-3xl border border-[#E8E4DC] shadow-sm flex items-center gap-4">
+                <div class="w-12 h-12 rounded-2xl bg-[#FAF8F5] border border-[#E8E4DC] flex items-center justify-center text-xl shrink-0 font-editorial">
+                    📍
+                </div>
+                <div>
+                    <span class="text-[10px] text-[#8A8477] uppercase tracking-wider font-medium">Saved Destinations</span>
+                    <span class="block text-2xl font-editorial font-normal text-[#14241B] mt-0.5">{{ request.user.addresses.count }} saved</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Profile Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+            
+            <!-- Left: Tab Selectors & Forms -->
+            <div class="lg:col-span-8 bg-white rounded-3xl border border-[#E8E4DC] p-6 sm:p-8 shadow-sm space-y-6">
+                
+                <!-- Tabs Bar -->
+                <div class="flex items-center gap-2 border-b border-[#E8E4DC] pb-4">
+                    <button 
+                        type="button" 
+                        @click="activeTab = 'details'"
+                        class="px-6 py-2.5 rounded-full text-xs uppercase tracking-widest font-medium transition"
+                        :class="activeTab === 'details' ? 'bg-[#14241B] text-white shadow-sm' : 'bg-[#FAF8F5] text-[#5C564B] hover:text-[#14241B]'"
+                    >
+                        Personal Profile
+                    </button>
+                    <button 
+                        type="button" 
+                        @click="activeTab = 'password'"
+                        class="px-6 py-2.5 rounded-full text-xs uppercase tracking-widest font-medium transition"
+                        :class="activeTab === 'password' ? 'bg-[#14241B] text-white shadow-sm' : 'bg-[#FAF8F5] text-[#5C564B] hover:text-[#14241B]'"
+                    >
+                        Security & Password
+                    </button>
+                </div>
+
+                <!-- Tab 1: Personal Details Form -->
+                <div x-show="activeTab === 'details'" class="space-y-5">
+                    <form method="POST" action="{% url 'accounts:profile' %}" class="space-y-4">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="update_profile">
+
+                        <div>
+                            <label class="block text-xs uppercase tracking-wider text-[#5C564B] font-medium mb-1.5">Full Name</label>
+                            {{ profile_form.name }}
+                            {% if profile_form.name.errors %}
+                                <p class="text-xs text-red-600 mt-1 pl-1">{{ profile_form.name.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+
+                        <div>
+                            <label class="block text-xs uppercase tracking-wider text-[#5C564B] font-medium mb-1.5">Email Address</label>
+                            <input type="email" value="{{ request.user.email }}" disabled class="w-full px-4 py-3 bg-[#FAF8F5] border border-[#E8E4DC] rounded-xl text-[#8A8477] text-xs cursor-not-allowed">
+                            <span class="text-[10px] text-[#8A8477] pl-1 mt-1 block">Account email serves as permanent studio identifier.</span>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs uppercase tracking-wider text-[#5C564B] font-medium mb-1.5">Phone Number</label>
+                            {{ profile_form.phone }}
+                            {% if profile_form.phone.errors %}
+                                <p class="text-xs text-red-600 mt-1 pl-1">{{ profile_form.phone.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+
+                        <div class="pt-2">
+                            <button type="submit" class="px-7 py-3 rounded-full bg-[#14241B] hover:bg-[#C2714F] text-white text-xs uppercase tracking-widest font-medium transition shadow-sm active:scale-95">
+                                Save Profile Changes
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Tab 2: Change Password Form -->
+                <div x-show="activeTab === 'password'" class="space-y-5" style="display: none;">
+                    <form method="POST" action="{% url 'accounts:profile' %}" class="space-y-4 max-w-md">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="change_password">
+
+                        {% for field in password_form %}
+                            <div>
+                                <label class="block text-xs uppercase tracking-wider text-[#5C564B] font-medium mb-1.5">{{ field.label }}</label>
+                                <input 
+                                    type="password" 
+                                    name="{{ field.name }}" 
+                                    class="w-full px-4 py-3 bg-[#FAF8F5] border border-[#D3CBBF] rounded-xl text-[#14241B] text-xs focus:bg-white focus:border-[#14241B] focus:ring-1 focus:ring-[#14241B] focus:outline-none transition"
+                                >
+                                {% if field.errors %}
+                                    <p class="text-xs text-red-600 mt-1 pl-1">{{ field.errors.0 }}</p>
+                                {% endif %}
+                            </div>
+                        {% endfor %}
+
+                        <div class="pt-2">
+                            <button type="submit" class="px-7 py-3 rounded-full bg-[#14241B] hover:bg-[#C2714F] text-white text-xs uppercase tracking-widest font-medium transition shadow-sm active:scale-95">
+                                Update Password
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+            </div>
+
+            <!-- Right: Default Address & Quick Orders Sidebar -->
+            <div class="lg:col-span-4 space-y-6">
+                
+                <!-- Default Delivery Address Card -->
+                <div class="bg-white rounded-3xl border border-[#E8E4DC] p-6 shadow-sm space-y-3 text-xs">
+                    <div class="flex items-center justify-between border-b border-[#E8E4DC] pb-3">
+                        <h3 class="uppercase tracking-widest text-[#8A8477] font-medium">Default Destination</h3>
+                        <a href="{% url 'accounts:addresses' %}" class="text-[11px] font-medium text-[#C2714F] hover:underline">Manage &rarr;</a>
+                    </div>
+
+                    {% if default_address %}
+                        <div class="p-4 rounded-2xl bg-[#FAF8F5] border border-[#E8E4DC] space-y-1">
+                            <span class="font-medium text-[#14241B] text-sm block">{{ default_address.full_name }}</span>
+                            <p class="text-[#5C564B] leading-relaxed">
+                                {{ default_address.address_line1 }}{% if default_address.address_line2 %}, {{ default_address.address_line2 }}{% endif %}<br>
+                                {{ default_address.city }}, {{ default_address.state }} - {{ default_address.pincode }}
+                            </p>
+                            <p class="text-[#8A8477] pt-1">📞 +91 {{ default_address.phone }}</p>
+                        </div>
+                    {% else %}
+                        <p class="text-[#8A8477] italic py-2">No primary delivery address designated yet.</p>
+                        <a href="{% url 'accounts:address_add' %}" class="inline-block px-5 py-2 rounded-full bg-[#FAF8F5] hover:bg-[#EFECE6] border border-[#E8E4DC] text-[#14241B] text-xs font-medium transition">
+                            + Add Destination
+                        </a>
+                    {% endif %}
+                </div>
+
+                <!-- Recent Orders Preview -->
+                <div class="bg-white rounded-3xl border border-[#E8E4DC] p-6 shadow-sm space-y-3 text-xs">
+                    <div class="flex items-center justify-between border-b border-[#E8E4DC] pb-3">
+                        <h3 class="uppercase tracking-widest text-[#8A8477] font-medium">Recent Acquisitions</h3>
+                        <a href="{% url 'orders:my_orders' %}" class="text-[11px] font-medium text-[#C2714F] hover:underline">All &rarr;</a>
+                    </div>
+
+                    {% if recent_orders %}
+                        <div class="divide-y divide-[#E8E4DC]">
+                            {% for order in recent_orders %}
+                                <div class="py-3 flex items-center justify-between">
+                                    <div>
+                                        <a href="{% url 'orders:order_detail' order_number=order.order_number %}" class="font-mono text-[#14241B] hover:text-[#C2714F] font-medium block">
+                                            #{{ order.order_number }}
+                                        </a>
+                                        <span class="text-[10px] text-[#8A8477]">{{ order.created_at|date:"d M Y" }} &bull; {{ order.item_count }} piece{{ order.item_count|pluralize }}</span>
+                                    </div>
+                                    <div class="text-right">
+                                        <span class="font-editorial text-sm text-[#14241B] block">₹{{ order.total }}</span>
+                                        <span class="text-[9px] font-medium uppercase px-2 py-0.5 rounded-full {% if order.order_status == 'delivered' %}bg-[#EFECE6] text-[#14241B]{% else %}bg-[#14241B] text-white{% endif %}">
+                                            {{ order.get_order_status_display }}
+                                        </span>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="text-[#8A8477] italic py-2">No past acquisitions recorded.</p>
+                    {% endif %}
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,627 @@
+{% extends 'base.html' %}
+
+{% block title %}Secure Checkout | Crookeries by AvailSmart{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-[#FAF8F5] py-10 sm:py-14" x-data="checkoutApp()">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        
+        <!-- Editorial Breadcrumbs & Header -->
+        <div class="mb-10 pb-6 border-b border-[#E8E4DC]">
+            <nav class="flex items-center gap-2 text-xs text-[#8A8477] tracking-wider uppercase mb-3">
+                <a href="/" class="hover:text-[#14241B] transition">Home</a>
+                <span class="text-[#D3CBBF]">/</span>
+                <a href="/cart/" class="hover:text-[#14241B] transition">Shopping Bag</a>
+                <span class="text-[#D3CBBF]">/</span>
+                <span class="font-medium text-[#14241B]">Studio Checkout</span>
+            </nav>
+            <div class="flex flex-col sm:flex-row sm:items-baseline justify-between gap-2">
+                <h1 class="text-3xl sm:text-4xl font-normal font-editorial text-[#14241B] tracking-tight">
+                    Finalize <span class="italic text-[#C2714F]">Delivery & Order</span>
+                </h1>
+                <span class="text-xs uppercase tracking-widest text-[#8A8477]">
+                    256-Bit Encrypted Concierge Checkout
+                </span>
+            </div>
+        </div>
+
+        <!-- Global Alert Messages -->
+        {% if messages %}
+            <div class="mb-8 space-y-2">
+                {% for message in messages %}
+                    <div class="p-4 rounded-2xl text-xs font-semibold flex items-center gap-2.5 {% if message.tags == 'error' %}bg-red-50 text-red-700 border border-red-200{% else %}bg-mint-tint text-emerald-dark border border-emerald-border/60{% endif %}">
+                        <span>{% if message.tags == 'error' %}⚠️{% else %}✓{% endif %}</span>
+                        <span>{{ message }}</span>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <!-- Main Checkout Form -->
+        <form id="checkoutForm" method="POST" action="{% url 'orders:place_order' %}" @submit="handleFormSubmit">
+            {% csrf_token %}
+            <input type="hidden" name="otp_code" x-model="orderOtp">
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start">
+                
+                <!-- Left Column: Delivery Address & Payment Method -->
+                <div class="lg:col-span-8 space-y-8">
+                    
+                    <!-- 1. Delivery Address Selection -->
+                    <div class="bg-white rounded-3xl border border-[#E8E4DC] p-6 sm:p-8 shadow-sm space-y-6">
+                        <div class="flex items-center justify-between border-b border-[#E8E4DC] pb-4">
+                            <div class="flex items-center gap-3">
+                                <span class="w-8 h-8 rounded-full bg-[#14241B] text-white flex items-center justify-center font-editorial text-sm">
+                                    1
+                                </span>
+                                <div>
+                                    <h2 class="text-lg font-editorial text-[#14241B]">Shipping Destination</h2>
+                                    <p class="text-xs text-[#8A8477]">Where should our studio artisans safely send your parcel?</p>
+                                </div>
+                            </div>
+
+                            {% if addresses.exists %}
+                                <button 
+                                    type="button" 
+                                    @click="toggleAddressMode()"
+                                    class="text-xs font-medium text-[#C2714F] hover:text-[#A85B3B] underline underline-offset-4 transition"
+                                >
+                                    <span x-text="showNewForm ? 'Choose Saved Address' : '+ Add New Address'"></span>
+                                </button>
+                            {% endif %}
+                        </div>
+
+                        <!-- Existing Addresses List -->
+                        {% if addresses.exists %}
+                            <div x-show="!showNewForm" x-cloak class="space-y-3">
+                                {% for addr in addresses %}
+                                    <label class="relative flex items-start gap-4 p-5 rounded-2xl border transition cursor-pointer" :class="selectedAddress == '{{ addr.id }}' ? 'border-[#14241B] bg-[#FAF8F5] ring-1 ring-[#14241B]' : 'border-[#E8E4DC] bg-white hover:border-[#C2714F]/60'">
+                                        <input 
+                                            type="radio" 
+                                            name="address_id" 
+                                            value="{{ addr.id }}" 
+                                            x-model="selectedAddress"
+                                            class="mt-1 text-[#14241B] focus:ring-[#14241B] border-[#D3CBBF] cursor-pointer"
+                                        >
+                                        <div class="flex-1 min-w-0">
+                                            <div class="flex items-center gap-2">
+                                                <span class="text-sm font-semibold text-[#14241B]">{{ addr.full_name }}</span>
+                                                <span class="px-2.5 py-0.5 rounded-full text-[10px] tracking-wider uppercase font-medium {% if addr.address_type == 'home' %}bg-[#EFECE6] text-[#14241B]{% else %}bg-[#F2EBE5] text-[#C2714F]{% endif %}">
+                                                    {{ addr.address_type }}
+                                                </span>
+                                                {% if addr.is_default %}
+                                                    <span class="px-2.5 py-0.5 rounded-full text-[10px] tracking-wider uppercase bg-[#14241B] text-white">
+                                                        Primary
+                                                    </span>
+                                                {% endif %}
+                                            </div>
+                                            <p class="text-xs text-[#5C564B] mt-1.5 leading-relaxed">
+                                                {{ addr.address_line1 }}{% if addr.address_line2 %}, {{ addr.address_line2 }}{% endif %}, {{ addr.city }}, {{ addr.state }} - {{ addr.pincode }}
+                                            </p>
+                                            <p class="text-xs text-[#8A8477] mt-1.5 flex items-center gap-1.5">
+                                                <span>Direct Dispatch:</span>
+                                                <span class="font-medium text-[#14241B]">+91 {{ addr.phone }}</span>
+                                            </p>
+                                        </div>
+                                    </label>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+
+                        <!-- New Address Form Section -->
+                        <div x-show="showNewForm" x-cloak class="space-y-4 pt-2">
+                            <input type="radio" name="address_id" value="new" x-model="selectedAddress" class="hidden">
+
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-xs font-medium text-[#14241B] mb-1.5">Recipient Full Name *</label>
+                                    <input 
+                                        type="text" 
+                                        name="new_full_name" 
+                                        id="new_full_name"
+                                        placeholder="e.g. Maya Sharma"
+                                        class="w-full px-4 py-2.5 rounded-xl border border-[#D3CBBF] bg-[#FAF8F5] text-xs focus:bg-white focus:outline-none focus:border-[#14241B] transition"
+                                    >
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-medium text-[#14241B] mb-1.5">Contact Number *</label>
+                                    <input 
+                                        type="tel" 
+                                        name="new_phone" 
+                                        id="new_phone"
+                                        placeholder="e.g. 9876543210"
+                                        class="w-full px-4 py-2.5 rounded-xl border border-[#D3CBBF] bg-[#FAF8F5] text-xs focus:bg-white focus:outline-none focus:border-[#14241B] transition"
+                                    >
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-medium text-[#14241B] mb-1.5">House / Apartment / Street *</label>
+                                <input 
+                                    type="text" 
+                                    name="new_address_line1" 
+                                    id="new_address_line1"
+                                    placeholder="e.g. Studio 4B, Artisan Lane, Whitefield"
+                                    class="w-full px-4 py-2.5 rounded-xl border border-[#D3CBBF] bg-[#FAF8F5] text-xs focus:bg-white focus:outline-none focus:border-[#14241B] transition"
+                                >
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-medium text-[#14241B] mb-1.5">Landmark / Suite (Optional)</label>
+                                <input 
+                                    type="text" 
+                                    name="new_address_line2" 
+                                    placeholder="e.g. Opposite Ceramic Guild"
+                                    class="w-full px-4 py-2.5 rounded-xl border border-[#D3CBBF] bg-[#FAF8F5] text-xs focus:bg-white focus:outline-none focus:border-[#14241B] transition"
+                                >
+                            </div>
+
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                                <div>
+                                    <label class="block text-xs font-medium text-[#14241B] mb-1.5">City *</label>
+                                    <input 
+                                        type="text" 
+                                        name="new_city" 
+                                        id="new_city"
+                                        placeholder="e.g. Bengaluru"
+                                        class="w-full px-4 py-2.5 rounded-xl border border-[#D3CBBF] bg-[#FAF8F5] text-xs focus:bg-white focus:outline-none focus:border-[#14241B] transition"
+                                    >
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-medium text-[#14241B] mb-1.5">State *</label>
+                                    <input 
+                                        type="text" 
+                                        name="new_state" 
+                                        id="new_state"
+                                        placeholder="e.g. Karnataka"
+                                        class="w-full px-4 py-2.5 rounded-xl border border-[#D3CBBF] bg-[#FAF8F5] text-xs focus:bg-white focus:outline-none focus:border-[#14241B] transition"
+                                    >
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-medium text-[#14241B] mb-1.5">Postal Code *</label>
+                                    <input 
+                                        type="text" 
+                                        name="new_pincode" 
+                                        id="new_pincode"
+                                        placeholder="e.g. 560066"
+                                        class="w-full px-4 py-2.5 rounded-xl border border-[#D3CBBF] bg-[#FAF8F5] text-xs focus:bg-white focus:outline-none focus:border-[#14241B] transition"
+                                    >
+                                </div>
+                            </div>
+
+                            <div class="flex items-center gap-6 pt-2">
+                                <label class="flex items-center gap-2 cursor-pointer text-xs font-medium text-[#14241B]">
+                                    <input type="radio" name="new_address_type" value="home" checked class="text-[#14241B] focus:ring-[#14241B]">
+                                    <span>Residence / Home</span>
+                                </label>
+                                <label class="flex items-center gap-2 cursor-pointer text-xs font-medium text-[#14241B]">
+                                    <input type="radio" name="new_address_type" value="work" class="text-[#14241B] focus:ring-[#14241B]">
+                                    <span>Workspace / Studio</span>
+                                </label>
+                                <label class="flex items-center gap-2 cursor-pointer text-xs font-medium text-[#5C564B] ml-auto">
+                                    <input type="checkbox" name="save_address" value="1" checked class="rounded text-[#14241B] focus:ring-[#14241B]">
+                                    <span>Save in Address Book</span>
+                                </label>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- 2. Payment Method -->
+                    <div class="bg-white rounded-3xl border border-[#E8E4DC] p-6 sm:p-8 shadow-sm space-y-6">
+                        <div class="flex items-center gap-3 border-b border-[#E8E4DC] pb-4">
+                            <span class="w-8 h-8 rounded-full bg-[#14241B] text-white flex items-center justify-center font-editorial text-sm">
+                                2
+                            </span>
+                            <div>
+                                <h2 class="text-lg font-editorial text-[#14241B]">Payment Settlement</h2>
+                                <p class="text-xs text-[#8A8477]">Select your preferred confidential settlement mechanism</p>
+                            </div>
+                        </div>
+
+                        <div class="space-y-3" x-data="{ paymentMethod: 'cod' }">
+                            <!-- COD -->
+                            <label class="relative flex items-start gap-4 p-5 rounded-2xl border transition cursor-pointer" :class="paymentMethod === 'cod' ? 'border-[#14241B] bg-[#FAF8F5] ring-1 ring-[#14241B]' : 'border-[#E8E4DC] bg-white hover:border-[#C2714F]/60'">
+                                <input 
+                                    type="radio" 
+                                    name="payment_method" 
+                                    value="cod" 
+                                    x-model="paymentMethod"
+                                    class="mt-1 text-[#14241B] focus:ring-[#14241B] border-[#D3CBBF] cursor-pointer"
+                                >
+                                <div class="flex-1">
+                                    <div class="flex items-center justify-between">
+                                        <span class="text-sm font-semibold text-[#14241B]">Cash on Delivery (COD)</span>
+                                        <span class="text-base">💵</span>
+                                    </div>
+                                    <p class="text-xs text-[#8A8477] mt-1 leading-relaxed">
+                                        Pay in cash or through UPI upon doorstep delivery & inspection by our courier partner.
+                                    </p>
+                                </div>
+                            </label>
+
+                            <!-- Online UPI / Card -->
+                            <label class="relative flex items-start gap-4 p-5 rounded-2xl border transition cursor-pointer" :class="paymentMethod === 'razorpay' ? 'border-[#14241B] bg-[#FAF8F5] ring-1 ring-[#14241B]' : 'border-[#E8E4DC] bg-white hover:border-[#C2714F]/60'">
+                                <input 
+                                    type="radio" 
+                                    name="payment_method" 
+                                    value="razorpay" 
+                                    x-model="paymentMethod"
+                                    class="mt-1 text-[#14241B] focus:ring-[#14241B] border-[#D3CBBF] cursor-pointer"
+                                >
+                                <div class="flex-1">
+                                    <div class="flex items-center justify-between">
+                                        <span class="text-sm font-semibold text-[#14241B]">Instant Online Payment</span>
+                                        <div class="flex items-center gap-1.5 text-xs text-[#8A8477]">
+                                            <span>UPI</span> · <span>Cards</span> · <span>NetBanking</span>
+                                        </div>
+                                    </div>
+                                    <p class="text-xs text-[#8A8477] mt-1 leading-relaxed">
+                                        Instant 256-bit encrypted checkout via Razorpay Gateway.
+                                    </p>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- 3. Studio Handling Notes -->
+                    <div class="bg-white rounded-3xl border border-[#E8E4DC] p-6 sm:p-8 shadow-sm">
+                        <label class="block text-xs font-medium text-[#14241B] mb-2 uppercase tracking-wider">
+                            Special Artisan Delivery Instructions (Optional)
+                        </label>
+                        <textarea 
+                            name="order_notes" 
+                            rows="2" 
+                            placeholder="e.g. Ring the studio bell, fragile porcelain handle with extra cushioning..."
+                            class="w-full px-4 py-3 rounded-2xl border border-[#D3CBBF] bg-[#FAF8F5] text-xs focus:bg-white focus:outline-none focus:border-[#14241B] transition"
+                        ></textarea>
+                    </div>
+
+                </div>
+
+                <!-- Right Column: Order Summary & Place Order CTA -->
+                <div class="lg:col-span-4 space-y-6 lg:sticky lg:top-28">
+                    
+                    <div class="bg-white rounded-3xl border border-[#E8E4DC] p-6 sm:p-7 shadow-card space-y-6">
+                        
+                        <div class="flex items-center justify-between border-b border-[#E8E4DC] pb-4">
+                            <h3 class="text-base font-editorial text-[#14241B]">Order Summary</h3>
+                            <span class="text-xs text-[#8A8477] font-medium">{{ cart.total_items }} Pieces</span>
+                        </div>
+
+                        <!-- Item Snippets -->
+                        <div class="divide-y divide-[#E8E4DC] max-h-64 overflow-y-auto no-scrollbar">
+                            {% for item in cart.items.all %}
+                                <div class="py-3 flex items-center justify-between gap-3 text-xs">
+                                    <div class="flex items-center gap-3 min-w-0">
+                                        <div class="w-10 h-10 rounded-xl bg-[#F5EFEB] border border-[#E8E4DC] overflow-hidden shrink-0 flex items-center justify-center">
+                                            {% if item.variant.product.images.first %}
+                                                <img src="{{ item.variant.product.images.first.image.url }}" alt="{{ item.variant.product.name }}" class="w-full h-full object-cover">
+                                            {% else %}
+                                                <span class="text-xs">🏺</span>
+                                            {% endif %}
+                                        </div>
+                                        <div class="min-w-0">
+                                            <p class="font-medium text-[#14241B] truncate">{{ item.variant.product.name }}</p>
+                                            <p class="text-[11px] text-[#8A8477] mt-0.5">
+                                                {{ item.variant.product_color.color_name }}{% if item.variant.size %} · {{ item.variant.size }}{% endif %}
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div class="text-right shrink-0">
+                                        <span class="font-medium text-[#14241B]">₹{{ item.total_price }}</span>
+                                        <span class="block text-[10px] text-[#8A8477]">Qty: {{ item.quantity }}</span>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+
+                        <!-- Price Calculations -->
+                        <div class="pt-4 border-t border-[#E8E4DC] space-y-2.5 text-xs">
+                            <div class="flex items-center justify-between text-[#5C564B]">
+                                <span>Bag Subtotal</span>
+                                <span class="font-medium text-[#14241B]">₹{{ subtotal }}</span>
+                            </div>
+
+                            {% if discount and discount > 0 %}
+                                <div class="flex items-center justify-between text-[#C2714F]">
+                                    <span>Studio Voucher ({{ coupon.code }})</span>
+                                    <span class="font-medium">- ₹{{ discount }}</span>
+                                </div>
+                            {% endif %}
+
+                            <div class="flex items-center justify-between text-[#5C564B]">
+                                <span>Artisan Shipping & Fragile Care</span>
+                                <span class="font-medium text-[#14241B]">
+                                    {% if shipping_charge == 0 %}COMPLIMENTARY{% else %}₹{{ shipping_charge }}{% endif %}
+                                </span>
+                            </div>
+
+                            <div class="pt-4 border-t border-[#E8E4DC] flex items-baseline justify-between">
+                                <div>
+                                    <span class="text-xs uppercase tracking-wider text-[#8A8477] block">Total Amount</span>
+                                    <span class="text-[10px] text-[#8A8477]">Inclusive of GST & insurance</span>
+                                </div>
+                                <span class="text-2xl font-normal font-editorial text-[#14241B]">₹{{ total }}</span>
+                            </div>
+                        </div>
+
+                        <!-- Authorize / Send Code CTA -->
+                        <button 
+                            type="button" 
+                            @click="initiateOrderOtp()"
+                            :disabled="isRequestingOtp"
+                            class="w-full py-4 rounded-full bg-[#14241B] hover:bg-[#C2714F] text-white text-xs uppercase tracking-widest font-medium text-center shadow-lg transition duration-200 active:scale-[0.98] flex items-center justify-center gap-2 group disabled:opacity-50"
+                        >
+                            <span x-show="!isRequestingOtp">Authorize & Place Order</span>
+                            <span x-show="isRequestingOtp" style="display: none;">Sending 6-Digit Email Code...</span>
+                            <span x-show="!isRequestingOtp" class="group-hover:translate-x-1 transition duration-200">&rarr;</span>
+                        </button>
+
+                        <!-- Trust Seal -->
+                        <div class="pt-2 flex items-center justify-center gap-2 text-[10px] text-[#8A8477]">
+                            <svg class="w-3.5 h-3.5 text-[#C2714F]" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M10 1.944A11.954 11.954 0 012.166 5C2.056 5.649 2 6.319 2 7c0 5.225 3.34 9.67 8 11.317C14.66 16.67 18 12.225 18 7c0-.682-.057-1.35-.166-2.001A11.954 11.954 0 0110 1.944zM11 14a1 1 0 11-2 0 1 1 0 012 0zm0-7a1 1 0 10-2 0v3a1 1 0 102 0V7z" clip-rule="evenodd"/>
+                            </svg>
+                            <span>Protected by 6-Digit Email OTP Confirmation</span>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+        </form>
+
+    </div>
+
+    <!-- ============================================== -->
+    <!-- 6-DIGIT EMAIL ORDER CONFIRMATION MODAL -->
+    <!-- ============================================== -->
+    <div 
+        x-cloak 
+        x-show="showOtpModal" 
+        class="fixed inset-0 z-50 overflow-y-auto bg-black/60 backdrop-blur-sm flex items-center justify-center p-4"
+        style="display: none;"
+    >
+        <div 
+            @click.away="showOtpModal = false"
+            class="bg-white rounded-3xl border border-[#E8E4DC] max-w-md w-full p-8 sm:p-10 shadow-2xl relative animate-fade-in"
+        >
+            <!-- Close Button -->
+            <button 
+                type="button" 
+                @click="showOtpModal = false"
+                class="absolute top-5 right-5 text-[#8A8477] hover:text-[#14241B] p-2 rounded-full hover:bg-[#FAF8F5] transition"
+            >
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
+
+            <!-- Icon -->
+            <div class="w-14 h-14 rounded-2xl bg-[#F5EFEB] border border-[#E8E4DC] flex items-center justify-center mx-auto mb-6 text-[#14241B]">
+                <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+            </div>
+
+            <!-- Header -->
+            <div class="text-center mb-6">
+                <span class="text-[10px] font-bold uppercase tracking-widest text-[#C2714F] block mb-1">
+                    Order Security Verification
+                </span>
+                <h3 class="text-2xl font-editorial text-[#14241B]">Confirm Studio Order</h3>
+                <p class="text-xs text-[#5C564B] mt-2 leading-relaxed">
+                    We've emailed a random 6-digit confirmation code to:
+                    <span class="font-bold text-[#14241B] block mt-0.5">{{ request.user.email }}</span>
+                </p>
+                <div class="mt-3 inline-block px-3 py-1 rounded-full bg-[#FAF8F5] border border-[#E8E4DC] text-xs font-semibold text-[#14241B]">
+                    Payable Amount: ₹{{ total }}
+                </div>
+            </div>
+
+            <!-- 6 Digit Input Boxes -->
+            <div class="flex items-center justify-center gap-2 sm:gap-2.5 mb-6">
+                <template x-for="(digit, index) in 6" :key="index">
+                    <input 
+                        type="text" 
+                        maxlength="1" 
+                        inputmode="numeric"
+                        pattern="[0-9]*"
+                        x-ref="'otp_digit_' + index"
+                        @input="handleOtpInput($event, index)"
+                        @keydown="handleOtpKeyDown($event, index)"
+                        @paste="handleOtpPaste($event)"
+                        class="w-11 h-13 text-center text-xl font-bold text-[#14241B] bg-[#FAF8F5] border border-[#D3CBBF] rounded-xl focus:bg-white focus:border-[#14241B] focus:ring-2 focus:ring-[#14241B]/20 outline-none transition font-mono"
+                    >
+                </template>
+            </div>
+
+            <!-- Submit Final Button -->
+            <button 
+                type="button" 
+                @click="submitOrderWithOtp()"
+                :disabled="orderOtp.length !== 6 || isSubmittingFinal"
+                class="w-full py-3.5 rounded-full bg-[#14241B] hover:bg-[#C2714F] text-white text-xs uppercase tracking-widest font-semibold transition active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed shadow-md flex items-center justify-center gap-2"
+            >
+                <span x-show="!isSubmittingFinal">Verify Code & Confirm Order &rarr;</span>
+                <span x-show="isSubmittingFinal" style="display: none;">Processing Order...</span>
+            </button>
+
+            <!-- Resend / Countdown -->
+            <div class="mt-6 pt-4 border-t border-[#E8E4DC] text-center text-xs text-[#8A8477]">
+                <span>Didn't receive the email? </span>
+                <button 
+                    type="button" 
+                    @click="initiateOrderOtp(true)" 
+                    :disabled="timer > 0 || isRequestingOtp"
+                    class="font-bold text-[#C2714F] hover:underline disabled:text-[#8A8477] disabled:no-underline transition ml-1"
+                >
+                    <span>Resend Code</span>
+                    <span x-show="timer > 0" class="font-mono">
+                        (<span x-text="formatTimer()"></span>)
+                    </span>
+                </button>
+            </div>
+
+        </div>
+    </div>
+
+</div>
+
+<!-- Alpine Checkout Controller -->
+<script>
+function checkoutApp() {
+    return {
+        selectedAddress: '{{ addresses.first.id|default:"new" }}',
+        showNewForm: {% if addresses.exists %}false{% else %}true{% endif %},
+        showOtpModal: false,
+        otpDigits: ['', '', '', '', '', ''],
+        orderOtp: '',
+        timer: 45,
+        timerInterval: null,
+        isRequestingOtp: false,
+        isSubmittingFinal: false,
+
+        toggleAddressMode() {
+            this.showNewForm = !this.showNewForm;
+            if (this.showNewForm) {
+                this.selectedAddress = 'new';
+            } else {
+                this.selectedAddress = '{{ addresses.first.id }}';
+            }
+        },
+
+        validateAddress() {
+            if (this.selectedAddress === 'new') {
+                const name = document.getElementById('new_full_name')?.value.trim();
+                const phone = document.getElementById('new_phone')?.value.trim();
+                const line1 = document.getElementById('new_address_line1')?.value.trim();
+                const city = document.getElementById('new_city')?.value.trim();
+                const state = document.getElementById('new_state')?.value.trim();
+                const pin = document.getElementById('new_pincode')?.value.trim();
+
+                if (!name || !phone || !line1 || !city || !state || !pin) {
+                    window.dispatchEvent(new CustomEvent('toast', {
+                        detail: { message: 'Please fill in all mandatory delivery address fields.', type: 'warning' }
+                    }));
+                    return false;
+                }
+            }
+            return true;
+        },
+
+        async initiateOrderOtp(isResend = false) {
+            if (!this.validateAddress()) return;
+            if (isResend && this.timer > 0) return;
+
+            this.isRequestingOtp = true;
+
+            try {
+                const res = await fetch("{% url 'orders:send_order_otp' %}", {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': getCookie('csrftoken'),
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                });
+
+                const data = await res.json();
+                if (data.status === 'success') {
+                    window.dispatchEvent(new CustomEvent('toast', {
+                        detail: { message: data.message, type: 'success' }
+                    }));
+                    this.showOtpModal = true;
+                    this.startTimer();
+                    this.$nextTick(() => {
+                        if (this.$refs['otp_digit_0']) this.$refs['otp_digit_0'].focus();
+                    });
+                } else {
+                    window.dispatchEvent(new CustomEvent('toast', {
+                        detail: { message: data.message, type: 'warning' }
+                    }));
+                }
+            } catch (err) {
+                console.error("Error sending order OTP:", err);
+                window.dispatchEvent(new CustomEvent('toast', {
+                    detail: { message: 'Failed to dispatch security code. Please retry.', type: 'error' }
+                }));
+            } finally {
+                this.isRequestingOtp = false;
+            }
+        },
+
+        startTimer() {
+            this.timer = 45;
+            if (this.timerInterval) clearInterval(this.timerInterval);
+            this.timerInterval = setInterval(() => {
+                if (this.timer > 0) {
+                    this.timer--;
+                } else {
+                    clearInterval(this.timerInterval);
+                }
+            }, 1000);
+        },
+
+        formatTimer() {
+            const m = Math.floor(this.timer / 60);
+            const s = this.timer % 60;
+            return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+        },
+
+        handleOtpInput(e, index) {
+            const val = e.target.value.replace(/[^0-9]/g, '');
+            e.target.value = val;
+            this.otpDigits[index] = val;
+            this.orderOtp = this.otpDigits.join('');
+
+            if (val && index < 5) {
+                const next = this.$refs['otp_digit_' + (index + 1)];
+                if (next) next.focus();
+            }
+        },
+
+        handleOtpKeyDown(e, index) {
+            if (e.key === 'Backspace' && !e.target.value && index > 0) {
+                const prev = this.$refs['otp_digit_' + (index - 1)];
+                if (prev) {
+                    prev.focus();
+                    prev.value = '';
+                    this.otpDigits[index - 1] = '';
+                    this.orderOtp = this.otpDigits.join('');
+                }
+            }
+        },
+
+        handleOtpPaste(e) {
+            e.preventDefault();
+            const text = (e.clipboardData || window.clipboardData).getData('text').replace(/[^0-9]/g, '');
+            if (!text) return;
+
+            const chars = text.slice(0, 6).split('');
+            chars.forEach((ch, idx) => {
+                if (idx < 6) {
+                    this.otpDigits[idx] = ch;
+                    const input = this.$refs['otp_digit_' + idx];
+                    if (input) input.value = ch;
+                }
+            });
+            this.orderOtp = this.otpDigits.join('');
+            const lastIdx = Math.min(chars.length, 5);
+            if (this.$refs['otp_digit_' + lastIdx]) {
+                this.$refs['otp_digit_' + lastIdx].focus();
+            }
+        },
+
+        submitOrderWithOtp() {
+            if (this.orderOtp.length !== 6) return;
+            this.isSubmittingFinal = true;
+            document.getElementById('checkoutForm').submit();
+        },
+
+        handleFormSubmit(e) {
+            if (!this.orderOtp || this.orderOtp.length !== 6) {
+                e.preventDefault();
+                this.initiateOrderOtp();
+            }
+        }
+    };
+}
+</script>
+{% endblock %}

@@ -1,0 +1,104 @@
+{% extends 'base.html' %}
+
+{% block title %}The Studio Story | AvailSmart Curations{% endblock %}
+
+{% block content %}
+<div class="space-y-16 pb-20">
+    
+    <!-- Hero Banner (Editorial Kinfolk Style) -->
+    <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 sm:pt-12 text-center">
+        <span class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#F5EFEB] border border-alabaster-border text-forest-dark text-[11px] font-semibold tracking-wider uppercase mb-4">
+            ✦ Studio Manifesto
+        </span>
+        <h1 class="font-editorial text-4xl sm:text-5xl lg:text-6xl font-bold text-forest-dark tracking-tight max-w-3xl mx-auto leading-tight">
+            Shaped by Hand. Made for Slow Mornings & Quiet Living.
+        </h1>
+        <p class="text-sm sm:text-base text-textMuted max-w-2xl mx-auto mt-4 leading-relaxed font-normal">
+            AvailSmart was founded on a simple dissatisfaction with fast-disposable consumer plastic. We believe everyday objects should carry permanence, texture, and quiet calm.
+        </p>
+    </section>
+
+    <!-- Three Visual Pillars of Craft -->
+    <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            
+            <div class="bg-white p-8 rounded-4xl border border-alabaster-border card-crookeries flex flex-col justify-between">
+                <div>
+                    <span class="font-editorial text-4xl font-bold text-clay block mb-3">01</span>
+                    <h3 class="font-editorial text-xl font-bold text-forest-dark mb-2">High-Fire Kiln Vitrification</h3>
+                    <p class="text-xs text-textMuted leading-relaxed">
+                        Our tableware is fired at 1,220°C in small-batch kilns. This fuses the clay into a non-porous, stone-hard ceramic that never absorbs liquids or stains.
+                    </p>
+                </div>
+                <div class="mt-8 pt-4 border-t border-alabaster-border text-[11px] font-semibold text-forest flex items-center gap-1.5">
+                    <span>100% Dishwasher & Microwave Safe</span>
+                </div>
+            </div>
+
+            <div class="bg-white p-8 rounded-4xl border border-alabaster-border card-crookeries flex flex-col justify-between">
+                <div>
+                    <span class="font-editorial text-4xl font-bold text-clay block mb-3">02</span>
+                    <h3 class="font-editorial text-xl font-bold text-forest-dark mb-2">Mineral Sourced Glazes</h3>
+                    <p class="text-xs text-textMuted leading-relaxed">
+                        We avoid synthetic chemical coatings. Every shade—from deep slate forest to creamy warm oat—is derived from natural feldspar and iron mineral glazes.
+                    </p>
+                </div>
+                <div class="mt-8 pt-4 border-t border-alabaster-border text-[11px] font-semibold text-forest flex items-center gap-1.5">
+                    <span>Zero Lead • Zero Cadmium</span>
+                </div>
+            </div>
+
+            <div class="bg-white p-8 rounded-4xl border border-alabaster-border card-crookeries flex flex-col justify-between">
+                <div>
+                    <span class="font-editorial text-4xl font-bold text-clay block mb-3">03</span>
+                    <h3 class="font-editorial text-xl font-bold text-forest-dark mb-2">Compostable Protective Packaging</h3>
+                    <p class="text-xs text-textMuted leading-relaxed">
+                        No plastic bubble wrap. Every ceramic piece is nestled in recycled honeycomb paper cushioning and unbleached Kraft boxes that break down organically.
+                    </p>
+                </div>
+                <div class="mt-8 pt-4 border-t border-alabaster-border text-[11px] font-semibold text-forest flex items-center gap-1.5">
+                    <span>100% Recyclable • Plastic-Free</span>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- Studio Narrative Split Block -->
+    <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="bg-[#F5EFEB] rounded-4xl border border-alabaster-border p-8 sm:p-14 grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
+            <div class="lg:col-span-6 space-y-5">
+                <span class="text-[10px] font-bold uppercase tracking-widest text-clay block">Our Philosophy</span>
+                <h2 class="font-editorial text-3xl sm:text-4xl font-bold text-forest-dark leading-tight">
+                    An antidote to the ephemeral.
+                </h2>
+                <p class="text-xs sm:text-sm text-textMuted leading-relaxed">
+                    When you hold an AvailSmart mug or pour from our ceramic carafes, you feel the weight of the maker’s hand. We work directly with master potters in Khurja, Jaipur, and regional artisan cooperatives across India.
+                </p>
+                <p class="text-xs sm:text-sm text-textMuted leading-relaxed">
+                    By removing intermediate middlemen, we ensure fair livable wages for artisans while offering museum-grade homeware directly to conscious homes.
+                </p>
+                <div class="pt-2">
+                    <a href="/catalog/" class="px-7 py-3 rounded-full bg-forest-dark hover:bg-forest text-white text-xs font-semibold tracking-wider transition active:scale-95 inline-block">
+                        Explore Studio Collection &rarr;
+                    </a>
+                </div>
+            </div>
+
+            <div class="lg:col-span-6 flex justify-center">
+                <div class="relative w-full max-w-md bg-white p-6 rounded-3xl border border-alabaster-border shadow-card text-center">
+                    <div class="w-16 h-16 rounded-full bg-[#FAF8F5] border border-alabaster-border flex items-center justify-center mx-auto text-3xl mb-4">
+                        🏺
+                    </div>
+                    <h4 class="font-editorial text-lg font-bold text-forest-dark">The Artisan Pledge</h4>
+                    <p class="text-xs text-textMuted mt-2 leading-relaxed">
+                        If any ceramic piece ever breaks through normal domestic use during your first year, we replace it gladly through our Studio Lifetime Guarantee.
+                    </p>
+                    <span class="inline-block mt-4 text-[10px] uppercase font-bold tracking-widest text-clay">Est. 2026 • AvailSmart India</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+</div>
+{% endblock %}
