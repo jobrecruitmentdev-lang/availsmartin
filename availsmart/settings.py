@@ -20,7 +20,9 @@ SECRET_KEY = os.getenv('SECRET_KEY', 'insecure-default-key-change-me')
 
 DEBUG = os.getenv('DEBUG', 'True').lower() in ('true', '1', 't')
 
-ALLOWED_HOSTS = [host.strip() for host in os.getenv('ALLOWED_HOSTS', '127.0.0.1,localhost').split(',') if host.strip()]
+ALLOWED_HOSTS = [host.strip() for host in os.getenv('ALLOWED_HOSTS', '127.0.0.1,localhost,availsmart.in,www.availsmart.in').split(',') if host.strip()]
+
+CSRF_TRUSTED_ORIGINS = [origin.strip() for origin in os.getenv('CSRF_TRUSTED_ORIGINS', 'https://availsmart.in,https://www.availsmart.in,http://127.0.0.1,http://localhost').split(',') if origin.strip()]
 
 # Application definition
 INSTALLED_APPS = [
