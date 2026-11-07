@@ -97,7 +97,7 @@ class UserLoginForm(forms.Form):
 class AdminLoginForm(forms.Form):
     email = forms.EmailField(
         widget=forms.EmailInput(attrs={
-            'placeholder': 'admin@availsmart.com',
+            'placeholder': 'staff@avails.com',
             'class': 'w-full px-4 py-3 bg-white/90 border border-emerald-dark/30 rounded-full text-textMain placeholder-textMuted/60 focus:outline-none focus:ring-2 focus:ring-emerald focus:border-transparent text-sm transition',
             'autocomplete': 'email'
         })
