@@ -75,36 +75,33 @@
     <div class="grid grid-cols-1 lg:grid-cols-4 gap-8 items-start">
         
         <!-- ============================================== -->
-        <!-- DESKTOP FILTER SIDEBAR -->
+        <!-- DESKTOP FILTER SIDEBAR (Spacious & Full-Length) -->
         <!-- ============================================== -->
-        <aside class="hidden lg:block lg:col-span-1 space-y-4 sticky top-24">
+        <aside class="hidden lg:block lg:col-span-1 bg-white rounded-3xl border border-alabaster-border p-6 shadow-soft space-y-7">
             
-            <!-- Primary Filter Controls Card -->
-            <div class="bg-white rounded-3xl border border-alabaster-border p-5 shadow-soft space-y-5 max-h-[calc(100vh-17rem)] overflow-y-auto no-scrollbar">
-                
-                <div class="flex items-center justify-between border-b border-alabaster-border pb-3">
-                    <h3 class="text-sm font-black text-forest-dark uppercase tracking-wider flex items-center gap-2">
-                        <svg class="w-4 h-4 text-emerald" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"/></svg>
-                        <span>Filters</span>
-                    </h3>
-                    <button 
-                        type="button" 
-                        @click="clearAllFilters()" 
-                        class="text-[11px] font-bold text-clay hover:underline"
-                    >
-                        Clear All
-                    </button>
-                </div>
+            <div class="flex items-center justify-between border-b border-alabaster-border pb-4">
+                <h3 class="text-sm font-black text-forest-dark uppercase tracking-wider flex items-center gap-2">
+                    <svg class="w-4 h-4 text-emerald" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"/></svg>
+                    <span>Filters</span>
+                </h3>
+                <button 
+                    type="button" 
+                    @click="clearAllFilters()" 
+                    class="text-[11px] font-bold text-clay hover:underline"
+                >
+                    Clear All
+                </button>
+            </div>
 
-                <!-- Categories Accordion -->
-                <div>
-                    <h4 class="text-xs font-bold text-textMain uppercase tracking-wider mb-2.5">Category</h4>
-                    <div class="space-y-1 text-xs max-h-48 overflow-y-auto pr-1 no-scrollbar">
+            <!-- Categories Accordion -->
+            <div>
+                <h4 class="text-xs font-bold text-textMain uppercase tracking-wider mb-3">Categories</h4>
+                <div class="space-y-1.5 text-xs">
                     <a 
                         href="/catalog/" 
                         @click.prevent="setCategory('')"
-                        class="block px-2.5 py-1.5 rounded-xl font-medium transition"
-                        :class="!category ? 'bg-mint-soft text-emerald font-bold' : 'text-textMuted hover:bg-mint-tint hover:text-emerald'"
+                        class="block px-3 py-2 rounded-xl font-medium transition"
+                        :class="!category ? 'bg-mint-soft text-emerald font-bold' : 'text-textMuted hover:bg-[#FAF8F5] hover:text-emerald'"
                     >
                         All Categories
                     </a>
@@ -349,55 +346,7 @@
                 </label>
             </div>
 
-        </div>
-
-        <!-- Luxury Studio Assurance Card (Permanently Accompanies Product Grid) -->
-        <div class="bg-gradient-to-br from-[#14241B] to-[#0A1610] rounded-3xl p-5 text-white shadow-soft border border-forest-light/20 space-y-3.5">
-            <div class="flex items-center gap-2.5 pb-2.5 border-b border-white/10">
-                <div class="w-7 h-7 rounded-full bg-white/10 flex items-center justify-center text-clay shrink-0">
-                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
-                </div>
-                <div>
-                    <h5 class="text-[11px] font-bold tracking-wider text-white uppercase font-sans">The Studio Promise</h5>
-                    <p class="text-[9px] text-white/60">Curated living assurances</p>
-                </div>
-            </div>
-
-            <div class="space-y-2.5 text-xs">
-                <div class="flex items-start gap-2">
-                    <svg class="w-3.5 h-3.5 text-emerald-tint shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"/></svg>
-                    <div>
-                        <span class="font-semibold text-white block text-[11px]">Complimentary Delivery</span>
-                        <span class="text-[10px] text-white/70 leading-relaxed block">Fully insured white-glove shipping on orders above ₹499.</span>
-                    </div>
-                </div>
-
-                <div class="flex items-start gap-2">
-                    <svg class="w-3.5 h-3.5 text-emerald-tint shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
-                    <div>
-                        <span class="font-semibold text-white block text-[11px]">7-Day In-Home Trial</span>
-                        <span class="text-[10px] text-white/70 leading-relaxed block">Live with your pieces. Doorstep exchanges & returns.</span>
-                    </div>
-                </div>
-
-                <div class="flex items-start gap-2">
-                    <svg class="w-3.5 h-3.5 text-emerald-tint shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4m-14 0v7a2 2 0 002 2h10a2 2 0 002-2v-7"/></svg>
-                    <div>
-                        <span class="font-semibold text-white block text-[11px]">Artisan Craftsmanship</span>
-                        <span class="text-[10px] text-white/70 leading-relaxed block">Handcrafted, lead-free ceramics crafted for daily ritual.</span>
-                    </div>
-                </div>
-            </div>
-
-            <div class="pt-2 border-t border-white/10">
-                <a href="{% url 'catalog:contact' %}" class="flex items-center justify-between text-[11px] font-semibold text-clay hover:text-white transition">
-                    <span>Need styling guidance?</span>
-                    <span class="text-xs">&rarr;</span>
-                </a>
-            </div>
-        </div>
-
-    </aside>
+        </aside>
 
         <!-- ============================================== -->
         <!-- PRODUCT RESULTS GRID AREA -->
