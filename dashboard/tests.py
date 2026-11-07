@@ -42,7 +42,7 @@ class AdminPanelCrudTests(TestCase):
         customer_client = Client()
         customer_client.login(email='customer@example.com', password='CustomerPassword@123')
         response = customer_client.get(reverse('dashboard:index'))
-        self.assertRedirects(response, '/avail-admin/login/?next=/avail-admin/')
+        self.assertRedirects(response, '/benzo/login/?next=/benzo/')
 
     def test_category_crud(self):
         # 1. Add Category

@@ -637,7 +637,7 @@ def robots_txt_view(request):
     """
     lines = [
         "User-agent: *",
-        "Disallow: /avail-admin/",
+        "Disallow: /benzo/",
         "Disallow: /django-admin/",
         "Disallow: /accounts/",
         "Disallow: /cart/",

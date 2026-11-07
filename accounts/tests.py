@@ -99,20 +99,20 @@ class AuthenticationAndLayoutTests(TestCase):
         self.assertContains(login_response, 'Welcome back')
 
     def test_custom_admin_access_control(self):
-        # 1. Unauthenticated request to /avail-admin/ redirects to /avail-admin/login/
-        response = self.client.get('/avail-admin/')
-        self.assertRedirects(response, '/avail-admin/login/?next=/avail-admin/')
+        # 1. Unauthenticated request to /benzo/ redirects to /benzo/login/
+        response = self.client.get('/benzo/')
+        self.assertRedirects(response, '/benzo/login/?next=/benzo/')
 
         # 2. Customer user attempting admin login is rejected
-        non_staff_login = self.client.post('/avail-admin/login/', {
+        non_staff_login = self.client.post('/benzo/login/', {
             'email': 'testuser@example.com',
             'password': 'Password@123'
         })
         self.assertEqual(non_staff_login.status_code, 200)
         self.assertContains(non_staff_login, 'Access Denied')
 
-        # 3. Staff user successfully logs in and views /avail-admin/
-        admin_login = self.client.post('/avail-admin/login/', {
+        # 3. Staff user successfully logs in and views /benzo/
+        admin_login = self.client.post('/benzo/login/', {
             'email': 'adminuser@availsmart.com',
             'password': 'AdminPassword@123'
         }, follow=True)

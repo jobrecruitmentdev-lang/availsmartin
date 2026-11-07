@@ -42,7 +42,9 @@
                     <li><a href="{% url 'orders:returns_policy' %}" class="hover:text-white transition">7-Day Home Trial & Returns</a></li>
                     <li><a href="{% url 'catalog:contact' %}" class="hover:text-white transition">Contact Concierge</a></li>
                     <li><a href="{% url 'catalog:faqs' %}" class="hover:text-white transition">Studio Care FAQs</a></li>
-                    <li><a href="/avail-admin/" class="text-clay hover:underline transition text-xs font-semibold">Staff Admin Desk</a></li>
+                    {% if request.user.is_staff or request.user.is_superuser %}
+                        <li><a href="{% url 'dashboard:index' %}" class="text-clay hover:underline transition text-xs font-semibold">Staff Admin Desk</a></li>
+                    {% endif %}
                 </ul>
             </div>
 

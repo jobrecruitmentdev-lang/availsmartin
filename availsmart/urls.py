@@ -1,10 +1,9 @@
 """
 URL configuration for AvailSmart project.
-Routes user panel at '/' and admin panel at '/avail-admin/' (with '/admin' and '/admin/' aliases).
+Routes user panel at '/' and secret admin panel at '/benzo/'.
 """
 from django.contrib import admin
 from django.urls import path, include
-from django.views.generic import RedirectView
 from django.conf import settings
 from django.conf.urls.static import static
 from orders import views as order_views
@@ -15,13 +14,8 @@ urlpatterns = [
     path('robots.txt', catalog_views.robots_txt_view, name='robots_txt'),
     path('sitemap.xml', catalog_views.sitemap_xml_view, name='sitemap_xml'),
 
-    # Admin Panel Aliases (/admin and /admin/ redirect to custom dashboard)
-    path('admin', RedirectView.as_view(url='/avail-admin/', permanent=False)),
-    path('admin/', RedirectView.as_view(url='/avail-admin/', permanent=False)),
-    path('admin/<path:subpath>', RedirectView.as_view(url='/avail-admin/%(subpath)s', permanent=False)),
-
-    # Custom AvailSmart Admin Panel (separate from default django admin)
-    path('avail-admin/', include('dashboard.urls', namespace='dashboard')),
+    # Secret Custom AvailSmart Admin Panel (Cloaked at /benzo/)
+    path('benzo/', include('dashboard.urls', namespace='dashboard')),
     
     # Internal Django admin (backup/system)
     path('django-admin/', admin.site.urls),

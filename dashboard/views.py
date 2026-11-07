@@ -59,7 +59,7 @@ def admin_login_view(request):
                     session.pop('admin_lockout_until', None)
                     messages.success(request, f"Welcome to the AvailSmart Admin Portal, {user.name}!")
                     next_url = request.GET.get('next')
-                    return redirect(next_url if next_url and (next_url.startswith('/avail-admin') or next_url.startswith('/admin')) else 'dashboard:index')
+                    return redirect(next_url if next_url and (next_url.startswith('/benzo') or next_url.startswith('/admin')) else 'dashboard:index')
             else:
                 attempts = session.get('admin_attempts', 0) + 1
                 session['admin_attempts'] = attempts
@@ -84,7 +84,7 @@ def admin_logout_view(request):
 # ==========================================
 # DASHBOARD OVERVIEW & ANALYTICS (CHART.JS)
 # ==========================================
-@user_passes_test(is_staff_or_superuser, login_url='/avail-admin/login/')
+@user_passes_test(is_staff_or_superuser, login_url='/benzo/login/')
 def admin_dashboard(request):
     total_products = Product.objects.count()
     total_orders = Order.objects.count()
@@ -137,7 +137,7 @@ def admin_dashboard(request):
 # ==========================================
 # CATEGORIES CRUD
 # ==========================================
-@user_passes_test(is_staff_or_superuser, login_url='/avail-admin/login/')
+@user_passes_test(is_staff_or_superuser, login_url='/benzo/login/')
 def category_list(request):
     query = request.GET.get('q', '').strip()
     level = request.GET.get('level', 'all').strip()
@@ -190,7 +190,7 @@ def category_list(request):
     })
 
 
-@user_passes_test(is_staff_or_superuser, login_url='/avail-admin/login/')
+@user_passes_test(is_staff_or_superuser, login_url='/benzo/login/')
 def category_add(request):
     if request.method == 'POST':
         form = CategoryForm(request.POST, request.FILES)
@@ -208,7 +208,7 @@ def category_add(request):
     })
 
 
-@user_passes_test(is_staff_or_superuser, login_url='/avail-admin/login/')
+@user_passes_test(is_staff_or_superuser, login_url='/benzo/login/')
 def category_edit(request, pk):
     category = get_object_or_404(Category, pk=pk)
     if request.method == 'POST':
@@ -228,7 +228,7 @@ def category_edit(request, pk):
     })
 
 
-@user_passes_test(is_staff_or_superuser, login_url='/avail-admin/login/')
+@user_passes_test(is_staff_or_superuser, login_url='/benzo/login/')
 def category_delete(request, pk):
     category = get_object_or_404(Category, pk=pk)
     if request.method == 'POST':
@@ -241,7 +241,7 @@ def category_delete(request, pk):
 # ==========================================
 # BRANDS CRUD
 # ==========================================
-@user_passes_test(is_staff_or_superuser, login_url='/avail-admin/login/')
+@user_passes_test(is_staff_or_superuser, login_url='/benzo/login/')
 def brand_list(request):
     query = request.GET.get('q', '').strip()
     brands = Brand.objects.annotate(product_count=Count('products')).order_by('name')
@@ -259,7 +259,7 @@ def brand_list(request):
     })
 
 
-@user_passes_test(is_staff_or_superuser, login_url='/avail-admin/login/')
+@user_passes_test(is_staff_or_superuser, login_url='/benzo/login/')
 def brand_add(request):
     if request.method == 'POST':
         form = BrandForm(request.POST, request.FILES)
@@ -277,7 +277,7 @@ def brand_add(request):
     })
 
 
-@user_passes_test(is_staff_or_superuser, login_url='/avail-admin/login/')
+@user_passes_test(is_staff_or_superuser, login_url='/benzo/login/')
 def brand_edit(request, pk):
     brand = get_object_or_404(Brand, pk=pk)
     if request.method == 'POST':
@@ -297,7 +297,7 @@ def brand_edit(request, pk):
     })
 
 
-@user_passes_test(is_staff_or_superuser, login_url='/avail-admin/login/')
+@user_passes_test(is_staff_or_superuser, login_url='/benzo/login/')
 def brand_delete(request, pk):
     brand = get_object_or_404(Brand, pk=pk)
     if request.method == 'POST':
@@ -310,7 +310,7 @@ def brand_delete(request, pk):
 # ==========================================
 # PRODUCTS CRUD (DYNAMIC COLORS, IMAGES & VARIANTS)
 # ==========================================
-@user_passes_test(is_staff_or_superuser, login_url='/avail-admin/login/')
+@user_passes_test(is_staff_or_superuser, login_url='/benzo/login/')
 def product_list(request):
     query = request.GET.get('q', '').strip()
     category_id = request.GET.get('category')
@@ -354,7 +354,7 @@ def product_list(request):
     })
 
 
-@user_passes_test(is_staff_or_superuser, login_url='/avail-admin/login/')
+@user_passes_test(is_staff_or_superuser, login_url='/benzo/login/')
 def product_add(request):
     if request.method == 'POST':
         form = ProductBaseForm(request.POST)
@@ -448,7 +448,7 @@ def product_add(request):
     })
 
 
-@user_passes_test(is_staff_or_superuser, login_url='/avail-admin/login/')
+@user_passes_test(is_staff_or_superuser, login_url='/benzo/login/')
 def product_edit(request, pk):
     product = get_object_or_404(
         Product.objects.prefetch_related('colors__images', 'colors__variants', 'specifications'),
@@ -579,7 +579,7 @@ def product_edit(request, pk):
     })
 
 
-@user_passes_test(is_staff_or_superuser, login_url='/avail-admin/login/')
+@user_passes_test(is_staff_or_superuser, login_url='/benzo/login/')
 def product_delete(request, pk):
     product = get_object_or_404(Product, pk=pk)
     if request.method == 'POST':
@@ -589,7 +589,7 @@ def product_delete(request, pk):
     return redirect('dashboard:product_list')
 
 
-@user_passes_test(is_staff_or_superuser, login_url='/avail-admin/login/')
+@user_passes_test(is_staff_or_superuser, login_url='/benzo/login/')
 def product_bulk_action(request):
     if request.method == 'POST':
         action = request.POST.get('bulk_action')
@@ -620,7 +620,7 @@ def product_bulk_action(request):
 # ==========================================
 # ORDERS MANAGEMENT
 # ==========================================
-@user_passes_test(is_staff_or_superuser, login_url='/avail-admin/login/')
+@user_passes_test(is_staff_or_superuser, login_url='/benzo/login/')
 def order_list(request):
     query = request.GET.get('q', '').strip()
     status_filter = request.GET.get('status')
@@ -651,7 +651,7 @@ def order_list(request):
     })
 
 
-@user_passes_test(is_staff_or_superuser, login_url='/avail-admin/login/')
+@user_passes_test(is_staff_or_superuser, login_url='/benzo/login/')
 def order_detail(request, pk):
     order = get_object_or_404(
         Order.objects.select_related('user').prefetch_related('items__variant', 'payments'),
@@ -665,7 +665,7 @@ def order_detail(request, pk):
     })
 
 
-@user_passes_test(is_staff_or_superuser, login_url='/avail-admin/login/')
+@user_passes_test(is_staff_or_superuser, login_url='/benzo/login/')
 def order_change_status(request, pk):
     order = get_object_or_404(Order, pk=pk)
     if request.method == 'POST':
@@ -692,7 +692,7 @@ def order_change_status(request, pk):
     return redirect('dashboard:order_detail', pk=pk)
 
 
-@user_passes_test(is_staff_or_superuser, login_url='/avail-admin/login/')
+@user_passes_test(is_staff_or_superuser, login_url='/benzo/login/')
 def order_invoice(request, pk):
     order = get_object_or_404(
         Order.objects.select_related('user').prefetch_related('items'),
@@ -704,7 +704,7 @@ def order_invoice(request, pk):
 # ==========================================
 # USERS / CUSTOMERS MANAGEMENT
 # ==========================================
-@user_passes_test(is_staff_or_superuser, login_url='/avail-admin/login/')
+@user_passes_test(is_staff_or_superuser, login_url='/benzo/login/')
 def user_list(request):
     query = request.GET.get('q', '').strip()
     status_filter = request.GET.get('status')
@@ -733,7 +733,7 @@ def user_list(request):
     })
 
 
-@user_passes_test(is_staff_or_superuser, login_url='/avail-admin/login/')
+@user_passes_test(is_staff_or_superuser, login_url='/benzo/login/')
 def user_detail(request, pk):
     customer = get_object_or_404(User.objects.prefetch_related('addresses', 'orders'), pk=pk)
     total_spent = customer.orders.filter(payment_status='completed').aggregate(sum=Sum('total'))['sum'] or 0
@@ -745,7 +745,7 @@ def user_detail(request, pk):
     })
 
 
-@user_passes_test(is_staff_or_superuser, login_url='/avail-admin/login/')
+@user_passes_test(is_staff_or_superuser, login_url='/benzo/login/')
 def user_toggle_status(request, pk):
     customer = get_object_or_404(User, pk=pk)
     if request.method == 'POST':
@@ -759,7 +759,7 @@ def user_toggle_status(request, pk):
 # ==========================================
 # REVIEWS MANAGEMENT
 # ==========================================
-@user_passes_test(is_staff_or_superuser, login_url='/avail-admin/login/')
+@user_passes_test(is_staff_or_superuser, login_url='/benzo/login/')
 def review_list(request):
     status_filter = request.GET.get('status')
     reviews = Review.objects.select_related('user', 'product').order_by('-created_at')
@@ -779,7 +779,7 @@ def review_list(request):
     })
 
 
-@user_passes_test(is_staff_or_superuser, login_url='/avail-admin/login/')
+@user_passes_test(is_staff_or_superuser, login_url='/benzo/login/')
 def review_approve(request, pk):
     review = get_object_or_404(Review, pk=pk)
     review.is_approved = True
@@ -788,7 +788,7 @@ def review_approve(request, pk):
     return redirect('dashboard:review_list')
 
 
-@user_passes_test(is_staff_or_superuser, login_url='/avail-admin/login/')
+@user_passes_test(is_staff_or_superuser, login_url='/benzo/login/')
 def review_delete(request, pk):
     review = get_object_or_404(Review, pk=pk)
     product = review.product
@@ -801,7 +801,7 @@ def review_delete(request, pk):
 # ==========================================
 # COUPONS CRUD
 # ==========================================
-@user_passes_test(is_staff_or_superuser, login_url='/avail-admin/login/')
+@user_passes_test(is_staff_or_superuser, login_url='/benzo/login/')
 def coupon_list(request):
     coupons = Coupon.objects.order_by('-created_at')
     paginator = Paginator(coupons, 15)
@@ -813,7 +813,7 @@ def coupon_list(request):
     })
 
 
-@user_passes_test(is_staff_or_superuser, login_url='/avail-admin/login/')
+@user_passes_test(is_staff_or_superuser, login_url='/benzo/login/')
 def coupon_add(request):
     if request.method == 'POST':
         form = CouponForm(request.POST)
@@ -831,7 +831,7 @@ def coupon_add(request):
     })
 
 
-@user_passes_test(is_staff_or_superuser, login_url='/avail-admin/login/')
+@user_passes_test(is_staff_or_superuser, login_url='/benzo/login/')
 def coupon_edit(request, pk):
     coupon = get_object_or_404(Coupon, pk=pk)
     if request.method == 'POST':
@@ -851,7 +851,7 @@ def coupon_edit(request, pk):
     })
 
 
-@user_passes_test(is_staff_or_superuser, login_url='/avail-admin/login/')
+@user_passes_test(is_staff_or_superuser, login_url='/benzo/login/')
 def coupon_delete(request, pk):
     coupon = get_object_or_404(Coupon, pk=pk)
     code = coupon.code
@@ -863,7 +863,7 @@ def coupon_delete(request, pk):
 # ==========================================
 # HOMEPAGE BANNERS CRUD
 # ==========================================
-@user_passes_test(is_staff_or_superuser, login_url='/avail-admin/login/')
+@user_passes_test(is_staff_or_superuser, login_url='/benzo/login/')
 def banner_list(request):
     banners = Banner.objects.order_by('sort_order', '-created_at')
     return render(request, 'dashboard/banners/list.html', {
@@ -872,7 +872,7 @@ def banner_list(request):
     })
 
 
-@user_passes_test(is_staff_or_superuser, login_url='/avail-admin/login/')
+@user_passes_test(is_staff_or_superuser, login_url='/benzo/login/')
 def banner_add(request):
     if request.method == 'POST':
         form = BannerForm(request.POST, request.FILES)
@@ -890,7 +890,7 @@ def banner_add(request):
     })
 
 
-@user_passes_test(is_staff_or_superuser, login_url='/avail-admin/login/')
+@user_passes_test(is_staff_or_superuser, login_url='/benzo/login/')
 def banner_edit(request, pk):
     banner = get_object_or_404(Banner, pk=pk)
     if request.method == 'POST':
@@ -910,7 +910,7 @@ def banner_edit(request, pk):
     })
 
 
-@user_passes_test(is_staff_or_superuser, login_url='/avail-admin/login/')
+@user_passes_test(is_staff_or_superuser, login_url='/benzo/login/')
 def banner_delete(request, pk):
     banner = get_object_or_404(Banner, pk=pk)
     title = banner.title
