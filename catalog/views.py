@@ -201,8 +201,6 @@ def catalog_view(request, slug=None):
     size_qs = ProductVariant.objects.filter(is_active=True, product__is_active=True).exclude(size='')
     if cat_ids:
         available_sizes = size_qs.filter(product__category_id__in=cat_ids).values_list('size', flat=True).distinct().order_by('size')
-        if not available_sizes.exists():
-            available_sizes = size_qs.values_list('size', flat=True).distinct().order_by('size')
     else:
         available_sizes = size_qs.values_list('size', flat=True).distinct().order_by('size')
 
