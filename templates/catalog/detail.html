@@ -205,6 +205,63 @@
                 </p>
             {% endif %}
 
+            <!-- ============================================== -->
+            <!-- OLFACTORY FRAGRANCE PYRAMID & PERFORMANCE CARD -->
+            <!-- ============================================== -->
+            <div class="p-5 rounded-3xl bg-[#FAF8F5] border border-alabaster-border space-y-4">
+                <div class="flex items-center justify-between border-b border-alabaster-border pb-2.5">
+                    <span class="text-[10px] font-bold uppercase tracking-widest text-clay flex items-center gap-1.5">
+                        <span>✦</span>
+                        <span>Olfactory Fragrance Pyramid</span>
+                    </span>
+                    <span class="px-2 py-0.5 rounded-full bg-forest text-white text-[9px] font-bold uppercase tracking-wider">
+                        100% Pure Oil
+                    </span>
+                </div>
+
+                <!-- Notes Pyramid Grid -->
+                <div class="space-y-2.5 text-xs">
+                    <!-- Top Notes -->
+                    <div class="flex items-start gap-2.5">
+                        <span class="w-14 shrink-0 font-bold text-forest-dark text-[11px] uppercase tracking-wider">Top:</span>
+                        <span class="text-textMuted leading-snug">{{ product.top_notes|default:"Bergamot, Saffron, Pink Pepper (First 15-30m)" }}</span>
+                    </div>
+                    <!-- Heart Notes -->
+                    <div class="flex items-start gap-2.5">
+                        <span class="w-14 shrink-0 font-bold text-forest-dark text-[11px] uppercase tracking-wider">Heart:</span>
+                        <span class="text-textMuted leading-snug">{{ product.heart_notes|default:"Damascus Rose, Golden Amberwood, Jasmine (2-6 Hours)" }}</span>
+                    </div>
+                    <!-- Base Notes -->
+                    <div class="flex items-start gap-2.5">
+                        <span class="w-14 shrink-0 font-bold text-forest-dark text-[11px] uppercase tracking-wider">Base:</span>
+                        <span class="text-textMuted leading-snug">{{ product.base_notes|default:"Cambodian Oudh, Aged Sandalwood, White Musk (Up to 36h)" }}</span>
+                    </div>
+                </div>
+
+                <!-- Performance Meters (Longevity & Sillage) -->
+                <div class="pt-3 border-t border-alabaster-border grid grid-cols-2 gap-3 text-xs">
+                    <div class="bg-white p-2.5 rounded-2xl border border-alabaster-border">
+                        <div class="flex items-center justify-between text-[10px] font-bold text-textMuted mb-1">
+                            <span>LONGEVITY</span>
+                            <span class="text-clay">{{ product.longevity_hours|default:"36" }} Hours</span>
+                        </div>
+                        <div class="w-full bg-[#EAE5DE] h-1.5 rounded-full overflow-hidden">
+                            <div class="bg-clay h-full rounded-full" style="width: 90%;"></div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white p-2.5 rounded-2xl border border-alabaster-border">
+                        <div class="flex items-center justify-between text-[10px] font-bold text-textMuted mb-1">
+                            <span>SILLAGE</span>
+                            <span class="text-forest">{{ product.sillage_level|default:"Strong" }}</span>
+                        </div>
+                        <div class="w-full bg-[#EAE5DE] h-1.5 rounded-full overflow-hidden">
+                            <div class="bg-forest h-full rounded-full" style="width: 85%;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <div class="border-t border-alabaster-border"></div>
 
             <!-- 1. COLOR SELECTION SWATCHES -->
@@ -262,6 +319,43 @@
                 </div>
             </div>
 
+            <!-- BUNDLE & PACK UPGRADE BOX (Adil Qadri High AOV Booster) -->
+            <div class="p-4 rounded-3xl bg-[#F5EFEB]/70 border border-alabaster-border space-y-2.5">
+                <div class="flex items-center justify-between">
+                    <span class="text-[10px] font-bold uppercase tracking-widest text-forest-dark flex items-center gap-1">
+                        <span>🔥</span>
+                        <span>Bundle & Save More</span>
+                    </span>
+                    <span class="text-[10px] font-bold text-clay uppercase">Most Popular</span>
+                </div>
+
+                <div class="grid grid-cols-1 gap-2">
+                    <!-- Option 1: Single Bottle -->
+                    <label class="flex items-center justify-between p-3 rounded-2xl bg-white border border-forest-dark/30 shadow-2xs cursor-pointer hover:border-forest transition">
+                        <div class="flex items-center gap-2.5">
+                            <input type="radio" name="pack_choice" checked class="text-forest focus:ring-forest">
+                            <span class="text-xs font-bold text-forest-dark">1 Bottle (Standard)</span>
+                        </div>
+                        <span class="text-xs font-extrabold text-forest-dark" x-text="'₹' + currentPrice"></span>
+                    </label>
+
+                    <!-- Option 2: Pack of 2 Combo -->
+                    <label class="flex items-center justify-between p-3 rounded-2xl bg-[#EAF0EC] border-2 border-emerald shadow-2xs cursor-pointer hover:border-emerald-dark transition">
+                        <div class="flex items-center gap-2.5">
+                            <input type="radio" name="pack_choice" class="text-emerald focus:ring-emerald">
+                            <div>
+                                <span class="text-xs font-bold text-forest-dark block">Pack of 2 (Buy 1 Get 1 @ 30% Off)</span>
+                                <span class="text-[9.5px] text-emerald font-semibold">Includes Free Scent Discovery Vial</span>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <span class="text-xs font-extrabold text-emerald block" x-text="'₹' + Math.round(currentPrice * 1.7)"></span>
+                            <span class="text-[9px] text-clay font-bold uppercase">SAVE 30%</span>
+                        </div>
+                    </label>
+                </div>
+            </div>
+
             <!-- 3. QUANTITY & CALL TO ACTIONS -->
             <div class="pt-4 border-t border-emerald-border/60 space-y-4">
                 
@@ -309,19 +403,19 @@
 
             </div>
 
-            <!-- Trust Badges Strip (Warm Alabaster Box) -->
-            <div class="p-4 rounded-3xl bg-white border border-alabaster-border grid grid-cols-3 gap-2 text-center text-[11px] font-semibold text-textMuted shadow-2xs">
-                <div class="flex flex-col items-center gap-1">
-                    <span class="text-base">🚚</span>
-                    <span>Express Delivery</span>
-                </div>
-                <div class="flex flex-col items-center gap-1 border-x border-alabaster-border">
-                    <span class="text-base">🔄</span>
-                    <span>7-Day Home Trial</span>
-                </div>
+            <!-- Trust Badges Strip (Fragrance Excellence) -->
+            <div class="p-4 rounded-3xl bg-white border border-alabaster-border grid grid-cols-3 gap-2 text-center text-[10.5px] font-semibold text-textMuted shadow-2xs">
                 <div class="flex flex-col items-center gap-1">
                     <span class="text-base">🌿</span>
-                    <span>Natural Materials</span>
+                    <span class="text-forest-dark font-bold">100% Alcohol-Free</span>
+                </div>
+                <div class="flex flex-col items-center gap-1 border-x border-alabaster-border">
+                    <span class="text-base">⏳</span>
+                    <span class="text-forest-dark font-bold">36h Scent Lock</span>
+                </div>
+                <div class="flex flex-col items-center gap-1">
+                    <span class="text-base">🚚</span>
+                    <span class="text-forest-dark font-bold">Free COD & Shipping</span>
                 </div>
             </div>
 
@@ -535,6 +629,33 @@
             </div>
         </div>
     {% endif %}
+
+    <!-- ============================================== -->
+    <!-- MOBILE STICKY FLOATING BUY BAR (Adil Qadri Style) -->
+    <!-- ============================================== -->
+    <div class="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-alabaster-border p-3 shadow-2xl flex items-center justify-between gap-3">
+        <div class="flex items-center gap-2.5 min-w-0">
+            <div class="w-10 h-10 rounded-xl bg-[#FAF8F5] border border-alabaster-border p-1 shrink-0 overflow-hidden">
+                <img :src="activeImage" alt="{{ product.name }}" class="w-full h-full object-contain">
+            </div>
+            <div class="min-w-0">
+                <h4 class="text-xs font-bold text-forest-dark truncate">{{ product.name }}</h4>
+                <div class="flex items-center gap-1.5">
+                    <span class="text-xs font-extrabold text-clay" x-text="'₹' + currentPrice"></span>
+                    <span class="text-[9.5px] font-semibold text-emerald">100% Pure Oil</span>
+                </div>
+            </div>
+        </div>
+        <button 
+            type="button" 
+            @click="handleAddToCart(false)"
+            :disabled="!canAddToCart"
+            class="py-2.5 px-6 rounded-full bg-forest-dark hover:bg-forest text-white text-xs font-bold tracking-wider shadow-md transition active:scale-95 disabled:opacity-50 shrink-0 flex items-center gap-1.5"
+        >
+            <span>Add to Bag</span>
+            <span>&rarr;</span>
+        </button>
+    </div>
 
 </div>
 
