@@ -1,3 +1,4 @@
+{% load static %}
 <!-- AvailSmart Main Sticky Header - Crookeries Luxury Edition -->
 <header class="sticky top-0 z-40 w-full glass-header border-b border-alabaster-border transition-all duration-300">
     <!-- Top Announcement Strip (Editorial Warm Alabaster) -->
@@ -23,19 +24,13 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex items-center justify-between h-20 gap-4 sm:gap-8">
             
-            <!-- Brand Logo (Editorial Serif) -->
-            <a href="/" class="flex items-center gap-3 shrink-0 group">
-                <div class="w-10 h-10 rounded-2xl bg-forest-dark text-[#FAF8F5] flex items-center justify-center shadow-sm group-hover:scale-105 transition-transform border border-emerald/20">
-                    <svg class="w-5 h-5 text-emerald-tint" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
-                    </svg>
-                </div>
-                <div class="flex flex-col">
-                    <span class="font-editorial text-2xl font-bold tracking-tight text-forest-dark group-hover:text-emerald transition-colors leading-none">
-                        Avail<span class="text-emerald font-sans font-bold">Smart</span><span class="text-clay text-2xl font-editorial">.</span>
-                    </span>
-                    <span class="text-[9px] tracking-widest text-textMuted uppercase font-semibold mt-1">Curated Living & Objects</span>
-                </div>
+            <!-- Brand Logo (Official Signature Wordmark) -->
+            <a href="/" class="flex items-center gap-2.5 shrink-0 group py-1" title="AvailSmart">
+                <img 
+                    src="{% static 'images/logo/logo-blue.png' %}" 
+                    alt="AvailSmart" 
+                    class="h-9 sm:h-11 w-auto object-contain group-hover:scale-105 transition-transform duration-300 drop-shadow-xs"
+                >
             </a>
 
             <!-- Big Desktop Search Bar with Live Autocomplete -->

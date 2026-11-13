@@ -1,3 +1,4 @@
+{% load static %}
 <!-- AvailSmart Luxury Editorial Footer - Crookeries Edition -->
 <footer class="bg-forest-dark text-[#FAF8F5] pt-14 pb-24 md:pb-14 mt-20 border-t border-forest">
     <!-- Main Footer Content -->
@@ -6,12 +7,13 @@
             
             <!-- Brand Column -->
             <div class="col-span-2 space-y-4">
-                <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-2xl bg-forest border border-emerald/30 flex items-center justify-center text-white shadow-xs">
-                        <svg class="w-5 h-5 text-emerald-tint" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg>
-                    </div>
-                    <span class="font-editorial text-2xl font-bold tracking-tight text-white">Avail<span class="text-emerald font-sans font-bold">Smart</span><span class="text-clay text-2xl font-editorial">.</span></span>
-                </div>
+                <a href="/" class="inline-block py-1" title="AvailSmart">
+                    <img 
+                        src="{% static 'images/logo/logo-gold.png' %}" 
+                        alt="AvailSmart" 
+                        class="h-10 sm:h-12 w-auto object-contain hover:scale-105 transition-transform duration-300"
+                    >
+                </a>
                 <p class="text-xs text-[#FAF8F5]/70 leading-relaxed max-w-sm font-normal">
                     Curated objects shaped for slow mornings, tactile permanence, and intentional living. Hand-poured ceramics, organic textiles, and conscious lifestyle essentials.
                 </p>

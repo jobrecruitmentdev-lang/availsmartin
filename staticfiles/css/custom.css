@@ -23,12 +23,22 @@
   --font-serif-editorial: 'Playfair Display', Georgia, serif;
 }
 
+html {
+  overflow-x: hidden;
+  max-width: 100vw;
+  width: 100%;
+}
+
 body {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   background-color: var(--color-page-bg);
   color: var(--color-text-main);
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
+  overflow-x: hidden;
+  max-width: 100vw;
+  width: 100%;
+  position: relative;
 }
 
 /* Editorial Serif Utility */
@@ -61,6 +71,17 @@ body {
 }
 ::-webkit-scrollbar-thumb:hover {
   background: #1E3A2B;
+}
+
+/* Hide scrollbars utility (for carousels, mobile pill bars, category rows) */
+.no-scrollbar::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+.no-scrollbar {
+  -ms-overflow-style: none !important;  /* IE and Edge */
+  scrollbar-width: none !important;  /* Firefox */
 }
 
 /* Glassmorphism & Frosted Alabaster blur */

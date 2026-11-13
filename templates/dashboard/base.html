@@ -6,6 +6,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}AvailSmart Control Center - Staff Admin Portal{% endblock %}</title>
 
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="{% static 'images/favicons/favicon.ico' %}">
+    <link rel="icon" type="image/png" sizes="32x32" href="{% static 'images/favicons/favicon-32x32.png' %}">
+
     <!-- Google Font: Inter -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -92,14 +96,9 @@
     >
         <!-- Sidebar Brand Header (Height aligned with Top Bar: h-20 / 80px) -->
         <div class="h-20 px-5 flex items-center justify-between border-b border-emerald/25 shrink-0">
-            <a href="{% url 'dashboard:index' %}" class="flex items-center gap-2.5">
-                <div class="w-9 h-9 rounded-xl bg-emerald flex items-center justify-center text-white shadow-sm shrink-0">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg>
-                </div>
-                <div>
-                    <span class="text-base font-bold tracking-tight text-white leading-none block">Avail<span class="text-mint-soft">Admin</span></span>
-                    <span class="text-[10px] text-mint-soft/70 uppercase tracking-widest font-semibold block mt-1">Staff Control</span>
-                </div>
+            <a href="{% url 'dashboard:index' %}" class="flex items-center gap-2.5 py-1" title="AvailSmart Control Center">
+                <img src="{% static 'images/logo/logo-white.png' %}" alt="AvailSmart Admin" class="h-8 w-auto object-contain">
+                <span class="text-[10px] text-mint-soft/80 uppercase tracking-widest font-semibold px-2 py-0.5 rounded-full bg-emerald/40 border border-emerald/50">Staff</span>
             </a>
             <button @click="sidebarOpen = false" class="lg:hidden text-mint-soft/80 hover:text-white p-1">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
