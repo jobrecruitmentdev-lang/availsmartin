@@ -32,6 +32,7 @@ def home_view(request):
     """
     banners = Banner.objects.filter(is_active=True).order_by('sort_order')
     categories = Category.objects.filter(parent__isnull=True, is_active=True).prefetch_related('children').order_by('sort_order')[:8]
+    brands = Brand.objects.filter(is_active=True).order_by('name')[:12]
     
     # Trending (Featured)
     featured_products = (
@@ -61,6 +62,7 @@ def home_view(request):
     context = {
         'banners': banners,
         'categories': categories,
+        'brands': brands,
         'featured_products': featured_products,
         'new_arrivals': new_arrivals,
         'best_deals': best_deals,

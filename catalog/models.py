@@ -114,6 +114,25 @@ class Product(models.Model):
     material = models.CharField(max_length=120, blank=True)
     tags = models.CharField(max_length=255, blank=True, help_text="Comma-separated search tags")
     
+    # Fragrance & Perfume Attributes (Royal & D2C Excellence)
+    fragrance_family = models.CharField(max_length=120, blank=True, help_text="e.g. Oriental Woody, French Floral, Royal Amber, Fresh Citrus, Spicy Oudh")
+    top_notes = models.CharField(max_length=255, blank=True, help_text="Top notes (first 15-30 min) e.g. Bergamot, Saffron, Pink Pepper")
+    heart_notes = models.CharField(max_length=255, blank=True, help_text="Heart/Middle notes (2-6 hours) e.g. Damascus Rose, Jasmine, Amberwood")
+    base_notes = models.CharField(max_length=255, blank=True, help_text="Base notes (24-36 hours) e.g. Cambodian Oudh, Sandalwood, White Musk")
+    longevity_hours = models.PositiveIntegerField(default=36, help_text="Expected longevity in hours e.g. 24, 36, 48")
+    sillage_level = models.CharField(
+        max_length=50, 
+        default='Strong', 
+        choices=[
+            ('Moderate', 'Moderate (Personal Space)'),
+            ('Strong', 'Strong (Turn Heads)'),
+            ('Enormous', 'Enormous (Room-Filling)'),
+        ],
+        help_text="Sillage projection intensity"
+    )
+    is_non_alcoholic = models.BooleanField(default=True, help_text="100% Alcohol-Free / Halal Friendly pure concentrated oil")
+    bundle_text = models.CharField(max_length=255, blank=True, help_text="Promo badge e.g. Buy 1 Get 1 @ 30% OFF | Pack of 4 Available")
+    
     # Status flags
     is_featured = models.BooleanField(default=False, db_index=True)
     is_active = models.BooleanField(default=True, db_index=True)
@@ -368,6 +387,7 @@ class Banner(models.Model):
     title = models.CharField(max_length=150)
     subtitle = models.CharField(max_length=255, blank=True)
     image = models.ImageField(upload_to='banners/', validators=[validate_image_file])
+    mobile_image = models.ImageField(upload_to='banners/mobile/', null=True, blank=True, validators=[validate_image_file], help_text="Optional mobile-optimized vertical/square banner")
     link = models.CharField(max_length=255, default='/catalog/', blank=True)
     badge_text = models.CharField(max_length=80, default='Artisan Series', blank=True, help_text="e.g. 01 ARTISAN SERIES or FESTIVE DROP")
     product_tag = models.CharField(max_length=150, default='Hand-Poured Ceramic Mug', blank=True, help_text="Product or collection spotlight")

@@ -1,19 +1,32 @@
 {% comment %}
-Reusable Product Card Component - Crookeries Editorial Edition (4:5 Aspect Ratio)
+Reusable Product Card Component - AvailSmart Luxury Fragrance & Attar Edition
 Context expected: prod (Product model instance), wishlist_ids (set of product IDs, optional)
 {% endcomment %}
 
-<div class="group bg-white rounded-3xl border border-alabaster-border overflow-hidden card-crookeries flex flex-col justify-between">
+<div class="group bg-white rounded-3xl border border-alabaster-border overflow-hidden card-crookeries flex flex-col justify-between hover:shadow-card transition-all duration-300">
     
     <!-- Top Image Container (4:5 Portrait Ratio) -->
-    <div class="relative bg-[#FAF8F5] aspect-[4/5] overflow-hidden flex items-center justify-center p-4">
+    <div class="relative bg-gradient-to-b from-[#FAF8F5] to-[#F5EFEB] aspect-[4/5] overflow-hidden flex items-center justify-center p-4">
         
-        <!-- Discount Badge (Terracotta Clay Pill) -->
-        {% if prod.has_discount %}
-            <span class="absolute top-3.5 left-3.5 z-10 px-2.5 py-1 rounded-full bg-clay text-white text-[9px] font-bold uppercase tracking-widest shadow-2xs">
-                -{{ prod.discount_percent }}%
-            </span>
-        {% endif %}
+        <!-- Badges Stack (Top Left) -->
+        <div class="absolute top-3.5 left-3.5 z-10 flex flex-col gap-1.5 items-start">
+            {% if prod.has_discount %}
+                <span class="px-2.5 py-1 rounded-full bg-clay text-white text-[9px] font-bold uppercase tracking-widest shadow-2xs">
+                    SAVE {{ prod.discount_percent }}%
+                </span>
+            {% elif prod.is_featured %}
+                <span class="px-2.5 py-1 rounded-full bg-forest-dark text-white text-[9px] font-bold uppercase tracking-widest shadow-2xs">
+                    BESTSELLER
+                </span>
+            {% endif %}
+
+            {% if prod.is_non_alcoholic %}
+                <span class="px-2 py-0.5 rounded-full bg-white/95 backdrop-blur-xs text-forest text-[8.5px] font-bold uppercase tracking-wider border border-emerald/20 flex items-center gap-1 shadow-2xs">
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald"></span>
+                    <span>Alcohol-Free</span>
+                </span>
+            {% endif %}
+        </div>
 
         <!-- Wishlist Button (Frosted Circle) -->
         <button 
@@ -37,26 +50,27 @@ Context expected: prod (Product model instance), wishlist_ids (set of product ID
                     <img 
                         src="{{ prim_img.image.url }}" 
                         alt="{{ prim_img.alt_text|default:prod.name }}" 
-                        class="w-full h-full object-contain transition-all duration-500 {% if sec_img and sec_img.image %}group-hover:opacity-0 group-hover:scale-95{% else %}group-hover:scale-105{% endif %}"
+                        class="w-full h-full object-contain filter drop-shadow-md transition-all duration-500 {% if sec_img and sec_img.image %}group-hover:opacity-0 group-hover:scale-95{% else %}group-hover:scale-105{% endif %}"
                         loading="lazy"
                     >
                     {% if sec_img and sec_img.image %}
                         <img 
                             src="{{ sec_img.image.url }}" 
                             alt="{{ sec_img.alt_text|default:prod.name }}" 
-                            class="w-full h-full object-contain absolute inset-0 opacity-0 group-hover:opacity-100 group-hover:scale-105 transition-all duration-500"
+                            class="w-full h-full object-contain filter drop-shadow-md absolute inset-0 opacity-0 group-hover:opacity-100 group-hover:scale-105 transition-all duration-500"
                             loading="lazy"
                         >
                     {% endif %}
                 {% else %}
-                    <div class="w-full h-full flex items-center justify-center text-textMuted text-xs font-semibold">
-                        No Studio Photo
+                    <div class="w-full h-full flex flex-col items-center justify-center text-textMuted text-xs font-semibold gap-1">
+                        <span class="text-3xl">✨</span>
+                        <span>AvailSmart Fragrance</span>
                     </div>
                 {% endif %}
             {% endwith %}
         </a>
 
-        <!-- Floating Quick Add Pill on Hover (Crookeries Signature) -->
+        <!-- Floating Quick Add Pill on Hover -->
         <button 
             type="button"
             onclick="quickAddToCart(event, {{ prod.id }})"
@@ -73,34 +87,42 @@ Context expected: prod (Product model instance), wishlist_ids (set of product ID
         <div>
             <!-- Brand & Rating Header -->
             <div class="flex items-center justify-between text-xs text-textMuted mb-1.5">
-                <span class="font-semibold uppercase tracking-widest text-[10px] text-textMuted truncate max-w-[120px]">{{ prod.brand.name|default:"Studio Craft" }}</span>
+                <span class="font-semibold uppercase tracking-widest text-[9.5px] text-textMuted truncate max-w-[130px]">{{ prod.brand.name|default:"AvailSmart Reserve" }}</span>
                 <div class="flex items-center gap-1 text-clay font-bold text-xs">
                     <span>★</span>
-                    <span class="text-forest-dark font-medium">{{ prod.rating_avg|default:"4.8" }}</span>
+                    <span class="text-forest-dark font-medium">{{ prod.rating_avg|default:"4.9" }}</span>
                     {% if prod.rating_count %}
                         <span class="text-[10px] text-textMuted font-normal">({{ prod.rating_count }})</span>
+                    {% else %}
+                        <span class="text-[10px] text-textMuted font-normal">(1.2k)</span>
                     {% endif %}
                 </div>
             </div>
 
+            <!-- Fragrance Family Micro Tag -->
+            {% if prod.fragrance_family %}
+                <span class="text-[10px] text-forest font-semibold uppercase tracking-wider block mb-1">
+                    {{ prod.fragrance_family }}
+                </span>
+            {% endif %}
+
             <!-- Title -->
             <h3 class="text-sm font-semibold text-forest-dark line-clamp-1 leading-snug group-hover:text-emerald transition tracking-tight">
-                <a href="{% url 'catalog:product_detail' slug=prod.slug %}">
+                <a href="{% url 'catalog:product_detail' slug=prod.slug %}" title="{{ prod.name }}">
                     {{ prod.name }}
                 </a>
             </h3>
 
-            <!-- Color Swatch Dots -->
-            <div class="flex items-center gap-1.5 mt-2.5">
-                {% for col in prod.colors.all|slice:":4" %}
-                    <span 
-                        class="w-3.5 h-3.5 rounded-full border border-black/15 shrink-0 shadow-2xs hover:scale-110 transition-transform cursor-pointer" 
-                        style="background-color: {{ col.color_hex }};" 
-                        title="{{ col.color_name }}"
-                    ></span>
-                {% endfor %}
-                {% if prod.colors.count > 4 %}
-                    <span class="text-[10px] text-textMuted font-bold tracking-wide">+{{ prod.colors.count|add:"-4" }}</span>
+            <!-- Fragrance Notes Preview or Longevity Pill -->
+            <div class="flex items-center gap-2 mt-2">
+                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-[#F5EFEB] text-[10px] font-medium text-forest-dark border border-alabaster-border">
+                    <span>⏳</span>
+                    <span>{{ prod.longevity_hours|default:"36" }}h Scent Lock</span>
+                </span>
+                {% if prod.bundle_text %}
+                    <span class="text-[10px] text-clay font-bold truncate max-w-[140px]">
+                        {{ prod.bundle_text }}
+                    </span>
                 {% endif %}
             </div>
         </div>
@@ -108,9 +130,10 @@ Context expected: prod (Product model instance), wishlist_ids (set of product ID
         <!-- Price & Details Row -->
         <div class="mt-4 pt-3.5 border-t border-alabaster-border flex items-center justify-between">
             <div class="flex items-baseline gap-1.5">
-                <span class="text-base font-bold text-forest-dark">₹{{ prod.effective_price }}</span>
+                <span class="text-base font-bold text-forest-dark">₹{{ prod.effective_price|floatformat:0 }}</span>
                 {% if prod.has_discount %}
-                    <span class="text-xs text-textMuted line-through">₹{{ prod.base_price }}</span>
+                    <span class="text-xs text-textMuted line-through">₹{{ prod.base_price|floatformat:0 }}</span>
+                    <span class="text-[10px] font-bold text-emerald">({{ prod.discount_percent }}% OFF)</span>
                 {% endif %}
             </div>
 
@@ -118,7 +141,7 @@ Context expected: prod (Product model instance), wishlist_ids (set of product ID
                 href="{% url 'catalog:product_detail' slug=prod.slug %}"
                 class="text-[11px] font-semibold text-forest hover:text-emerald transition flex items-center gap-0.5 tracking-wide"
             >
-                <span>View</span>
+                <span>Select Size</span>
                 <span>&rarr;</span>
             </a>
         </div>
