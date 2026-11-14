@@ -5,7 +5,7 @@
 {% block content %}
 <div class="min-h-screen bg-[#FAF8F5] py-10 sm:py-14" x-data="checkoutApp()">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        
+
         <!-- Editorial Breadcrumbs & Header -->
         <div class="mb-10 pb-6 border-b border-[#E8E4DC]">
             <nav class="flex items-center gap-2 text-xs text-[#8A8477] tracking-wider uppercase mb-3">
@@ -27,14 +27,15 @@
 
         <!-- Global Alert Messages -->
         {% if messages %}
-            <div class="mb-8 space-y-2">
-                {% for message in messages %}
-                    <div class="p-4 rounded-2xl text-xs font-semibold flex items-center gap-2.5 {% if message.tags == 'error' %}bg-red-50 text-red-700 border border-red-200{% else %}bg-mint-tint text-emerald-dark border border-emerald-border/60{% endif %}">
-                        <span>{% if message.tags == 'error' %}⚠️{% else %}✓{% endif %}</span>
-                        <span>{{ message }}</span>
-                    </div>
-                {% endfor %}
+        <div class="mb-8 space-y-2">
+            {% for message in messages %}
+            <div
+                class="p-4 rounded-2xl text-xs font-semibold flex items-center gap-2.5 {% if message.tags == 'error' %}bg-red-50 text-red-700 border border-red-200{% else %}bg-mint-tint text-emerald-dark border border-emerald-border/60{% endif %}">
+                <span>{% if message.tags == 'error' %}⚠️{% else %}✓{% endif %}</span>
+                <span>{{ message }}</span>
             </div>
+            {% endfor %}
+        </div>
         {% endif %}
 
         <!-- Main Checkout Form -->
@@ -43,69 +44,68 @@
             <input type="hidden" name="otp_code" x-model="orderOtp">
 
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start">
-                
+
                 <!-- Left Column: Delivery Address & Payment Method -->
                 <div class="lg:col-span-8 space-y-8">
-                    
+
                     <!-- 1. Delivery Address Selection -->
                     <div class="bg-white rounded-3xl border border-[#E8E4DC] p-6 sm:p-8 shadow-sm space-y-6">
                         <div class="flex items-center justify-between border-b border-[#E8E4DC] pb-4">
                             <div class="flex items-center gap-3">
-                                <span class="w-8 h-8 rounded-full bg-[#14241B] text-white flex items-center justify-center font-editorial text-sm">
+                                <span
+                                    class="w-8 h-8 rounded-full bg-[#14241B] text-white flex items-center justify-center font-editorial text-sm">
                                     1
                                 </span>
                                 <div>
                                     <h2 class="text-lg font-editorial text-[#14241B]">Shipping Destination</h2>
-                                    <p class="text-xs text-[#8A8477]">Where should our studio artisans safely send your parcel?</p>
+                                    <p class="text-xs text-[#8A8477]">Where should our studio artisans safely send your
+                                        parcel?</p>
                                 </div>
                             </div>
 
                             {% if addresses.exists %}
-                                <button 
-                                    type="button" 
-                                    @click="toggleAddressMode()"
-                                    class="text-xs font-medium text-[#C2714F] hover:text-[#A85B3B] underline underline-offset-4 transition"
-                                >
-                                    <span x-text="showNewForm ? 'Choose Saved Address' : '+ Add New Address'"></span>
-                                </button>
+                            <button type="button" @click="toggleAddressMode()"
+                                class="text-xs font-medium text-[#C2714F] hover:text-[#A85B3B] underline underline-offset-4 transition">
+                                <span x-text="showNewForm ? 'Choose Saved Address' : '+ Add New Address'"></span>
+                            </button>
                             {% endif %}
                         </div>
 
                         <!-- Existing Addresses List -->
                         {% if addresses.exists %}
-                            <div x-show="!showNewForm" x-cloak class="space-y-3">
-                                {% for addr in addresses %}
-                                    <label class="relative flex items-start gap-4 p-5 rounded-2xl border transition cursor-pointer" :class="selectedAddress == '{{ addr.id }}' ? 'border-[#14241B] bg-[#FAF8F5] ring-1 ring-[#14241B]' : 'border-[#E8E4DC] bg-white hover:border-[#C2714F]/60'">
-                                        <input 
-                                            type="radio" 
-                                            name="address_id" 
-                                            value="{{ addr.id }}" 
-                                            x-model="selectedAddress"
-                                            class="mt-1 text-[#14241B] focus:ring-[#14241B] border-[#D3CBBF] cursor-pointer"
-                                        >
-                                        <div class="flex-1 min-w-0">
-                                            <div class="flex items-center gap-2">
-                                                <span class="text-sm font-semibold text-[#14241B]">{{ addr.full_name }}</span>
-                                                <span class="px-2.5 py-0.5 rounded-full text-[10px] tracking-wider uppercase font-medium {% if addr.address_type == 'home' %}bg-[#EFECE6] text-[#14241B]{% else %}bg-[#F2EBE5] text-[#C2714F]{% endif %}">
-                                                    {{ addr.address_type }}
-                                                </span>
-                                                {% if addr.is_default %}
-                                                    <span class="px-2.5 py-0.5 rounded-full text-[10px] tracking-wider uppercase bg-[#14241B] text-white">
-                                                        Primary
-                                                    </span>
-                                                {% endif %}
-                                            </div>
-                                            <p class="text-xs text-[#5C564B] mt-1.5 leading-relaxed">
-                                                {{ addr.address_line1 }}{% if addr.address_line2 %}, {{ addr.address_line2 }}{% endif %}, {{ addr.city }}, {{ addr.state }} - {{ addr.pincode }}
-                                            </p>
-                                            <p class="text-xs text-[#8A8477] mt-1.5 flex items-center gap-1.5">
-                                                <span>Direct Dispatch:</span>
-                                                <span class="font-medium text-[#14241B]">+91 {{ addr.phone }}</span>
-                                            </p>
-                                        </div>
-                                    </label>
-                                {% endfor %}
-                            </div>
+                        <div x-show="!showNewForm" x-cloak class="space-y-3">
+                            {% for addr in addresses %}
+                            <label
+                                class="relative flex items-start gap-4 p-5 rounded-2xl border transition cursor-pointer"
+                                :class="selectedAddress == '{{ addr.id }}' ? 'border-[#14241B] bg-[#FAF8F5] ring-1 ring-[#14241B]' : 'border-[#E8E4DC] bg-white hover:border-[#C2714F]/60'">
+                                <input type="radio" name="address_id" value="{{ addr.id }}" x-model="selectedAddress"
+                                    class="mt-1 text-[#14241B] focus:ring-[#14241B] border-[#D3CBBF] cursor-pointer">
+                                <div class="flex-1 min-w-0">
+                                    <div class="flex items-center gap-2">
+                                        <span class="text-sm font-semibold text-[#14241B]">{{ addr.full_name }}</span>
+                                        <span
+                                            class="px-2.5 py-0.5 rounded-full text-[10px] tracking-wider uppercase font-medium {% if addr.address_type == 'home' %}bg-[#EFECE6] text-[#14241B]{% else %}bg-[#F2EBE5] text-[#C2714F]{% endif %}">
+                                            {{ addr.address_type }}
+                                        </span>
+                                        {% if addr.is_default %}
+                                        <span
+                                            class="px-2.5 py-0.5 rounded-full text-[10px] tracking-wider uppercase bg-[#14241B] text-white">
+                                            Primary
+                                        </span>
+                                        {% endif %}
+                                    </div>
+                                    <p class="text-xs text-[#5C564B] mt-1.5 leading-relaxed">
+                                        {{ addr.address_line1 }}{% if addr.address_line2 %}, {{ addr.address_line2 }}{%
+                                        endif %}, {{ addr.city }}, {{ addr.state }} - {{ addr.pincode }}
+                                    </p>
+                                    <p class="text-xs text-[#8A8477] mt-1.5 flex items-center gap-1.5">
+                                        <span>Direct Dispatch:</span>
+                                        <span class="font-medium text-[#14241B]">+91 {{ addr.phone }}</span>
+                                    </p>
+                                </div>
+                            </label>
+                            {% endfor %}
+                        </div>
                         {% endif %}
 
                         <!-- New Address Form Section -->
@@ -114,92 +114,70 @@
 
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <div>
-                                    <label class="block text-xs font-medium text-[#14241B] mb-1.5">Recipient Full Name *</label>
-                                    <input 
-                                        type="text" 
-                                        name="new_full_name" 
-                                        id="new_full_name"
+                                    <label class="block text-xs font-medium text-[#14241B] mb-1.5">Recipient Full Name
+                                        *</label>
+                                    <input type="text" name="new_full_name" id="new_full_name"
                                         placeholder="e.g. Maya Sharma"
-                                        class="w-full px-4 py-2.5 rounded-xl border border-[#D3CBBF] bg-[#FAF8F5] text-xs focus:bg-white focus:outline-none focus:border-[#14241B] transition"
-                                    >
+                                        class="w-full px-4 py-2.5 rounded-xl border border-[#D3CBBF] bg-[#FAF8F5] text-xs focus:bg-white focus:outline-none focus:border-[#14241B] transition">
                                 </div>
                                 <div>
-                                    <label class="block text-xs font-medium text-[#14241B] mb-1.5">Contact Number *</label>
-                                    <input 
-                                        type="tel" 
-                                        name="new_phone" 
-                                        id="new_phone"
-                                        placeholder="e.g. 9876543210"
-                                        class="w-full px-4 py-2.5 rounded-xl border border-[#D3CBBF] bg-[#FAF8F5] text-xs focus:bg-white focus:outline-none focus:border-[#14241B] transition"
-                                    >
+                                    <label class="block text-xs font-medium text-[#14241B] mb-1.5">Contact Number
+                                        *</label>
+                                    <input type="tel" name="new_phone" id="new_phone" placeholder="e.g. 9876543210"
+                                        class="w-full px-4 py-2.5 rounded-xl border border-[#D3CBBF] bg-[#FAF8F5] text-xs focus:bg-white focus:outline-none focus:border-[#14241B] transition">
                                 </div>
                             </div>
 
                             <div>
-                                <label class="block text-xs font-medium text-[#14241B] mb-1.5">House / Apartment / Street *</label>
-                                <input 
-                                    type="text" 
-                                    name="new_address_line1" 
-                                    id="new_address_line1"
+                                <label class="block text-xs font-medium text-[#14241B] mb-1.5">House / Apartment /
+                                    Street *</label>
+                                <input type="text" name="new_address_line1" id="new_address_line1"
                                     placeholder="e.g. Studio 4B, Artisan Lane, Whitefield"
-                                    class="w-full px-4 py-2.5 rounded-xl border border-[#D3CBBF] bg-[#FAF8F5] text-xs focus:bg-white focus:outline-none focus:border-[#14241B] transition"
-                                >
+                                    class="w-full px-4 py-2.5 rounded-xl border border-[#D3CBBF] bg-[#FAF8F5] text-xs focus:bg-white focus:outline-none focus:border-[#14241B] transition">
                             </div>
 
                             <div>
-                                <label class="block text-xs font-medium text-[#14241B] mb-1.5">Landmark / Suite (Optional)</label>
-                                <input 
-                                    type="text" 
-                                    name="new_address_line2" 
-                                    placeholder="e.g. Opposite Ceramic Guild"
-                                    class="w-full px-4 py-2.5 rounded-xl border border-[#D3CBBF] bg-[#FAF8F5] text-xs focus:bg-white focus:outline-none focus:border-[#14241B] transition"
-                                >
+                                <label class="block text-xs font-medium text-[#14241B] mb-1.5">Landmark / Suite
+                                    (Optional)</label>
+                                <input type="text" name="new_address_line2" placeholder="e.g. Opposite Ceramic Guild"
+                                    class="w-full px-4 py-2.5 rounded-xl border border-[#D3CBBF] bg-[#FAF8F5] text-xs focus:bg-white focus:outline-none focus:border-[#14241B] transition">
                             </div>
 
                             <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                                 <div>
                                     <label class="block text-xs font-medium text-[#14241B] mb-1.5">City *</label>
-                                    <input 
-                                        type="text" 
-                                        name="new_city" 
-                                        id="new_city"
-                                        placeholder="e.g. Bengaluru"
-                                        class="w-full px-4 py-2.5 rounded-xl border border-[#D3CBBF] bg-[#FAF8F5] text-xs focus:bg-white focus:outline-none focus:border-[#14241B] transition"
-                                    >
+                                    <input type="text" name="new_city" id="new_city" placeholder="e.g. Bengaluru"
+                                        class="w-full px-4 py-2.5 rounded-xl border border-[#D3CBBF] bg-[#FAF8F5] text-xs focus:bg-white focus:outline-none focus:border-[#14241B] transition">
                                 </div>
                                 <div>
                                     <label class="block text-xs font-medium text-[#14241B] mb-1.5">State *</label>
-                                    <input 
-                                        type="text" 
-                                        name="new_state" 
-                                        id="new_state"
-                                        placeholder="e.g. Karnataka"
-                                        class="w-full px-4 py-2.5 rounded-xl border border-[#D3CBBF] bg-[#FAF8F5] text-xs focus:bg-white focus:outline-none focus:border-[#14241B] transition"
-                                    >
+                                    <input type="text" name="new_state" id="new_state" placeholder="e.g. Karnataka"
+                                        class="w-full px-4 py-2.5 rounded-xl border border-[#D3CBBF] bg-[#FAF8F5] text-xs focus:bg-white focus:outline-none focus:border-[#14241B] transition">
                                 </div>
                                 <div>
                                     <label class="block text-xs font-medium text-[#14241B] mb-1.5">Postal Code *</label>
-                                    <input 
-                                        type="text" 
-                                        name="new_pincode" 
-                                        id="new_pincode"
-                                        placeholder="e.g. 560066"
-                                        class="w-full px-4 py-2.5 rounded-xl border border-[#D3CBBF] bg-[#FAF8F5] text-xs focus:bg-white focus:outline-none focus:border-[#14241B] transition"
-                                    >
+                                    <input type="text" name="new_pincode" id="new_pincode" placeholder="e.g. 560066"
+                                        class="w-full px-4 py-2.5 rounded-xl border border-[#D3CBBF] bg-[#FAF8F5] text-xs focus:bg-white focus:outline-none focus:border-[#14241B] transition">
                                 </div>
                             </div>
 
                             <div class="flex items-center gap-6 pt-2">
-                                <label class="flex items-center gap-2 cursor-pointer text-xs font-medium text-[#14241B]">
-                                    <input type="radio" name="new_address_type" value="home" checked class="text-[#14241B] focus:ring-[#14241B]">
+                                <label
+                                    class="flex items-center gap-2 cursor-pointer text-xs font-medium text-[#14241B]">
+                                    <input type="radio" name="new_address_type" value="home" checked
+                                        class="text-[#14241B] focus:ring-[#14241B]">
                                     <span>Residence / Home</span>
                                 </label>
-                                <label class="flex items-center gap-2 cursor-pointer text-xs font-medium text-[#14241B]">
-                                    <input type="radio" name="new_address_type" value="work" class="text-[#14241B] focus:ring-[#14241B]">
+                                <label
+                                    class="flex items-center gap-2 cursor-pointer text-xs font-medium text-[#14241B]">
+                                    <input type="radio" name="new_address_type" value="work"
+                                        class="text-[#14241B] focus:ring-[#14241B]">
                                     <span>Workspace / Studio</span>
                                 </label>
-                                <label class="flex items-center gap-2 cursor-pointer text-xs font-medium text-[#5C564B] ml-auto">
-                                    <input type="checkbox" name="save_address" value="1" checked class="rounded text-[#14241B] focus:ring-[#14241B]">
+                                <label
+                                    class="flex items-center gap-2 cursor-pointer text-xs font-medium text-[#5C564B] ml-auto">
+                                    <input type="checkbox" name="save_address" value="1" checked
+                                        class="rounded text-[#14241B] focus:ring-[#14241B]">
                                     <span>Save in Address Book</span>
                                 </label>
                             </div>
@@ -210,50 +188,49 @@
                     <!-- 2. Payment Method -->
                     <div class="bg-white rounded-3xl border border-[#E8E4DC] p-6 sm:p-8 shadow-sm space-y-6">
                         <div class="flex items-center gap-3 border-b border-[#E8E4DC] pb-4">
-                            <span class="w-8 h-8 rounded-full bg-[#14241B] text-white flex items-center justify-center font-editorial text-sm">
+                            <span
+                                class="w-8 h-8 rounded-full bg-[#14241B] text-white flex items-center justify-center font-editorial text-sm">
                                 2
                             </span>
                             <div>
                                 <h2 class="text-lg font-editorial text-[#14241B]">Payment Settlement</h2>
-                                <p class="text-xs text-[#8A8477]">Select your preferred confidential settlement mechanism</p>
+                                <p class="text-xs text-[#8A8477]">Select your preferred confidential settlement
+                                    mechanism</p>
                             </div>
                         </div>
 
                         <div class="space-y-3">
                             <!-- COD -->
-                            <label class="relative flex items-start gap-4 p-5 rounded-2xl border transition cursor-pointer" :class="paymentMethod === 'cod' ? 'border-[#14241B] bg-[#FAF8F5] ring-1 ring-[#14241B]' : 'border-[#E8E4DC] bg-white hover:border-[#C2714F]/60'">
-                                <input 
-                                    type="radio" 
-                                    name="payment_method" 
-                                    value="cod" 
-                                    x-model="paymentMethod"
-                                    class="mt-1 text-[#14241B] focus:ring-[#14241B] border-[#D3CBBF] cursor-pointer"
-                                >
+                            <label
+                                class="relative flex items-start gap-4 p-5 rounded-2xl border transition cursor-pointer"
+                                :class="paymentMethod === 'cod' ? 'border-[#14241B] bg-[#FAF8F5] ring-1 ring-[#14241B]' : 'border-[#E8E4DC] bg-white hover:border-[#C2714F]/60'">
+                                <input type="radio" name="payment_method" value="cod" x-model="paymentMethod"
+                                    class="mt-1 text-[#14241B] focus:ring-[#14241B] border-[#D3CBBF] cursor-pointer">
                                 <div class="flex-1">
                                     <div class="flex items-center justify-between">
                                         <span class="text-sm font-semibold text-[#14241B]">Cash on Delivery (COD)</span>
                                         <span class="text-base">💵</span>
                                     </div>
                                     <p class="text-xs text-[#8A8477] mt-1 leading-relaxed">
-                                        Pay in cash or through UPI upon doorstep delivery & inspection by our courier partner.
+                                        Pay in cash or through UPI upon doorstep delivery & inspection by our courier
+                                        partner.
                                     </p>
                                 </div>
                             </label>
 
                             <!-- Online UPI / Card with Instant ₹50 Discount (Adil Qadri Style) -->
-                            <label class="relative flex items-start gap-4 p-5 rounded-2xl border transition cursor-pointer" :class="paymentMethod === 'razorpay' ? 'border-emerald-600 bg-emerald-50/50 ring-2 ring-emerald-500/20' : 'border-[#E8E4DC] bg-white hover:border-emerald-600/60'">
-                                <input 
-                                    type="radio" 
-                                    name="payment_method" 
-                                    value="razorpay" 
-                                    x-model="paymentMethod"
-                                    class="mt-1 text-emerald-600 focus:ring-emerald-600 border-[#D3CBBF] cursor-pointer"
-                                >
+                            <label
+                                class="relative flex items-start gap-4 p-5 rounded-2xl border transition cursor-pointer"
+                                :class="paymentMethod === 'razorpay' ? 'border-emerald-600 bg-emerald-50/50 ring-2 ring-emerald-500/20' : 'border-[#E8E4DC] bg-white hover:border-emerald-600/60'">
+                                <input type="radio" name="payment_method" value="razorpay" x-model="paymentMethod"
+                                    class="mt-1 text-emerald-600 focus:ring-emerald-600 border-[#D3CBBF] cursor-pointer">
                                 <div class="flex-1">
                                     <div class="flex items-center justify-between">
                                         <div class="flex items-center gap-2">
-                                            <span class="text-sm font-bold text-[#14241B]">Instant UPI / Cards / NetBanking</span>
-                                            <span class="px-2 py-0.5 rounded-full bg-emerald-600 text-white text-[10px] font-black uppercase tracking-wider animate-pulse">
+                                            <span class="text-sm font-bold text-[#14241B]">Instant UPI / Cards /
+                                                NetBanking</span>
+                                            <span
+                                                class="px-2 py-0.5 rounded-full bg-emerald-600 text-white text-[10px] font-black uppercase tracking-wider animate-pulse">
                                                 SAVE ₹50 INSTANT
                                             </span>
                                         </div>
@@ -262,7 +239,8 @@
                                         </div>
                                     </div>
                                     <p class="text-xs text-emerald-800 font-medium mt-1 leading-relaxed">
-                                        ⚡ Extra ₹50 instant discount applied automatically on all prepaid online payments. Faster dispatch & zero COD verification delay.
+                                        ⚡ Extra ₹50 instant discount applied automatically on all prepaid online
+                                        payments. Faster dispatch & zero COD verification delay.
                                     </p>
                                 </div>
                             </label>
@@ -274,21 +252,18 @@
                         <label class="block text-xs font-medium text-[#14241B] mb-2 uppercase tracking-wider">
                             Special Artisan Delivery Instructions (Optional)
                         </label>
-                        <textarea 
-                            name="order_notes" 
-                            rows="2" 
+                        <textarea name="order_notes" rows="2"
                             placeholder="e.g. Ring the studio bell, fragile porcelain handle with extra cushioning..."
-                            class="w-full px-4 py-3 rounded-2xl border border-[#D3CBBF] bg-[#FAF8F5] text-xs focus:bg-white focus:outline-none focus:border-[#14241B] transition"
-                        ></textarea>
+                            class="w-full px-4 py-3 rounded-2xl border border-[#D3CBBF] bg-[#FAF8F5] text-xs focus:bg-white focus:outline-none focus:border-[#14241B] transition"></textarea>
                     </div>
 
                 </div>
 
                 <!-- Right Column: Order Summary & Place Order CTA -->
                 <div class="lg:col-span-4 space-y-6 lg:sticky lg:top-28">
-                    
+
                     <div class="bg-white rounded-3xl border border-[#E8E4DC] p-6 sm:p-7 shadow-card space-y-6">
-                        
+
                         <div class="flex items-center justify-between border-b border-[#E8E4DC] pb-4">
                             <h3 class="text-base font-editorial text-[#14241B]">Order Summary</h3>
                             <span class="text-xs text-[#8A8477] font-medium">{{ cart.total_items }} Pieces</span>
@@ -297,27 +272,31 @@
                         <!-- Item Snippets -->
                         <div class="divide-y divide-[#E8E4DC] max-h-64 overflow-y-auto no-scrollbar">
                             {% for item in cart.items.all %}
-                                <div class="py-3 flex items-center justify-between gap-3 text-xs">
-                                    <div class="flex items-center gap-3 min-w-0">
-                                        <div class="w-10 h-10 rounded-xl bg-[#F5EFEB] border border-[#E8E4DC] overflow-hidden shrink-0 flex items-center justify-center">
-                                            {% if item.variant.product.images.first %}
-                                                <img src="{{ item.variant.product.images.first.image.url }}" alt="{{ item.variant.product.name }}" class="w-full h-full object-cover">
-                                            {% else %}
-                                                <span class="text-xs">🏺</span>
-                                            {% endif %}
-                                        </div>
-                                        <div class="min-w-0">
-                                            <p class="font-medium text-[#14241B] truncate">{{ item.variant.product.name }}</p>
-                                            <p class="text-[11px] text-[#8A8477] mt-0.5">
-                                                {{ item.variant.product_color.color_name }}{% if item.variant.size %} · {{ item.variant.size }}{% endif %}
-                                            </p>
-                                        </div>
+                            <div class="py-3 flex items-center justify-between gap-3 text-xs">
+                                <div class="flex items-center gap-3 min-w-0">
+                                    <div
+                                        class="w-10 h-10 rounded-xl bg-[#F5EFEB] border border-[#E8E4DC] overflow-hidden shrink-0 flex items-center justify-center">
+                                        {% if item.variant.product.images.first %}
+                                        <img src="{{ item.variant.product.images.first.image.url }}"
+                                            alt="{{ item.variant.product.name }}" class="w-full h-full object-cover">
+                                        {% else %}
+                                        <span class="text-xs">🏺</span>
+                                        {% endif %}
                                     </div>
-                                    <div class="text-right shrink-0">
-                                        <span class="font-medium text-[#14241B]">₹{{ item.total_price }}</span>
-                                        <span class="block text-[10px] text-[#8A8477]">Qty: {{ item.quantity }}</span>
+                                    <div class="min-w-0">
+                                        <p class="font-medium text-[#14241B] truncate">{{ item.variant.product.name }}
+                                        </p>
+                                        <p class="text-[11px] text-[#8A8477] mt-0.5">
+                                            {{ item.variant.product_color.color_name }}{% if item.variant.size %} · {{
+                                            item.variant.size }}{% endif %}
+                                        </p>
                                     </div>
                                 </div>
+                                <div class="text-right shrink-0">
+                                    <span class="font-medium text-[#14241B]">₹{{ item.total_price }}</span>
+                                    <span class="block text-[10px] text-[#8A8477]">Qty: {{ item.quantity }}</span>
+                                </div>
+                            </div>
                             {% endfor %}
                         </div>
 
@@ -329,21 +308,23 @@
                             </div>
 
                             {% if discount and discount > 0 %}
-                                <div class="flex items-center justify-between text-[#C2714F]">
-                                    <span>Studio Voucher ({{ coupon.code }})</span>
-                                    <span class="font-medium">- ₹{{ discount }}</span>
-                                </div>
+                            <div class="flex items-center justify-between text-[#C2714F]">
+                                <span>Studio Voucher ({{ coupon.code }})</span>
+                                <span class="font-medium">- ₹{{ discount }}</span>
+                            </div>
                             {% endif %}
 
                             <div class="flex items-center justify-between text-[#5C564B]">
                                 <span>Artisan Shipping & Fragile Care</span>
                                 <span class="font-medium text-[#14241B]">
-                                    {% if shipping_charge == 0 %}COMPLIMENTARY{% else %}₹{{ shipping_charge }}{% endif %}
+                                    {% if shipping_charge == 0 %}COMPLIMENTARY{% else %}₹{{ shipping_charge }}{% endif
+                                    %}
                                 </span>
                             </div>
 
                             <!-- UPI Discount Preview -->
-                            <div x-show="paymentMethod === 'razorpay'" class="flex items-center justify-between text-emerald-700 bg-emerald-50 px-3 py-2 rounded-xl border border-emerald-200">
+                            <div x-show="paymentMethod === 'razorpay'"
+                                class="flex items-center justify-between text-emerald-700 bg-emerald-50 px-3 py-2 rounded-xl border border-emerald-200">
                                 <span class="font-bold flex items-center gap-1">
                                     <span>⚡</span>
                                     <span>Instant UPI Prepaid Bonus</span>
@@ -353,29 +334,31 @@
 
                             <div class="pt-4 border-t border-[#E8E4DC] flex items-baseline justify-between">
                                 <div>
-                                    <span class="text-xs uppercase tracking-wider text-[#8A8477] block">Total Amount</span>
+                                    <span class="text-xs uppercase tracking-wider text-[#8A8477] block">Total
+                                        Amount</span>
                                     <span class="text-[10px] text-[#8A8477]">Inclusive of GST & insurance</span>
                                 </div>
-                                <span class="text-2xl font-normal font-editorial text-[#14241B]" x-text="paymentMethod === 'razorpay' ? '₹{{ upi_total }}' : '₹{{ total }}'">₹{{ total }}</span>
+                                <span class="text-2xl font-normal font-editorial text-[#14241B]"
+                                    x-text="paymentMethod === 'razorpay' ? '₹{{ upi_total }}' : '₹{{ total }}'">₹{{
+                                    total }}</span>
                             </div>
                         </div>
 
                         <!-- Authorize / Send Code CTA -->
-                        <button 
-                            type="button" 
-                            @click="initiateOrderOtp()"
-                            :disabled="isRequestingOtp"
-                            class="w-full py-4 rounded-full bg-[#14241B] hover:bg-[#C2714F] text-white text-xs uppercase tracking-widest font-medium text-center shadow-lg transition duration-200 active:scale-[0.98] flex items-center justify-center gap-2 group disabled:opacity-50"
-                        >
+                        <button type="button" @click="initiateOrderOtp()" :disabled="isRequestingOtp"
+                            class="w-full py-4 rounded-full bg-[#14241B] hover:bg-[#C2714F] text-white text-xs uppercase tracking-widest font-medium text-center shadow-lg transition duration-200 active:scale-[0.98] flex items-center justify-center gap-2 group disabled:opacity-50">
                             <span x-show="!isRequestingOtp">Authorize & Place Order</span>
                             <span x-show="isRequestingOtp" style="display: none;">Sending 6-Digit Email Code...</span>
-                            <span x-show="!isRequestingOtp" class="group-hover:translate-x-1 transition duration-200">&rarr;</span>
+                            <span x-show="!isRequestingOtp"
+                                class="group-hover:translate-x-1 transition duration-200">&rarr;</span>
                         </button>
 
                         <!-- Trust Seal -->
                         <div class="pt-2 flex items-center justify-center gap-2 text-[10px] text-[#8A8477]">
                             <svg class="w-3.5 h-3.5 text-[#C2714F]" fill="currentColor" viewBox="0 0 20 20">
-                                <path fill-rule="evenodd" d="M10 1.944A11.954 11.954 0 012.166 5C2.056 5.649 2 6.319 2 7c0 5.225 3.34 9.67 8 11.317C14.66 16.67 18 12.225 18 7c0-.682-.057-1.35-.166-2.001A11.954 11.954 0 0110 1.944zM11 14a1 1 0 11-2 0 1 1 0 012 0zm0-7a1 1 0 10-2 0v3a1 1 0 102 0V7z" clip-rule="evenodd"/>
+                                <path fill-rule="evenodd"
+                                    d="M10 1.944A11.954 11.954 0 012.166 5C2.056 5.649 2 6.319 2 7c0 5.225 3.34 9.67 8 11.317C14.66 16.67 18 12.225 18 7c0-.682-.057-1.35-.166-2.001A11.954 11.954 0 0110 1.944zM11 14a1 1 0 11-2 0 1 1 0 012 0zm0-7a1 1 0 10-2 0v3a1 1 0 102 0V7z"
+                                    clip-rule="evenodd" />
                             </svg>
                             <span>Protected by 6-Digit Email OTP Confirmation</span>
                         </div>
@@ -391,28 +374,26 @@
     <!-- ============================================== -->
     <!-- 6-DIGIT EMAIL ORDER CONFIRMATION MODAL -->
     <!-- ============================================== -->
-    <div 
-        x-cloak 
-        x-show="showOtpModal" 
+    <div x-cloak x-show="showOtpModal"
         class="fixed inset-0 z-50 overflow-y-auto bg-black/60 backdrop-blur-sm flex items-center justify-center p-4"
-        style="display: none;"
-    >
-        <div 
-            @click.away="showOtpModal = false"
-            class="bg-white rounded-3xl border border-[#E8E4DC] max-w-md w-full p-8 sm:p-10 shadow-2xl relative animate-fade-in"
-        >
+        style="display: none;">
+        <div @click.away="showOtpModal = false"
+            class="bg-white rounded-3xl border border-[#E8E4DC] max-w-md w-full p-8 sm:p-10 shadow-2xl relative animate-fade-in">
             <!-- Close Button -->
-            <button 
-                type="button" 
-                @click="showOtpModal = false"
-                class="absolute top-5 right-5 text-[#8A8477] hover:text-[#14241B] p-2 rounded-full hover:bg-[#FAF8F5] transition"
-            >
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+            <button type="button" @click="showOtpModal = false"
+                class="absolute top-5 right-5 text-[#8A8477] hover:text-[#14241B] p-2 rounded-full hover:bg-[#FAF8F5] transition">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
             </button>
 
             <!-- Icon -->
-            <div class="w-14 h-14 rounded-2xl bg-[#F5EFEB] border border-[#E8E4DC] flex items-center justify-center mx-auto mb-6 text-[#14241B]">
-                <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+            <div
+                class="w-14 h-14 rounded-2xl bg-[#F5EFEB] border border-[#E8E4DC] flex items-center justify-center mx-auto mb-6 text-[#14241B]">
+                <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"
+                        d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                </svg>
             </div>
 
             <!-- Header -->
@@ -425,35 +406,26 @@
                     We've emailed a random 6-digit confirmation code to:
                     <span class="font-bold text-[#14241B] block mt-0.5">{{ request.user.email }}</span>
                 </p>
-                <div class="mt-3 inline-block px-3 py-1 rounded-full bg-[#FAF8F5] border border-[#E8E4DC] text-xs font-semibold text-[#14241B]">
-                    Payable Amount: <span x-text="paymentMethod === 'razorpay' ? '₹{{ upi_total }}' : '₹{{ total }}'">₹{{ total }}</span>
+                <div
+                    class="mt-3 inline-block px-3 py-1 rounded-full bg-[#FAF8F5] border border-[#E8E4DC] text-xs font-semibold text-[#14241B]">
+                    Payable Amount: <span
+                        x-text="paymentMethod === 'razorpay' ? '₹{{ upi_total }}' : '₹{{ total }}'">₹{{ total }}</span>
                 </div>
             </div>
 
             <!-- 6 Digit Input Boxes -->
             <div class="flex items-center justify-center gap-2 sm:gap-2.5 mb-6">
                 <template x-for="(digit, index) in 6" :key="index">
-                    <input 
-                        type="text" 
-                        maxlength="1" 
-                        inputmode="numeric"
-                        pattern="[0-9]*"
-                        x-ref="'otp_digit_' + index"
-                        @input="handleOtpInput($event, index)"
-                        @keydown="handleOtpKeyDown($event, index)"
+                    <input type="text" maxlength="1" inputmode="numeric" pattern="[0-9]*" x-ref="'otp_digit_' + index"
+                        @input="handleOtpInput($event, index)" @keydown="handleOtpKeyDown($event, index)"
                         @paste="handleOtpPaste($event)"
-                        class="w-11 h-13 text-center text-xl font-bold text-[#14241B] bg-[#FAF8F5] border border-[#D3CBBF] rounded-xl focus:bg-white focus:border-[#14241B] focus:ring-2 focus:ring-[#14241B]/20 outline-none transition font-mono"
-                    >
+                        class="w-11 h-13 text-center text-xl font-bold text-[#14241B] bg-[#FAF8F5] border border-[#D3CBBF] rounded-xl focus:bg-white focus:border-[#14241B] focus:ring-2 focus:ring-[#14241B]/20 outline-none transition font-mono">
                 </template>
             </div>
 
             <!-- Submit Final Button -->
-            <button 
-                type="button" 
-                @click="submitOrderWithOtp()"
-                :disabled="orderOtp.length !== 6 || isSubmittingFinal"
-                class="w-full py-3.5 rounded-full bg-[#14241B] hover:bg-[#C2714F] text-white text-xs uppercase tracking-widest font-semibold transition active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed shadow-md flex items-center justify-center gap-2"
-            >
+            <button type="button" @click="submitOrderWithOtp()" :disabled="orderOtp.length !== 6 || isSubmittingFinal"
+                class="w-full py-3.5 rounded-full bg-[#14241B] hover:bg-[#C2714F] text-white text-xs uppercase tracking-widest font-semibold transition active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed shadow-md flex items-center justify-center gap-2">
                 <span x-show="!isSubmittingFinal">Verify Code & Confirm Order &rarr;</span>
                 <span x-show="isSubmittingFinal" style="display: none;">Processing Order...</span>
             </button>
@@ -461,12 +433,8 @@
             <!-- Resend / Countdown -->
             <div class="mt-6 pt-4 border-t border-[#E8E4DC] text-center text-xs text-[#8A8477]">
                 <span>Didn't receive the email? </span>
-                <button 
-                    type="button" 
-                    @click="initiateOrderOtp(true)" 
-                    :disabled="timer > 0 || isRequestingOtp"
-                    class="font-bold text-[#C2714F] hover:underline disabled:text-[#8A8477] disabled:no-underline transition ml-1"
-                >
+                <button type="button" @click="initiateOrderOtp(true)" :disabled="timer > 0 || isRequestingOtp"
+                    class="font-bold text-[#C2714F] hover:underline disabled:text-[#8A8477] disabled:no-underline transition ml-1">
                     <span>Resend Code</span>
                     <span x-show="timer > 0" class="font-mono">
                         (<span x-text="formatTimer()"></span>)
@@ -481,20 +449,20 @@
 
 <!-- Alpine Checkout Controller -->
 <script>
-function checkoutApp() {
-    return {
-        selectedAddress: '{{ addresses.first.id|default:"new" }}',
-        showNewForm: {% if addresses.exists %}false{% else %}true{% endif %},
+    function checkoutApp() {
+        return {
+            selectedAddress: '{{ addresses.first.id|default:"new" }}',
+            showNewForm: {% if addresses.exists %}false{% else %} true{% endif %},
         paymentMethod: 'cod',
-        showOtpModal: false,
-        otpDigits: ['', '', '', '', '', ''],
-        orderOtp: '',
-        timer: 45,
-        timerInterval: null,
-        isRequestingOtp: false,
-        isSubmittingFinal: false,
+            showOtpModal: false,
+                otpDigits: ['', '', '', '', '', ''],
+                    orderOtp: '',
+                        timer: 45,
+                            timerInterval: null,
+                                isRequestingOtp: false,
+                                    isSubmittingFinal: false,
 
-        toggleAddressMode() {
+                                        toggleAddressMode() {
             this.showNewForm = !this.showNewForm;
             if (this.showNewForm) {
                 this.selectedAddress = 'new';
