@@ -217,7 +217,7 @@ class Command(BaseCommand):
                 ]
             },
             {
-                'name': 'Shark Tank Discovery Sets',
+                'name': 'Imperial Discovery Sets',
                 'slug': 'discovery-sets',
                 'description': 'Curated luxury discovery sample boxes containing 6ml to 10ml mini flacons. Try before you commit to a full bottle.',
                 'sort_order': 3,
@@ -285,7 +285,7 @@ class Command(BaseCommand):
                 'sillage_level': 'Enormous',
                 'is_non_alcoholic': True,
                 'bundle_text': 'Pack of 2 @ ₹1,199 (Save 50%)',
-                'short_description': 'The legendary Shark Tank viral signature attar. 100% alcohol-free pure oil with rich sweet amber, floral warmth, and an unforgettable 36-hour trail.',
+                'short_description': 'The legendary imperial signature attar. 100% alcohol-free pure oil with rich sweet amber, floral warmth, and an unforgettable 36-hour trail.',
                 'full_description': 'Shanaya by Adil Qadri is one of India’s most celebrated luxury attars. Formulated without a single drop of alcohol, this concentrated perfume oil opens with luminous citrus and golden sweet amber before melting into a decadent heart of spiced cinnamon and Damascus rose. The dry-down reveals rich agarwood and cashmere white musk that remains on clothing well past 36 hours.',
                 'rating_avg': Decimal('4.94'),
                 'rating_count': 1840,
@@ -303,7 +303,7 @@ class Command(BaseCommand):
                 }
             },
             {
-                'name': 'The AvailSmart 10-Fragrance Shark Tank Discovery Box',
+                'name': 'The AvailSmart 10-Fragrance Imperial Discovery Box',
                 'slug': 'availsmart-10-fragrance-discovery-box',
                 'brand': 'availsmart-reserve',
                 'category': 'pocket-samplers',
@@ -686,7 +686,7 @@ class Command(BaseCommand):
                 'longevity_hours': 36,
                 'sillage_level': 'Strong',
                 'is_non_alcoholic': True,
-                'bundle_text': 'Shark Tank India Featured Scent',
+                'bundle_text': 'Award-Winning Imperial Signature Scent',
                 'short_description': 'Opulent, sweet floral musk designed for memorable presence. 100% alcohol-free roll-on with golden honeyed undertones.',
                 'full_description': 'Lavish Musk by Adil Qadri is created for those who enjoy sweet, alluring floral musks with depth. The golden honeyed floral heart develops into a soft, velvety trail of musk that lingers on clothes for days.',
                 'rating_avg': Decimal('4.89'),
