@@ -93,19 +93,19 @@ Partial template for Product Grid and Active Filter Chips (rendered on page load
 {% else %}
     <!-- Empty State -->
     <div class="bg-white rounded-4xl border border-alabaster-border p-12 sm:p-16 text-center max-w-md mx-auto shadow-card my-10">
-        <div class="w-16 h-16 rounded-3xl bg-[#F5EFEB] text-forest flex items-center justify-center mx-auto text-2xl mb-4">
-            🏺
+        <div class="w-16 h-16 rounded-3xl bg-[#FAF8F5] border border-gold-border/30 text-gold flex items-center justify-center mx-auto text-2xl mb-4 shadow-2xs">
+            👑
         </div>
-        <h3 class="font-editorial text-xl font-bold text-forest-dark">No Matching Objects Found</h3>
+        <h3 class="font-editorial text-xl font-bold text-forest-dark">No Matching Fragrances Found</h3>
         <p class="text-xs text-textMuted mt-1.5 leading-relaxed">
-            We couldn't find any studio items matching your selected criteria. Try relaxing your filter tags or resetting the price range.
+            We couldn't find any fragrances matching your selected scent notes or criteria. Try clearing some filters or explore our pure attar collections.
         </p>
         <button 
             type="button" 
             @click="clearAllFilters()" 
             class="mt-6 px-7 py-3 rounded-full bg-forest-dark hover:bg-forest text-white text-xs font-semibold tracking-wider shadow-sm transition active:scale-95"
         >
-            Reset All Filters
+            Reset Scent Filters
         </button>
     </div>
 {% endif %}

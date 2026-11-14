@@ -154,6 +154,16 @@ def catalog_view(request, slug=None):
         except (ValueError, TypeError):
             pass
 
+    # Fragrance family filter
+    selected_families = request.GET.getlist('fragrance_family')
+    if selected_families:
+        queryset = queryset.filter(fragrance_family__in=selected_families)
+
+    # Alcohol-free filter
+    alcohol_free_only = request.GET.get('alcohol_free') in ['1', 'true', 'on']
+    if alcohol_free_only:
+        queryset = queryset.filter(is_non_alcoholic=True)
+
     # In-stock only
     in_stock_only = request.GET.get('in_stock') in ['1', 'true', 'on']
     if in_stock_only:
@@ -214,6 +224,16 @@ def catalog_view(request, slug=None):
     catalog_min_price = int(price_aggregate['min_p'] or 0)
     catalog_max_price = int(price_aggregate['max_p'] or 10000)
 
+    # Fragrance families available for filter
+    available_families = (
+        Product.objects.filter(is_active=True)
+        .exclude(fragrance_family__isnull=True)
+        .exclude(fragrance_family='')
+        .values('fragrance_family')
+        .annotate(pcount=Count('id'))
+        .order_by('-pcount')
+    )
+
     # 5. Build Active Filters List for Chips UI
     active_filters = []
     if selected_category:
@@ -221,6 +241,10 @@ def catalog_view(request, slug=None):
     for b in selected_brands:
         brand_obj = Brand.objects.filter(slug=b).first()
         active_filters.append({'type': 'brand', 'label': f"Brand: {brand_obj.name if brand_obj else b}", 'value': b})
+    for fam in selected_families:
+        active_filters.append({'type': 'fragrance_family', 'label': f"Family: {fam}", 'value': fam})
+    if alcohol_free_only:
+        active_filters.append({'type': 'alcohol_free', 'label': "100% Alcohol-Free", 'value': '1'})
     if min_price:
         active_filters.append({'type': 'min_price', 'label': f"Min: ₹{min_price}", 'value': min_price})
     if max_price:
@@ -250,6 +274,8 @@ def catalog_view(request, slug=None):
         'total_count': paginator.count,
         'selected_category': selected_category,
         'selected_brands': selected_brands,
+        'selected_families': selected_families,
+        'alcohol_free_only': alcohol_free_only,
         'selected_colors': selected_colors,
         'selected_sizes': selected_sizes,
         'min_price': min_price or catalog_min_price,
@@ -262,6 +288,7 @@ def catalog_view(request, slug=None):
         'sort': sort,
         'all_categories': all_categories,
         'available_brands': available_brands,
+        'available_families': available_families,
         'available_colors': available_colors,
         'available_sizes': available_sizes,
         'active_filters': active_filters,
@@ -296,7 +323,13 @@ def search_autocomplete_view(request):
     # Matching products
     products_qs = (
         Product.objects.filter(
-            Q(name__icontains=query) | Q(tags__icontains=query) | Q(brand__name__icontains=query),
+            Q(name__icontains=query) |
+            Q(tags__icontains=query) |
+            Q(brand__name__icontains=query) |
+            Q(fragrance_family__icontains=query) |
+            Q(top_notes__icontains=query) |
+            Q(heart_notes__icontains=query) |
+            Q(base_notes__icontains=query),
             is_active=True
         )
         .select_related('brand', 'category')
@@ -379,6 +412,10 @@ def search_view(request):
             Q(tags__icontains=query) |
             Q(brand__name__icontains=query) |
             Q(category__name__icontains=query) |
+            Q(fragrance_family__icontains=query) |
+            Q(top_notes__icontains=query) |
+            Q(heart_notes__icontains=query) |
+            Q(base_notes__icontains=query) |
             Q(sku__icontains=query)
         )
 

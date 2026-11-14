@@ -29,11 +29,11 @@
                 {% if selected_category %}
                     {{ selected_category.name }}
                 {% else %}
-                    All Curated Collections
+                    The Royal Fragrance Archive
                 {% endif %}
             </h1>
             <p class="text-xs text-textMuted mt-1">
-                Showing <span x-text="totalCount" class="font-semibold text-forest-dark">{{ total_count }}</span> intentional objects
+                Showing <span x-text="totalCount" class="font-semibold text-forest-dark">{{ total_count }}</span> royal fragrances & pure attars
             </p>
         </div>
 
@@ -214,6 +214,59 @@
                 >
             </div>
 
+            <!-- 100% Alcohol-Free Pure Attar Switch (Adil Qadri Trust Pillar) -->
+            <div class="pt-4 border-t border-alabaster-border">
+                <label class="flex items-center justify-between p-3 rounded-2xl bg-gradient-to-r from-[#FAF8F5] to-emerald/5 border border-emerald/20 cursor-pointer hover:border-emerald/40 transition">
+                    <div class="flex items-center gap-2.5">
+                        <span class="text-base">🌿</span>
+                        <div>
+                            <span class="text-xs font-bold text-forest-dark block">100% Alcohol-Free</span>
+                            <span class="text-[10px] text-textMuted block">Halal & Pure Attar Oils</span>
+                        </div>
+                    </div>
+                    <input 
+                        type="checkbox" 
+                        x-model="alcoholFree" 
+                        @change="fetchFilteredResults(1)"
+                        class="w-4 h-4 rounded text-emerald focus:ring-emerald border-emerald-border cursor-pointer accent-emerald"
+                    >
+                </label>
+            </div>
+
+            <!-- Fragrance Family Accordion -->
+            {% if available_families %}
+                <div class="pt-4 border-t border-alabaster-border" x-data="{ familiesOpen: true }">
+                    <div 
+                        @click="familiesOpen = !familiesOpen" 
+                        class="flex items-center justify-between cursor-pointer group select-none mb-2.5"
+                    >
+                        <h4 class="text-xs font-bold text-forest-dark uppercase tracking-wider group-hover:text-emerald transition flex items-center gap-1.5">
+                            <span>✨</span>
+                            <span>Fragrance Family</span>
+                        </h4>
+                        <span class="text-[10px] text-textMuted font-mono">({{ available_families|length }})</span>
+                    </div>
+
+                    <div x-show="familiesOpen" class="space-y-1.5 max-h-48 overflow-y-auto pr-1 text-xs">
+                        {% for f in available_families %}
+                            <label class="flex items-center justify-between p-1.5 rounded-xl hover:bg-[#FAF8F5] cursor-pointer group transition">
+                                <span class="flex items-center gap-2 text-textMain group-hover:text-forest-dark">
+                                    <input 
+                                        type="checkbox" 
+                                        value="{{ f.fragrance_family }}" 
+                                        :checked="fragranceFamilies.includes('{{ f.fragrance_family|escapejs }}')"
+                                        @change="toggleFamily('{{ f.fragrance_family|escapejs }}')"
+                                        class="rounded text-emerald focus:ring-emerald border-alabaster-border cursor-pointer"
+                                    >
+                                    <span class="text-xs font-medium">{{ f.fragrance_family }}</span>
+                                </span>
+                                <span class="text-[10px] text-textMuted font-semibold">({{ f.pcount }})</span>
+                            </label>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endif %}
+
             <!-- Brand Filter -->
             {% if available_brands %}
                 <div class="pt-4 border-t border-emerald-border/40">
@@ -242,7 +295,7 @@
             {% if available_colors %}
                 <div class="pt-5 border-t border-alabaster-border">
                     <div class="flex items-center justify-between mb-3">
-                        <h4 class="text-xs font-bold text-forest-dark uppercase tracking-wider">Colors & Glazes</h4>
+                        <h4 class="text-xs font-bold text-forest-dark uppercase tracking-wider">Flacon & Accent</h4>
                         <span class="text-[10px] text-textMuted font-mono">({{ available_colors|length }})</span>
                     </div>
 
@@ -275,7 +328,7 @@
             {% if available_sizes %}
                 <div class="pt-4 border-t border-emerald-border/40" x-data="{ showAllSizes: false, sizeQuery: '' }">
                     <div class="flex items-center justify-between mb-2">
-                        <h4 class="text-xs font-bold text-textMain uppercase tracking-wider">Size</h4>
+                        <h4 class="text-xs font-bold text-textMain uppercase tracking-wider">Volume & Bottle Size</h4>
                         {% if available_sizes|length > 6 %}
                             <button 
                                 type="button" 
@@ -505,6 +558,8 @@ function catalogFilterApp() {
         totalCount: {{ total_count }},
         category: '{{ selected_category.slug|default:"" }}',
         brands: {{ selected_brands|safe }},
+        fragranceFamilies: {{ selected_families|safe|default:"[]" }},
+        alcoholFree: {{ alcohol_free_only|yesno:"true,false" }},
         minPrice: {{ min_price }},
         maxPrice: {{ max_price }},
         colors: {{ selected_colors|safe }},
@@ -519,6 +574,8 @@ function catalogFilterApp() {
             let count = 0;
             if (this.category) count++;
             count += this.brands.length;
+            count += this.fragranceFamilies.length;
+            if (this.alcoholFree) count++;
             count += this.colors.length;
             count += this.sizes.length;
             if (this.rating) count++;
@@ -539,6 +596,16 @@ function catalogFilterApp() {
 
         setCategory(slug) {
             this.category = slug;
+            this.fetchFilteredResults(1);
+        },
+
+        toggleFamily(familyName) {
+            const idx = this.fragranceFamilies.indexOf(familyName);
+            if (idx > -1) {
+                this.fragranceFamilies.splice(idx, 1);
+            } else {
+                this.fragranceFamilies.push(familyName);
+            }
             this.fetchFilteredResults(1);
         },
 
@@ -565,6 +632,8 @@ function catalogFilterApp() {
         removeFilter(type, value) {
             if (type === 'category') this.category = '';
             else if (type === 'brand') this.brands = this.brands.filter(b => b !== value);
+            else if (type === 'fragrance_family') this.fragranceFamilies = this.fragranceFamilies.filter(f => f !== value);
+            else if (type === 'alcohol_free') this.alcoholFree = false;
             else if (type === 'color') this.colors = this.colors.filter(c => c !== value);
             else if (type === 'size') this.sizes = this.sizes.filter(s => s !== value);
             else if (type === 'rating') this.rating = '';
@@ -578,6 +647,8 @@ function catalogFilterApp() {
         clearAllFilters() {
             this.category = '';
             this.brands = [];
+            this.fragranceFamilies = [];
+            this.alcoholFree = false;
             this.colors = [];
             this.sizes = [];
             this.rating = '';
@@ -599,6 +670,8 @@ function catalogFilterApp() {
             const params = new URLSearchParams();
             if (this.category) params.set('category', this.category);
             this.brands.forEach(b => params.append('brand', b));
+            this.fragranceFamilies.forEach(f => params.append('fragrance_family', f));
+            if (this.alcoholFree) params.set('alcohol_free', '1');
             if (this.minPrice > {{ catalog_min_price }}) params.set('min_price', this.minPrice);
             if (this.maxPrice < {{ catalog_max_price }}) params.set('max_price', this.maxPrice);
             this.colors.forEach(c => params.append('color', c));
@@ -639,6 +712,8 @@ function catalogFilterApp() {
                             {
                                 category: this.category,
                                 brands: [...this.brands],
+                                fragranceFamilies: [...this.fragranceFamilies],
+                                alcoholFree: this.alcoholFree,
                                 minPrice: this.minPrice,
                                 maxPrice: this.maxPrice,
                                 colors: [...this.colors],
@@ -664,6 +739,8 @@ function catalogFilterApp() {
         restoreState(state) {
             this.category = state.category || '';
             this.brands = state.brands || [];
+            this.fragranceFamilies = state.fragranceFamilies || [];
+            this.alcoholFree = state.alcoholFree || false;
             this.minPrice = state.minPrice || {{ catalog_min_price }};
             this.maxPrice = state.maxPrice || {{ catalog_max_price }};
             this.colors = state.colors || [];
