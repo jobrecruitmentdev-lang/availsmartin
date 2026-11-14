@@ -4,28 +4,28 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}AvailSmart - Everything Better | Premium Multi-Category Marketplace{% endblock %}</title>
-    <meta name="description" content="{% block meta_description %}AvailSmart is your destination for curated fashion, electronics, home decor, beauty, and lifestyle essentials with fast shipping and easy returns.{% endblock %}">
+    <title>{% block title %}AvailSmart | Luxury Attars, Pure Perfumes & Royal Fragrances{% endblock %}</title>
+    <meta name="description" content="{% block meta_description %}AvailSmart is India's premier luxury fragrance house. 100% alcohol-free concentrated attars, French-Arabian EDP sprays, rare Cambodian Oudh, and discovery boxes with 36+ hour longevity.{% endblock %}">
     <link rel="canonical" href="{{ request.build_absolute_uri }}">
 
     <!-- OpenGraph Social Metadata -->
     <meta property="og:site_name" content="AvailSmart">
-    <meta property="og:title" content="{% block og_title %}AvailSmart - Smart Picks for Every Lifestyle{% endblock %}">
-    <meta property="og:description" content="{% block og_description %}Discover premium fashion, wireless audio, home decor, and skincare across all categories.{% endblock %}">
+    <meta property="og:title" content="{% block og_title %}AvailSmart | Luxury Attars & Royal Fragrances{% endblock %}">
+    <meta property="og:description" content="{% block og_description %}Discover pure 100% alcohol-free attars, French EDP sprays, and royal oudh elixirs with guaranteed 36+ hour scent lock.{% endblock %}">
     <meta property="og:type" content="{% block og_type %}website{% endblock %}">
     <meta property="og:url" content="{{ request.build_absolute_uri }}">
     <meta property="og:image" content="{% block og_image %}{{ request.scheme }}://{{ request.get_host }}{% static 'img/og-availsmart.png' %}{% endblock %}">
 
     <!-- Twitter Cards -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="{% block twitter_title %}AvailSmart - Premium Marketplace{% endblock %}">
-    <meta name="twitter:description" content="{% block twitter_description %}Smart picks for every lifestyle. Mixed multi-category products with express delivery.{% endblock %}">
+    <meta name="twitter:title" content="{% block twitter_title %}AvailSmart | Imperial Fragrance House{% endblock %}">
+    <meta name="twitter:description" content="{% block twitter_description %}100% Alcohol-Free Pure Attars & French-Arabian Perfume Sprays. Handcrafted with aged Oudh & Amber.{% endblock %}">
     
-    <!-- Favicon & Brand Icons -->
-    <link rel="icon" type="image/x-icon" href="{% static 'images/favicons/favicon.ico' %}">
-    <link rel="icon" type="image/png" sizes="32x32" href="{% static 'images/favicons/favicon-32x32.png' %}">
-    <link rel="icon" type="image/png" sizes="16x16" href="{% static 'images/favicons/favicon-16x16.png' %}">
-    <link rel="apple-touch-icon" sizes="180x180" href="{% static 'images/favicons/apple-touch-icon.png' %}">
+    <!-- Favicon & Brand Icons (Royal Crown Imperial Edition) -->
+    <link rel="icon" type="image/x-icon" href="{% static 'images/favicons/favicon.ico' %}?v=royal2">
+    <link rel="icon" type="image/png" sizes="32x32" href="{% static 'images/favicons/favicon-32x32.png' %}?v=royal2">
+    <link rel="icon" type="image/png" sizes="16x16" href="{% static 'images/favicons/favicon-16x16.png' %}?v=royal2">
+    <link rel="apple-touch-icon" sizes="180x180" href="{% static 'images/favicons/apple-touch-icon.png' %}?v=royal2">
     
     <!-- Prevent Alpine Flash of Unstyled Content (FOUC) -->
     <style>

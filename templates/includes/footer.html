@@ -1,5 +1,5 @@
 {% load static %}
-<!-- AvailSmart Luxury Editorial Footer - Crookeries Edition -->
+<!-- AvailSmart Luxury Editorial Footer - Fragrance House Edition -->
 <footer class="bg-forest-dark text-[#FAF8F5] pt-14 pb-24 md:pb-14 mt-20 border-t border-forest">
     <!-- Main Footer Content -->
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
@@ -7,19 +7,19 @@
             
             <!-- Brand Column -->
             <div class="col-span-2 space-y-4">
-                <a href="/" class="inline-block py-1" title="AvailSmart">
+                <a href="/" class="inline-block py-1" title="AvailSmart Imperial Fragrances">
                     <img 
                         src="{% static 'images/logo/logo-gold.png' %}" 
                         alt="AvailSmart" 
-                        class="h-10 sm:h-12 w-auto object-contain hover:scale-105 transition-transform duration-300"
+                        class="h-13 sm:h-16 lg:h-18 w-auto object-contain hover:scale-105 transition-transform duration-300 drop-shadow-md"
                     >
                 </a>
-                <p class="text-xs text-[#FAF8F5]/70 leading-relaxed max-w-sm font-normal">
-                    Curated objects shaped for slow mornings, tactile permanence, and intentional living. Hand-poured ceramics, organic textiles, and conscious lifestyle essentials.
+                <p class="text-xs text-[#FAF8F5]/75 leading-relaxed max-w-sm font-normal">
+                    The Imperial Fragrance Reserve. Handcrafted with aged Cambodian Oudh, Damascus Rose, and Amber Elixirs. 100% alcohol-free concentrated attars and French-Arabian EDP sprays engineered for unmatched 36+ hour longevity.
                 </p>
-                <div class="flex items-center gap-2.5 text-[11px] text-[#FAF8F5]/60 pt-1">
-                    <span class="inline-block w-2 h-2 rounded-full bg-clay animate-pulse"></span>
-                    <span>Studio Support Active • Mon–Sat 9:00 AM – 8:00 PM IST</span>
+                <div class="flex items-center gap-2.5 text-[11px] text-[#FAF8F5]/70 pt-1">
+                    <span class="inline-block w-2 h-2 rounded-full bg-emerald animate-pulse"></span>
+                    <span>Royal Fragrance Concierge Active • Mon–Sat 9:00 AM – 9:00 PM IST</span>
                 </div>
             </div>
 
@@ -27,11 +27,11 @@
             <div>
                 <h5 class="text-[11px] font-bold uppercase tracking-widest text-[#FAF8F5]/50 mb-3.5">Curations</h5>
                 <ul class="space-y-2 text-xs text-[#FAF8F5]/80">
-                    <li><a href="/catalog/home-living/" class="hover:text-white transition">Ceramics & Tableware</a></li>
-                    <li><a href="/catalog/fashion/" class="hover:text-white transition">Linen & Wardrobe</a></li>
-                    <li><a href="/catalog/electronics/" class="hover:text-white transition">Acoustic Audio</a></li>
-                    <li><a href="/catalog/beauty-wellness/" class="hover:text-white transition">Botanical Care</a></li>
-                    <li><a href="/catalog/lifestyle-fitness/" class="hover:text-white transition">Sanctuary Objects</a></li>
+                    <li><a href="/catalog/pure-attars/" class="hover:text-white transition">Pure Concentrated Attars</a></li>
+                    <li><a href="/catalog/edp-sprays/" class="hover:text-white transition">French & Arabian EDPs</a></li>
+                    <li><a href="/catalog/?deal=discovery" class="hover:text-white transition">Discovery Sampler Box</a></li>
+                    <li><a href="/catalog/rare-cambodian-oudh/" class="hover:text-white transition">Rare Cambodian Oudh</a></li>
+                    <li><a href="/catalog/bakhoor-incense/" class="hover:text-white transition">Luxury Bakhoor & Incense</a></li>
                 </ul>
             </div>
 
@@ -39,11 +39,11 @@
             <div>
                 <h5 class="text-[11px] font-bold uppercase tracking-widest text-[#FAF8F5]/50 mb-3.5">Concierge</h5>
                 <ul class="space-y-2 text-xs text-[#FAF8F5]/80">
-                    <li><a href="{% url 'orders:track_order' %}" class="hover:text-white transition">Track Delivery</a></li>
-                    <li><a href="{% url 'catalog:story' %}" class="hover:text-white transition">The Studio Story</a></li>
-                    <li><a href="{% url 'orders:returns_policy' %}" class="hover:text-white transition">7-Day Home Trial & Returns</a></li>
-                    <li><a href="{% url 'catalog:contact' %}" class="hover:text-white transition">Contact Concierge</a></li>
-                    <li><a href="{% url 'catalog:faqs' %}" class="hover:text-white transition">Studio Care FAQs</a></li>
+                    <li><a href="{% url 'orders:track_order' %}" class="hover:text-white transition">Track Order Delivery</a></li>
+                    <li><a href="{% url 'catalog:story' %}" class="hover:text-white transition">The Fragrance Story</a></li>
+                    <li><a href="{% url 'orders:returns_policy' %}" class="hover:text-white transition">100% Damage-Free Guarantee</a></li>
+                    <li><a href="{% url 'catalog:contact' %}" class="hover:text-white transition">Scent Concierge & WhatsApp</a></li>
+                    <li><a href="{% url 'catalog:faqs' %}" class="hover:text-white transition">36h Scent Lock FAQs</a></li>
                     {% if request.user.is_staff or request.user.is_superuser %}
                         <li><a href="{% url 'dashboard:index' %}" class="text-clay hover:underline transition text-xs font-semibold">Staff Admin Desk</a></li>
                     {% endif %}
@@ -52,9 +52,9 @@
 
             <!-- Newsletter -->
             <div class="col-span-2 md:col-span-1">
-                <h5 class="text-[11px] font-bold uppercase tracking-widest text-[#FAF8F5]/50 mb-3.5">Private Releases</h5>
-                <p class="text-xs text-[#FAF8F5]/70 mb-3 leading-relaxed">Join our mailing circle for quiet studio drops and seasonal archives.</p>
-                <form class="space-y-2" onsubmit="event.preventDefault(); window.dispatchEvent(new CustomEvent('toast', { detail: { message: 'Subscribed to studio circle.', type: 'success' } }));">
+                <h5 class="text-[11px] font-bold uppercase tracking-widest text-[#FAF8F5]/50 mb-3.5">Private Vault</h5>
+                <p class="text-xs text-[#FAF8F5]/70 mb-3 leading-relaxed">Join the Royal Olfactory Circle for secret attar drops and private VIP discounts.</p>
+                <form class="space-y-2" onsubmit="event.preventDefault(); window.dispatchEvent(new CustomEvent('toast', { detail: { message: 'Welcome to the Royal Olfactory Circle!', type: 'success' } }));">
                     <input 
                         type="email" 
                         placeholder="Your email address" 
@@ -62,7 +62,7 @@
                         required
                     >
                     <button type="submit" class="w-full py-2.5 bg-clay hover:bg-clay-hover text-white rounded-full text-xs font-semibold tracking-wider transition shadow-2xs">
-                        Request Invite
+                        Claim VIP Access
                     </button>
                 </form>
             </div>
@@ -72,14 +72,14 @@
     <!-- Bottom Bar -->
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 border-t border-forest/60 flex flex-col sm:flex-row items-center justify-between gap-4 text-[11px] text-[#FAF8F5]/50">
         <div>
-            © 2026 AvailSmart Studio Private Limited. Crafted with Django, Alpine.js & Tailwind CSS.
+            © 2026 AvailSmart Imperial Fragrances Private Limited. Crafted with Django, Alpine.js & Tailwind CSS.
         </div>
         <div class="flex items-center gap-4">
-            <a href="{% url 'catalog:story' %}" class="hover:text-white cursor-pointer transition">Studio Manifesto</a>
+            <a href="{% url 'catalog:story' %}" class="hover:text-white cursor-pointer transition">Fragrance Manifesto</a>
             <span>•</span>
             <a href="{% url 'catalog:privacy' %}" class="hover:text-white cursor-pointer transition">Privacy & Ethics</a>
             <span>•</span>
-            <a href="{% url 'catalog:terms' %}" class="hover:text-white cursor-pointer transition">Terms of Craft</a>
+            <a href="{% url 'catalog:terms' %}" class="hover:text-white cursor-pointer transition">Terms of Reserve</a>
         </div>
     </div>
 </footer>

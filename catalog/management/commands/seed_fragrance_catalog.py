@@ -873,15 +873,16 @@ class Command(BaseCommand):
                 )
 
         # ---------------------------------------------------------
-        # 5. SEED EDITORIAL HERO BANNERS
+        # 5. SEED EDITORIAL HERO BANNERS (Photorealistic Flacons)
         # ---------------------------------------------------------
         self.stdout.write("5. Seeding Fragrance Hero Banners...")
-        banner_1_file = create_pro_fallback_perfume_image(
-            "THE ROYAL FRAGRANCE ARCHIVE",
-            "100% Alcohol-Free Pure Attars & French Sprays",
+        banner_1_file = fetch_and_crop_perfume_image(
+            photo_id='photo-1592945403244-b3fbafd7f539',
+            title="The Royal Fragrance Archive",
+            subtitle="100% Alcohol-Free Pure Attars & French Sprays",
             liquid_color='#D4AF37',
-            width=1600,
-            height=700
+            target_w=1600,
+            target_h=1000
         )
         b1 = Banner(
             title="The Royal Fragrance Archive",
@@ -896,12 +897,13 @@ class Command(BaseCommand):
         )
         b1.image.save("banner_royal_fragrances.webp", banner_1_file, save=True)
 
-        banner_2_file = create_pro_fallback_perfume_image(
-            "DISCOVERY BOX AT ₹499",
-            "10 Iconic 6ml Samples • Shark Tank Viral Bestseller",
+        banner_2_file = fetch_and_crop_perfume_image(
+            photo_id='photo-1547887537-6158d64c35b3',
+            title="Discovery Box at ₹499",
+            subtitle="10 Iconic 6ml Samples • Shark Tank Viral Bestseller",
             liquid_color='#1C529C',
-            width=1600,
-            height=700
+            target_w=1600,
+            target_h=1000
         )
         b2 = Banner(
             title="The AvailSmart 10-Fragrance Discovery Box",

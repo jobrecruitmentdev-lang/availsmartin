@@ -61,18 +61,20 @@
 
             </div>
 
-            <!-- Right Column: Visual Showcase Frame -->
+            <!-- Right Column: Visual Showcase Frame (Cinematic Luxury Flacon) -->
             <div class="lg:col-span-7 relative">
                 {% with hero_banner=banners|first %}
-                <div class="relative rounded-4xl overflow-hidden bg-gradient-to-tr from-[#1E293B] via-[#0F172A] to-[#0B0F17] border border-alabaster-border shadow-luxury aspect-[16/10] sm:aspect-[16/11] flex items-center justify-center p-6 group">
+                <div class="relative rounded-4xl overflow-hidden bg-[#0A110D] border border-alabaster-border/60 shadow-luxury aspect-[16/10] sm:aspect-[16/11] flex items-center justify-center group">
                     
                     {% if hero_banner and hero_banner.image %}
-                        <a href="{{ hero_banner.link|default:'/catalog/' }}" class="w-full h-full flex items-center justify-center">
+                        <a href="{{ hero_banner.link|default:'/catalog/' }}" class="w-full h-full block relative overflow-hidden">
                             <img 
                                 src="{{ hero_banner.image.url }}" 
                                 alt="{{ hero_banner.product_tag|default:'Royal Fragrance' }}" 
-                                class="w-full h-full object-contain filter drop-shadow-2xl group-hover:scale-105 transition-transform duration-700"
+                                class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 filter brightness-95"
                             >
+                            <!-- Cinematic Ambient Overlay for Badge Contrast -->
+                            <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-black/30 pointer-events-none"></div>
                         </a>
                     {% else %}
                         <!-- Default Grand Arabian Showcase -->
