@@ -1,12 +1,14 @@
 import os
 import io
 import urllib.request
+from datetime import timedelta
 from decimal import Decimal
 from PIL import Image, ImageDraw, ImageFont
 
 from django.core.management.base import BaseCommand
 from django.core.files.base import ContentFile
 from django.utils.text import slugify
+from django.utils import timezone
 from django.conf import settings
 
 from accounts.models import User
@@ -812,7 +814,7 @@ class Command(BaseCommand):
 
             # Attach primary image
             img_obj = ProductImage(
-                color=color_obj,
+                product_color=color_obj,
                 is_primary=True,
                 alt_text=f"{p['name']} Luxury Fragrance Presentation"
             )
@@ -827,9 +829,10 @@ class Command(BaseCommand):
 
                 ProductVariant.objects.create(
                     product=prod,
+                    product_color=color_obj,
                     size=s_name,
                     stock_quantity=50 + (s_idx * 20),
-                    price_override=variant_disc or variant_base,
+                    price=variant_disc or variant_base,
                     sku=f"{prod.sku}-V{s_idx+1}",
                     is_active=True
                 )
@@ -838,34 +841,34 @@ class Command(BaseCommand):
             for spec_k, spec_v in p['specs'].items():
                 ProductSpecification.objects.create(
                     product=prod,
-                    name=spec_k,
+                    key=spec_k,
                     value=spec_v
                 )
 
             # Add Verified Customer Reviews for Social Proof
+            review_user, _ = User.objects.get_or_create(
+                email='connoisseur@availsmart.in',
+                defaults={
+                    'name': 'Fragrance Connoisseur',
+                    'is_active': True
+                }
+            )
             sample_reviews = [
                 {
-                    'author': 'Zaid K.',
                     'rating': 5,
-                    'title': 'Absolute Beast Longevity! Lasted 2 days on my kurta',
-                    'content': 'I was skeptical about the 36 hour claim, but this fragrance is unreal. The projection is smooth without being overwhelming, and people kept asking what scent I was wearing all evening.'
+                    'comment': 'Absolute Beast Longevity! Lasted 2 days on my kurta. I was skeptical about the 36 hour claim, but this fragrance is unreal. The projection is smooth without being overwhelming, and people kept asking what scent I was wearing all evening.'
                 },
                 {
-                    'author': 'Amina S.',
                     'rating': 5,
-                    'title': '100% Alcohol-Free and Pure Luxury',
-                    'content': 'Gentle on skin, zero irritation, and smells richer than luxury designer perfumes costing 5 times as much. Packaging was stunning.'
+                    'comment': '100% Alcohol-Free and Pure Luxury. Gentle on skin, zero irritation, and smells richer than luxury designer perfumes costing 5 times as much. Packaging was stunning.'
                 }
             ]
-            for r_idx, r in enumerate(sample_reviews):
+            for r in sample_reviews:
                 Review.objects.create(
                     product=prod,
-                    user=None,
-                    author_name=r['author'],
+                    user=review_user,
                     rating=r['rating'],
-                    title=r['title'],
-                    content=r['content'],
-                    is_verified_buyer=True,
+                    comment=r['comment'],
                     is_approved=True
                 )
 
@@ -883,8 +886,11 @@ class Command(BaseCommand):
         b1 = Banner(
             title="The Royal Fragrance Archive",
             subtitle="Distilled from aged Cambodian Oudh, Damascus Rose, and golden amber. 100% Alcohol-Free with guaranteed 36+ hour projection.",
-            link_url="/catalog/",
-            cta_text="Explore Royal Attars",
+            link="/catalog/",
+            button_text="Explore Royal Attars",
+            badge_text="2026 Reserve",
+            product_tag="Imperial White Oudh Attar",
+            price_text="From ₹399 • 100% Pure Oil",
             sort_order=1,
             is_active=True
         )
@@ -900,11 +906,41 @@ class Command(BaseCommand):
         b2 = Banner(
             title="The AvailSmart 10-Fragrance Discovery Box",
             subtitle="Experience 10 iconic luxury attars & French-Arabian EDPs (6ml each) curated for day, evening, and formal rituals.",
-            link_url="/product/availsmart-10-fragrance-discovery-box/",
-            cta_text="Get Discovery Box @ ₹499",
+            link="/catalog/?deal=discovery",
+            button_text="Get Discovery Box @ ₹499",
+            badge_text="Special Offer",
+            product_tag="Shark Tank Discovery Set",
+            price_text="₹499 (50% OFF)",
             sort_order=2,
             is_active=True
         )
         b2.image.save("banner_discovery_box.webp", banner_2_file, save=True)
+
+        # ---------------------------------------------------------
+        # 6. SEED PREPAID & COMBO COUPONS
+        # ---------------------------------------------------------
+        self.stdout.write("6. Seeding Promo & Combo Coupons...")
+        Coupon.objects.get_or_create(
+            code="UPI50",
+            defaults={
+                'discount_type': 'flat',
+                'value': Decimal('50.00'),
+                'min_order': Decimal('299.00'),
+                'expiry': timezone.now() + timedelta(days=365),
+                'usage_limit': 100000,
+                'is_active': True
+            }
+        )
+        Coupon.objects.get_or_create(
+            code="TRIO899",
+            defaults={
+                'discount_type': 'flat',
+                'value': Decimal('298.00'),
+                'min_order': Decimal('899.00'),
+                'expiry': timezone.now() + timedelta(days=365),
+                'usage_limit': 100000,
+                'is_active': True
+            }
+        )
 
         self.stdout.write(self.style.SUCCESS("===> Successfully seeded AvailSmart Luxury Fragrance Catalog!"))

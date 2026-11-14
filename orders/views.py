@@ -41,12 +41,15 @@ def checkout_view(request):
             request.session.pop('coupon_id', None)
 
     totals = _calculate_cart_totals(cart, coupon)
+    upi_totals = _calculate_cart_totals(cart, coupon, payment_method='razorpay')
 
     context = {
         'cart': cart,
         'addresses': addresses,
         'coupon': coupon,
         **totals,
+        'upi_total': upi_totals['total'],
+        'upi_discount_amount': upi_totals['upi_discount'],
     }
     return render(request, 'orders/checkout.html', context)
 
@@ -198,11 +201,12 @@ def place_order_view(request):
         if coupon_id:
             coupon = Coupon.objects.filter(id=coupon_id, is_active=True).first()
 
-        totals = _calculate_cart_totals(cart, coupon)
+        payment_method = request.POST.get('payment_method', 'cod')
+        totals = _calculate_cart_totals(cart, coupon, payment_method=payment_method)
+        total_discount = totals['discount'] + totals['upi_discount']
 
         # 4. Generate Order
         order_number = Order.generate_order_number()
-        payment_method = request.POST.get('payment_method', 'cod')
         order_notes = request.POST.get('order_notes', '').strip()
 
         order = Order.objects.create(
@@ -210,7 +214,7 @@ def place_order_view(request):
             user=request.user,
             shipping_address_snapshot=address_snapshot,
             subtotal=totals['subtotal'],
-            discount=totals['discount'],
+            discount=total_discount,
             shipping_charge=totals['shipping_charge'],
             tax=Decimal('0.00'),
             total=totals['total'],

@@ -57,6 +57,14 @@ def home_view(request):
         .order_by('-discount_percent')[:8]
     )
 
+    # Flagship Pure Attars for the 3 for ₹899 Interactive Combo Builder
+    trio_attars = (
+        Product.objects.filter(is_non_alcoholic=True, is_active=True)
+        .select_related('brand', 'category')
+        .prefetch_related('colors__images', 'variants')
+        .order_by('-rating_avg', 'id')[:8]
+    )
+
     wishlist_ids = _get_user_wishlist_ids(request.user)
 
     context = {
@@ -66,6 +74,7 @@ def home_view(request):
         'featured_products': featured_products,
         'new_arrivals': new_arrivals,
         'best_deals': best_deals,
+        'trio_attars': trio_attars,
         'wishlist_ids': wishlist_ids,
     }
     return render(request, 'catalog/home.html', context)

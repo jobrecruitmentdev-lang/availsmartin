@@ -27,9 +27,9 @@ def _get_cart(request):
     return cart
 
 
-def _calculate_cart_totals(cart, coupon=None):
+def _calculate_cart_totals(cart, coupon=None, payment_method=None):
     """
-    Calculates subtotal, coupon discount, shipping charge, and final total.
+    Calculates subtotal, coupon discount, shipping charge, UPI prepaid incentive, and final total.
     """
     subtotal = Decimal('0.00')
     for item in cart.items.select_related('variant', 'variant__product').all():
@@ -39,16 +39,23 @@ def _calculate_cart_totals(cart, coupon=None):
     if coupon and coupon.is_valid:
         discount = coupon.calculate_discount(subtotal)
 
-    # Free shipping on orders ₹999 or more
-    shipping_charge = Decimal('0.00') if subtotal >= Decimal('999.00') or subtotal == Decimal('0.00') else Decimal('99.00')
-    total = max(Decimal('0.00'), subtotal - discount + shipping_charge)
+    # Free express delivery on orders ₹499 or more
+    shipping_charge = Decimal('0.00') if subtotal >= Decimal('499.00') or subtotal == Decimal('0.00') else Decimal('70.00')
+
+    # Extra ₹50 Instant Discount on Prepaid UPI / Online Payment (Adil Qadri RTO reducer)
+    upi_discount = Decimal('0.00')
+    if payment_method in ['razorpay', 'upi'] and subtotal >= Decimal('299.00'):
+        upi_discount = Decimal('50.00')
+
+    total = max(Decimal('0.00'), subtotal - discount - upi_discount + shipping_charge)
 
     return {
         'subtotal': subtotal,
         'discount': discount,
+        'upi_discount': upi_discount,
         'shipping_charge': shipping_charge,
         'total': total,
-        'free_shipping_needed': max(Decimal('0.00'), Decimal('999.00') - subtotal) if subtotal < Decimal('999.00') else Decimal('0.00'),
+        'free_shipping_needed': max(Decimal('0.00'), Decimal('499.00') - subtotal) if subtotal < Decimal('499.00') else Decimal('0.00'),
     }
 
 
@@ -149,6 +156,76 @@ def add_to_cart_view(request, variant_id=None):
         'item_title': variant.product.name,
         'variant_label': f"{variant.product_color.color_name} / {variant.size}" if variant.size else variant.product_color.color_name,
         'price': str(variant.effective_price),
+    })
+
+
+@require_POST
+def add_bundle_to_cart_view(request):
+    """
+    Adds multiple fragrance products to the cart simultaneously (e.g. Pick Any 3 for ₹899 Trio Combo).
+    Automatically applies combo coupon TRIO899 for instant bundle savings.
+    """
+    next_url = request.META.get('HTTP_REFERER', '/')
+
+    if not request.user.is_authenticated:
+        login_url = f"{reverse('accounts:login')}?next={next_url}"
+        if request.headers.get('x-requested-with') == 'XMLHttpRequest' or request.content_type == 'application/json':
+            return JsonResponse({
+                'status': 'unauthenticated',
+                'message': 'Please sign in to add your luxury combo to bag.',
+                'redirect_url': login_url
+            }, status=401)
+        messages.warning(request, "Please log in to add items to your cart.")
+        return redirect(login_url)
+
+    try:
+        if request.content_type == 'application/json':
+            data = json.loads(request.body)
+            product_ids = data.get('product_ids', [])
+        else:
+            product_ids = request.POST.getlist('product_ids') or request.POST.getlist('product_ids[]') or request.POST.get('product_ids', [])
+
+        if isinstance(product_ids, str):
+            product_ids = [int(p.strip()) for p in product_ids.split(',') if p.strip()]
+        else:
+            product_ids = [int(p) for p in product_ids if p]
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': f'Invalid data: {str(e)}'}, status=400)
+
+    if not product_ids:
+        return JsonResponse({'status': 'error', 'message': 'No items selected for combo.'}, status=400)
+
+    cart = _get_cart(request)
+    added_names = []
+
+    for pid in product_ids:
+        try:
+            prod = Product.objects.get(id=pid, is_active=True)
+            variant = prod.variants.filter(is_active=True, stock_quantity__gt=0).first()
+            if not variant:
+                variant = prod.variants.filter(is_active=True).first()
+            if variant:
+                cart_item, created = CartItem.objects.get_or_create(cart=cart, variant=variant)
+                if not created:
+                    cart_item.quantity += 1
+                else:
+                    cart_item.quantity = 1
+                cart_item.save()
+                added_names.append(prod.name)
+        except Product.DoesNotExist:
+            continue
+
+    # Apply Trio Combo Coupon if 3 or more items
+    if len(product_ids) >= 3:
+        trio_coupon = Coupon.objects.filter(code='TRIO899', is_active=True).first()
+        if trio_coupon and trio_coupon.is_valid:
+            request.session['coupon_id'] = trio_coupon.id
+
+    return JsonResponse({
+        'status': 'success',
+        'message': f"Added {len(added_names)} fragrances to your bag at exclusive Trio Combo pricing (₹899)!",
+        'cart_count': cart.total_items,
+        'added_items': added_names,
     })
 
 
