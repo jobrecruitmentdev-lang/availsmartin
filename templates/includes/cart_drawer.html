@@ -68,16 +68,25 @@
                 </button>
             </div>
 
-            <!-- Free Gift / Free Shipping Progress Bar (Adil Qadri Style) -->
-            <div x-show="!cartData.is_empty" class="pt-2">
-                <div class="flex items-center justify-between text-[10px] font-bold text-forest-dark mb-1">
-                    <span x-text="parseFloat(cartData.subtotal) >= 499 ? '🎉 You unlocked FREE Express Delivery!' : `Add ₹${(499 - parseFloat(cartData.subtotal)).toFixed(0)} more for FREE Delivery`"></span>
-                    <span class="text-clay">Free Gift @ ₹999</span>
+            <!-- Multi-Tier Free Gift & Delivery Progress Bar (Adil Qadri Style) -->
+            <div x-show="!cartData.is_empty" class="pt-2 space-y-1.5">
+                <div class="flex items-center justify-between text-[11px] font-bold text-forest-dark">
+                    <span x-show="parseFloat(cartData.subtotal) < 499" class="text-clay">
+                        🚚 Add ₹<span x-text="(499 - parseFloat(cartData.subtotal)).toFixed(0)"></span> more for <strong class="text-forest-dark">FREE Delivery</strong>
+                    </span>
+                    <span x-show="parseFloat(cartData.subtotal) >= 499 && parseFloat(cartData.subtotal) < 899" class="text-emerald font-extrabold">
+                        🎉 FREE Express Delivery Unlocked! Add ₹<span x-text="(899 - parseFloat(cartData.subtotal)).toFixed(0)"></span> for <span class="text-clay">Free Scent Vial</span>
+                    </span>
+                    <span x-show="parseFloat(cartData.subtotal) >= 899" class="text-emerald font-extrabold flex items-center gap-1">
+                        <span>🎁</span>
+                        <span>FREE Delivery + Free Discovery Scent Vial Unlocked!</span>
+                    </span>
+                    <span class="text-[10px] text-textMuted uppercase tracking-wider font-semibold">Goal: ₹899</span>
                 </div>
-                <div class="w-full bg-[#EAE5DE] h-2 rounded-full overflow-hidden">
+                <div class="w-full bg-[#EAE5DE] h-2.5 rounded-full overflow-hidden p-0.5">
                     <div 
-                        class="bg-gradient-to-r from-clay to-emerald h-full rounded-full transition-all duration-500"
-                        :style="`width: ${Math.min((parseFloat(cartData.subtotal) / 499) * 100, 100)}%;`"
+                        class="bg-gradient-to-r from-clay via-[#D4AF37] to-emerald h-full rounded-full transition-all duration-500 shadow-xs"
+                        :style="`width: ${Math.min((parseFloat(cartData.subtotal) / 899) * 100, 100)}%;`"
                     ></div>
                 </div>
             </div>
@@ -134,6 +143,17 @@
 
         <!-- Drawer Footer -->
         <div x-show="!cartData.is_empty" class="p-6 border-t border-alabaster-border bg-[#F5EFEB] space-y-3.5">
+            <!-- UPI Discount Teaser (Adil Qadri RTO reducer) -->
+            <div class="px-3.5 py-2 rounded-2xl bg-emerald-50 border border-emerald-200/80 flex items-center justify-between text-xs">
+                <span class="text-emerald-800 font-semibold flex items-center gap-1.5 text-[11px]">
+                    <span>⚡</span>
+                    <span>Extra ₹50 Instant OFF on UPI / Prepaid</span>
+                </span>
+                <span class="text-[9.5px] font-black uppercase text-emerald-700 bg-white px-2 py-0.5 rounded-full border border-emerald-300">
+                    Auto-Applied
+                </span>
+            </div>
+
             <div class="flex items-center justify-between text-xs font-semibold">
                 <span class="text-textMuted uppercase tracking-wider text-[10px]">Estimated Total</span>
                 <span class="text-base font-bold text-forest-dark" x-text="'₹' + cartData.subtotal"></span>
@@ -147,9 +167,10 @@
                 </a>
                 <a 
                     href="/orders/checkout/" 
-                    class="py-3 px-4 rounded-full bg-forest-dark hover:bg-forest text-white font-semibold text-xs tracking-wider text-center shadow-sm transition active:scale-95"
+                    class="py-3 px-4 rounded-full bg-forest-dark hover:bg-forest text-white font-semibold text-xs tracking-wider text-center shadow-sm transition active:scale-95 flex items-center justify-center gap-1.5"
                 >
-                    Checkout &rarr;
+                    <span>Checkout</span>
+                    <span>&rarr;</span>
                 </a>
             </div>
         </div>

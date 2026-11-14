@@ -648,6 +648,200 @@
     </section>
 
     <!-- ============================================== -->
+    <!-- 8.5. WHY CONNOISSEURS CHOOSE AVAILSMART (Adil Qadri Trust Grid) -->
+    <!-- ============================================== -->
+    <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="bg-[#FAF8F5] rounded-4xl border border-alabaster-border p-8 sm:p-14 shadow-card space-y-10">
+            
+            <div class="text-center max-w-2xl mx-auto space-y-2">
+                <span class="text-[10px] font-bold uppercase tracking-widest text-clay block">The AvailSmart Standard</span>
+                <h3 class="font-editorial text-3xl sm:text-4xl font-bold text-forest-dark tracking-tight">Why Connoisseurs Choose Our Fragrance House</h3>
+                <p class="text-xs sm:text-sm text-textMuted leading-relaxed">
+                    Crafted for discerning individuals who value long-lasting presence, pure botanical distillation, and regal presentation.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6">
+                
+                <div class="p-5 sm:p-6 rounded-3xl bg-white border border-alabaster-border shadow-2xs space-y-3">
+                    <div class="w-12 h-12 rounded-2xl bg-[#EAF0EC] text-emerald flex items-center justify-center text-2xl">
+                        🌿
+                    </div>
+                    <h4 class="text-xs sm:text-sm font-bold text-forest-dark">100% Alcohol-Free</h4>
+                    <p class="text-[11px] text-textMuted leading-relaxed">
+                        Pure concentrated perfume oils. 100% Halal and puja friendly with zero skin burning or alcohol evaporation.
+                    </p>
+                </div>
+
+                <div class="p-5 sm:p-6 rounded-3xl bg-white border border-alabaster-border shadow-2xs space-y-3">
+                    <div class="w-12 h-12 rounded-2xl bg-[#F6ECE6] text-clay flex items-center justify-center text-2xl">
+                        ⏳
+                    </div>
+                    <h4 class="text-xs sm:text-sm font-bold text-forest-dark">36h Scent Lock</h4>
+                    <p class="text-[11px] text-textMuted leading-relaxed">
+                        Infused with aged resinous oils that bond with body heat to provide unforgettable projection for 36+ hours.
+                    </p>
+                </div>
+
+                <div class="p-5 sm:p-6 rounded-3xl bg-white border border-alabaster-border shadow-2xs space-y-3">
+                    <div class="w-12 h-12 rounded-2xl bg-[#FAF8F5] text-forest flex items-center justify-center text-2xl">
+                        🐰
+                    </div>
+                    <h4 class="text-xs sm:text-sm font-bold text-forest-dark">100% Vegan & Cruelty-Free</h4>
+                    <p class="text-[11px] text-textMuted leading-relaxed">
+                        Zero animal-derived musks. Ethically compounded using plant-derived botanicals and organic resins.
+                    </p>
+                </div>
+
+                <div class="p-5 sm:p-6 rounded-3xl bg-white border border-alabaster-border shadow-2xs space-y-3">
+                    <div class="w-12 h-12 rounded-2xl bg-[#EAF0EC] text-forest flex items-center justify-center text-2xl">
+                        🧪
+                    </div>
+                    <h4 class="text-xs sm:text-sm font-bold text-forest-dark">Dermatologically Certified</h4>
+                    <p class="text-[11px] text-textMuted leading-relaxed">
+                        IFRA compliant formulations. Hypoallergenic and free from parabens, sulfates, and harsh synthetic dyes.
+                    </p>
+                </div>
+
+                <div class="p-5 sm:p-6 rounded-3xl bg-white border border-alabaster-border shadow-2xs space-y-3">
+                    <div class="w-12 h-12 rounded-2xl bg-[#F6ECE6] text-[#D4AF37] flex items-center justify-center text-2xl">
+                        👑
+                    </div>
+                    <h4 class="text-xs sm:text-sm font-bold text-forest-dark">Hand-Poured Crystal Flacons</h4>
+                    <p class="text-[11px] text-textMuted leading-relaxed">
+                        Heavy cut-glass bottles with precision stainless-steel roll-on applicators for controlled, zero-spill ritual.
+                    </p>
+                </div>
+
+                <div class="p-5 sm:p-6 rounded-3xl bg-white border border-alabaster-border shadow-2xs space-y-3">
+                    <div class="w-12 h-12 rounded-2xl bg-[#FAF8F5] text-forest flex items-center justify-center text-2xl">
+                        🛡️
+                    </div>
+                    <h4 class="text-xs sm:text-sm font-bold text-forest-dark">Damage-Free Transit</h4>
+                    <p class="text-[11px] text-textMuted leading-relaxed">
+                        Triple-cushioned shockproof flacon packaging. Free express replacement if any transit damage occurs.
+                    </p>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================== -->
+    <!-- 8.6. CONNOISSEURS FAQ ACCORDION -->
+    <!-- ============================================== -->
+    <section class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8" x-data="{ openFaq: null }">
+        <div class="bg-white rounded-4xl border border-alabaster-border p-8 sm:p-12 shadow-card space-y-6">
+            
+            <div class="text-center space-y-1.5 mb-8">
+                <span class="text-[10px] font-bold uppercase tracking-widest text-clay block">Knowledge & Guidance</span>
+                <h3 class="font-editorial text-2xl sm:text-3xl font-bold text-forest-dark">Frequently Asked Questions</h3>
+                <p class="text-xs text-textMuted">Everything you need to know about our formulations, delivery, and combo offers.</p>
+            </div>
+
+            <div class="divide-y divide-alabaster-border space-y-1">
+                
+                <!-- Q1 -->
+                <div class="pt-4">
+                    <button 
+                        type="button" 
+                        @click="openFaq = (openFaq === 1 ? null : 1)" 
+                        class="w-full flex items-center justify-between text-left py-2.5 group cursor-pointer"
+                    >
+                        <span class="text-xs sm:text-sm font-bold text-forest-dark group-hover:text-emerald transition">
+                            How should I apply pure concentrated attar for 36-hour longevity?
+                        </span>
+                        <span class="w-6 h-6 rounded-full bg-[#FAF8F5] flex items-center justify-center text-xs font-bold text-forest-dark shrink-0 transition-transform duration-300" :class="openFaq === 1 ? 'rotate-180 bg-forest text-white' : ''">
+                            ↓
+                        </span>
+                    </button>
+                    <div x-show="openFaq === 1" x-collapse class="text-xs text-textMuted leading-relaxed pb-4 pt-1">
+                        Apply directly using the rollerball onto warm pulse points: wrist insides, base of the neck, behind ears, and collarbone. Body warmth activates the aromatic resins over 36 hours. You can also lightly dab on fabric collar edges for extended trail.
+                    </div>
+                </div>
+
+                <!-- Q2 -->
+                <div class="pt-4">
+                    <button 
+                        type="button" 
+                        @click="openFaq = (openFaq === 2 ? null : 2)" 
+                        class="w-full flex items-center justify-between text-left py-2.5 group cursor-pointer"
+                    >
+                        <span class="text-xs sm:text-sm font-bold text-forest-dark group-hover:text-emerald transition">
+                            Are AvailSmart fragrances 100% alcohol-free and Halal / Puja friendly?
+                        </span>
+                        <span class="w-6 h-6 rounded-full bg-[#FAF8F5] flex items-center justify-center text-xs font-bold text-forest-dark shrink-0 transition-transform duration-300" :class="openFaq === 2 ? 'rotate-180 bg-forest text-white' : ''">
+                            ↓
+                        </span>
+                    </button>
+                    <div x-show="openFaq === 2" x-collapse class="text-xs text-textMuted leading-relaxed pb-4 pt-1">
+                        Yes, 100%! All our pure roll-on attars and elixirs are distilled in pure plant oils and essential concentrates without ethyl alcohol, denatured spirits, or synthetic diluents. They are 100% safe for daily prayers, namaz, and sacred ceremonies.
+                    </div>
+                </div>
+
+                <!-- Q3 -->
+                <div class="pt-4">
+                    <button 
+                        type="button" 
+                        @click="openFaq = (openFaq === 3 ? null : 3)" 
+                        class="w-full flex items-center justify-between text-left py-2.5 group cursor-pointer"
+                    >
+                        <span class="text-xs sm:text-sm font-bold text-forest-dark group-hover:text-emerald transition">
+                            How does the "Pick Any 3 at ₹899" Trio Combo deal work?
+                        </span>
+                        <span class="w-6 h-6 rounded-full bg-[#FAF8F5] flex items-center justify-center text-xs font-bold text-forest-dark shrink-0 transition-transform duration-300" :class="openFaq === 3 ? 'rotate-180 bg-forest text-white' : ''">
+                            ↓
+                        </span>
+                    </button>
+                    <div x-show="openFaq === 3" x-collapse class="text-xs text-textMuted leading-relaxed pb-4 pt-1">
+                        Simply choose any 3 fragrances in our interactive Trio Builder on the homepage. When you click "Add Royal Trio to Bag", your bundle discount is automatically applied, bringing the total down from ₹1,197 to just ₹899, plus you get Free Express Shipping and a complimentary 2ml sample vial!
+                    </div>
+                </div>
+
+                <!-- Q4 -->
+                <div class="pt-4">
+                    <button 
+                        type="button" 
+                        @click="openFaq = (openFaq === 4 ? null : 4)" 
+                        class="w-full flex items-center justify-between text-left py-2.5 group cursor-pointer"
+                    >
+                        <span class="text-xs sm:text-sm font-bold text-forest-dark group-hover:text-emerald transition">
+                            Can I pay via Cash on Delivery (COD)?
+                        </span>
+                        <span class="w-6 h-6 rounded-full bg-[#FAF8F5] flex items-center justify-center text-xs font-bold text-forest-dark shrink-0 transition-transform duration-300" :class="openFaq === 4 ? 'rotate-180 bg-forest text-white' : ''">
+                            ↓
+                        </span>
+                    </button>
+                    <div x-show="openFaq === 4" x-collapse class="text-xs text-textMuted leading-relaxed pb-4 pt-1">
+                        Yes, Cash on Delivery is available across 26,000+ Indian PIN codes. However, if you choose prepaid payment via UPI (GPay, PhonePe, Paytm), you receive an instant extra ₹50 discount automatically on checkout!
+                    </div>
+                </div>
+
+                <!-- Q5 -->
+                <div class="pt-4">
+                    <button 
+                        type="button" 
+                        @click="openFaq = (openFaq === 5 ? null : 5)" 
+                        class="w-full flex items-center justify-between text-left py-2.5 group cursor-pointer"
+                    >
+                        <span class="text-xs sm:text-sm font-bold text-forest-dark group-hover:text-emerald transition">
+                            What if my bottle gets damaged during courier shipping?
+                        </span>
+                        <span class="w-6 h-6 rounded-full bg-[#FAF8F5] flex items-center justify-center text-xs font-bold text-forest-dark shrink-0 transition-transform duration-300" :class="openFaq === 5 ? 'rotate-180 bg-forest text-white' : ''">
+                            ↓
+                        </span>
+                    </button>
+                    <div x-show="openFaq === 5" x-collapse class="text-xs text-textMuted leading-relaxed pb-4 pt-1">
+                        Every AvailSmart shipment is packed in shockproof bubble casing and sealed in heavy luxury boxes. If any leakage or glass damage occurs in transit, simply share an unboxing photo with our concierge team and we dispatch an immediate replacement within 24 hours at zero cost.
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    </section>
+
+    <!-- ============================================== -->
     <!-- 9. VIP NEWSLETTER & PRIVATE RESERVE DROPS -->
     <!-- ============================================== -->
     <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
