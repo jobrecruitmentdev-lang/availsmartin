@@ -242,8 +242,7 @@
                     </svg>
                 </button>
                 <div>
-                    <h1 class="text-xl font-bold text-emerald-dark leading-tight tracking-tight">{% block header_title
-                        %}Control Center{% endblock %}</h1>
+                    <h1 class="text-xl font-bold text-emerald-dark leading-tight tracking-tight">{% block header_title %}Control Center{% endblock %}</h1>
                     <p class="text-xs text-textMuted hidden sm:block mt-0.5">AvailSmart Multi-Category E-Commerce
                         Management</p>
                 </div>
@@ -257,8 +256,7 @@
                         {{ request.user.name|slice:":1"|default:request.user.email|slice:":1" }}
                     </div>
                     <div class="hidden sm:block text-right">
-                        <span class="text-sm font-bold text-textMain block leading-tight">{{
-                            request.user.name|default:request.user.email }}</span>
+                        <span class="text-sm font-bold text-textMain block leading-tight">{{ request.user.name|default:request.user.email }}</span>
                         <span
                             class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-mint-tint text-emerald border border-emerald-border/60 mt-1">
                             {% if request.user.is_superuser %}Super Administrator{% else %}Staff Admin{% endif %}
