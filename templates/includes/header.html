@@ -43,11 +43,12 @@
     </div>
 
     <!-- Main Navigation Bar -->
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex items-center justify-between h-20 sm:h-22 gap-4 sm:gap-8">
 
             <!-- Brand Logo (Official Signature Wordmark - Enlarged for Regality) -->
-            <a href="/" class="flex items-center gap-2.5 shrink-0 group py-1.5" title="AvailSmart - Luxury Fragrance House">
+            <a href="/" class="flex items-center gap-2.5 shrink-0 group py-1.5"
+                title="AvailSmart - Luxury Fragrance House">
                 <img src="{% static 'images/logo/logo-blue.png' %}" alt="AvailSmart"
                     class="h-12 sm:h-14 lg:h-16 w-auto object-contain group-hover:scale-105 transition-transform duration-300 drop-shadow-sm">
             </a>
@@ -300,11 +301,11 @@
             </div>
         </div>
 
-        <!-- Category Pills Row & Sub-Category Mega Menu (Overflow Resistant) -->
+        <!-- Category Pills Row & Sub-Category Mega Menu (All 5 Verticals + Bakhoor Always Visible) -->
         <nav
-            class="border-t border-alabaster-border/80 py-2 px-1 overflow-x-auto lg:overflow-visible no-scrollbar flex items-center justify-start gap-1.5 sm:gap-2 text-xs font-medium relative">
+            class="border-t border-alabaster-border/80 py-2 px-1 overflow-x-auto lg:overflow-visible no-scrollbar flex items-center justify-start gap-1 sm:gap-1.5 text-xs font-medium relative">
             <a href="/catalog/"
-                class="shrink-0 px-4 py-1.5 rounded-full bg-forest-dark text-white font-semibold transition tracking-wide text-xs hover:bg-forest-light flex items-center gap-1.5 whitespace-nowrap shadow-2xs">
+                class="shrink-0 px-3.5 py-1.5 rounded-full bg-forest-dark text-white font-semibold transition tracking-wide text-xs hover:bg-forest-light flex items-center gap-1.5 whitespace-nowrap shadow-2xs">
                 <svg class="w-3.5 h-3.5 text-white/80" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7" />
                 </svg>
@@ -312,10 +313,10 @@
             </a>
 
             {% for cat in nav_categories|slice:":5" %}
-            <div class="relative shrink-0 group {% if forloop.counter > 4 %}hidden 2xl:flex{% elif forloop.counter > 3 %}hidden xl:flex{% else %}flex{% endif %}"
+            <div class="relative shrink-0 group flex"
                 x-data="{ subOpen: false }" @mouseenter="subOpen = true" @mouseleave="subOpen = false">
                 <a href="/catalog/{{ cat.slug }}/"
-                    class="px-3.5 py-1.5 rounded-full hover:bg-[#F5EFEB] text-textMuted hover:text-forest-dark transition flex items-center gap-1 font-medium tracking-wide text-xs group-hover:text-forest-dark whitespace-nowrap">
+                    class="px-2.5 sm:px-3 py-1.5 rounded-full hover:bg-[#F5EFEB] text-textMuted hover:text-forest-dark transition flex items-center gap-1 font-medium tracking-wide text-xs group-hover:text-forest-dark whitespace-nowrap">
                     <span>{{ cat.name }}</span>
                     {% if cat.children.all %}
                     <svg class="w-3 h-3 text-textMuted group-hover:text-forest-dark transition-transform group-hover:rotate-180"
@@ -352,11 +353,11 @@
             </div>
             {% endfor %}
 
-            <!-- Overflow / More Categories Dropdown (Always Visible & Never Clipped) -->
+            <!-- Overflow / More Collections Dropdown (Always Visible & Never Clipped) -->
             <div class="relative shrink-0 group ml-auto pr-1" x-data="{ moreOpen: false }" @mouseenter="moreOpen = true"
                 @mouseleave="moreOpen = false">
                 <button type="button"
-                    class="px-3.5 py-1.5 rounded-full bg-[#FAF8F5] border border-alabaster-border hover:bg-[#F5EFEB] text-textMuted hover:text-forest-dark transition flex items-center gap-1.5 font-semibold tracking-wide text-xs whitespace-nowrap shadow-2xs">
+                    class="px-3 py-1.5 rounded-full bg-[#FAF8F5] border border-alabaster-border hover:bg-[#F5EFEB] text-textMuted hover:text-forest-dark transition flex items-center gap-1 font-semibold tracking-wide text-xs whitespace-nowrap shadow-2xs">
                     <span>More Collections</span>
                     <svg class="w-3 h-3 text-textMuted transition-transform group-hover:rotate-180" fill="none"
                         stroke="currentColor" viewBox="0 0 24 24">
@@ -375,15 +376,18 @@
                         class="w-72 bg-white/95 backdrop-blur-md rounded-2xl shadow-xl border border-alabaster-border p-2.5 max-h-96 overflow-y-auto no-scrollbar">
                         <div
                             class="px-3 py-1.5 mb-1.5 border-b border-alabaster-border flex items-center justify-between">
-                            <span class="text-[10px] font-bold uppercase tracking-wider text-textMuted">Explore All Collections</span>
-                            <span class="text-[10px] font-semibold text-clay">{{ nav_categories|length }} Collections</span>
+                            <span class="text-[10px] font-bold uppercase tracking-wider text-textMuted">Explore All
+                                Collections</span>
+                            <span class="text-[10px] font-semibold text-clay">{{ nav_categories|length }}
+                                Collections</span>
                         </div>
                         <div class="space-y-0.5">
                             {% for extra_cat in nav_categories %}
                             <a href="/catalog/{{ extra_cat.slug }}/"
                                 class="flex items-center justify-between px-3.5 py-2 rounded-xl text-xs text-forest-dark hover:bg-[#FAF8F5] hover:text-emerald transition font-medium">
                                 <span>{{ extra_cat.name }}</span>
-                                <span class="text-[10px] text-textMuted">{% if extra_cat.children.all %}{{ extra_cat.children.count }} sub{% endif %}</span>
+                                <span class="text-[10px] text-textMuted">{% if extra_cat.children.all %}{{
+                                    extra_cat.children.count }} sub{% endif %}</span>
                             </a>
                             {% endfor %}
                         </div>
