@@ -344,12 +344,12 @@
                             </div>
                         </div>
 
-                        <!-- Authorize / Send Code CTA -->
-                        <button type="button" @click="initiateOrderOtp()" :disabled="isRequestingOtp"
+                        <!-- Place Order CTA (Seamless One-Click Authorization) -->
+                        <button type="submit" :disabled="isSubmittingFinal"
                             class="w-full py-4 rounded-full bg-[#14241B] hover:bg-[#C2714F] text-white text-xs uppercase tracking-widest font-medium text-center shadow-lg transition duration-200 active:scale-[0.98] flex items-center justify-center gap-2 group disabled:opacity-50">
-                            <span x-show="!isRequestingOtp">Authorize & Place Order</span>
-                            <span x-show="isRequestingOtp" style="display: none;">Sending 6-Digit Email Code...</span>
-                            <span x-show="!isRequestingOtp"
+                            <span x-show="!isSubmittingFinal">Authorize & Place Order</span>
+                            <span x-show="isSubmittingFinal" style="display: none;">Securing Your Studio Order...</span>
+                            <span x-show="!isSubmittingFinal"
                                 class="group-hover:translate-x-1 transition duration-200">&rarr;</span>
                         </button>
 
@@ -599,10 +599,12 @@
         },
 
         handleFormSubmit(e) {
-            if (!this.orderOtp || this.orderOtp.length !== 6) {
+            if (!this.validateAddress()) {
                 e.preventDefault();
-                this.initiateOrderOtp();
+                return false;
             }
+            this.isSubmittingFinal = true;
+            return true;
         }
     };
 }

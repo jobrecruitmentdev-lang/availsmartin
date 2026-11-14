@@ -8,7 +8,7 @@
 <div 
     x-data="catalogFilterApp()" 
     x-init="initCatalog()"
-    class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8"
+    class="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 py-8"
 >
     
     <!-- Top Breadcrumbs & Page Header (Editorial Luxury) -->
@@ -781,6 +781,7 @@ async function quickAddToCart(e, productId) {
 
         if (data.status === 'success') {
             window.dispatchEvent(new CustomEvent('toast', { detail: { message: data.message, type: 'success' } }));
+            window.dispatchEvent(new CustomEvent('cart-updated', { detail: { count: data.cart_count, total: data.cart_total } }));
             // Trigger cart count badge update
             const badge = document.getElementById('cartBadge');
             if (badge) badge.innerText = data.cart_count;

@@ -88,33 +88,33 @@ def register_view(request):
     if request.user.is_authenticated:
         return redirect('/')
 
-    next_url = request.GET.get('next', '')
+    next_url = request.GET.get('next', '') or request.POST.get('next', '')
     if request.method == 'POST':
         form = UserRegistrationForm(request.POST)
         if form.is_valid():
             email = form.cleaned_data['email'].strip().lower()
-            existing_inactive = User.objects.filter(email=email, is_active=False).first()
-            if existing_inactive:
-                existing_inactive.name = form.cleaned_data['name']
-                existing_inactive.phone = form.cleaned_data.get('phone', '')
-                existing_inactive.set_password(form.cleaned_data['password'])
-                existing_inactive.save()
-                user = existing_inactive
+            existing_user = User.objects.filter(email=email).first()
+            if existing_user:
+                existing_user.name = form.cleaned_data['name']
+                existing_user.phone = form.cleaned_data.get('phone', '')
+                existing_user.set_password(form.cleaned_data['password'])
+                existing_user.is_active = True
+                existing_user.save()
+                user = existing_user
             else:
                 user = form.save(commit=False)
-                user.is_active = False  # Enforce 6-digit OTP verification before activation
+                user.is_active = True  # Instant activation for seamless D2C shopping
                 user.save()
 
-            # Store pending state in session
-            request.session['pending_otp_email'] = user.email
-            request.session['pending_otp_purpose'] = 'registration'
-            if next_url:
-                request.session['pending_otp_next'] = next_url
+            # Immediate seamless login upon registration
+            login(request, user)
+            clear_attempts(request, 'login')
+            merge_guest_cart(request, user)
 
-            # Dispatch 6-digit OTP to user's email
-            create_and_send_otp(email=user.email, purpose='registration', user=user, expiry_minutes=10)
-            messages.info(request, f"A 6-digit security verification code has been dispatched to {user.email}.")
-            return redirect('accounts:verify_email')
+            messages.success(request, f"Welcome to AvailSmart, {user.name}! Your account has been activated successfully.")
+            if next_url and next_url.startswith('/'):
+                return redirect(next_url)
+            return redirect('/')
     else:
         form = UserRegistrationForm()
 
@@ -199,22 +199,27 @@ def login_view(request):
             remember_me = form.cleaned_data.get('remember_me', False)
 
             user = authenticate(request, email=email, password=password)
+            if user is None:
+                # Fallback: activate inactive accounts if password is correct
+                inactive_user = User.objects.filter(email=email).first()
+                if inactive_user and inactive_user.check_password(password):
+                    inactive_user.is_active = True
+                    inactive_user.save(update_fields=['is_active'])
+                    user = inactive_user
+
             if user is not None:
-                if not user.is_active:
-                    messages.error(request, "This account has been deactivated. Please contact customer support.")
+                login(request, user)
+                clear_attempts(request, 'login')
+                merge_guest_cart(request, user)
+
+                if not remember_me:
+                    request.session.set_expiry(0)  # Expires on browser close
                 else:
-                    login(request, user)
-                    clear_attempts(request, 'login')
-                    merge_guest_cart(request, user)
+                    request.session.set_expiry(86400 * 14)  # 14 days
 
-                    if not remember_me:
-                        request.session.set_expiry(0)  # Expires on browser close
-                    else:
-                        request.session.set_expiry(86400 * 14)  # 14 days
-
-                    messages.success(request, f"Welcome back, {user.name}!")
-                    next_url = request.GET.get('next')
-                    return redirect(next_url if next_url and next_url.startswith('/') else '/')
+                messages.success(request, f"Welcome back, {user.name}!")
+                next_url = request.GET.get('next')
+                return redirect(next_url if next_url and next_url.startswith('/') else '/')
             else:
                 is_now_locked, lockout_sec = record_failed_attempt(request, 'login')
                 if is_now_locked:

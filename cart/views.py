@@ -87,21 +87,8 @@ def cart_detail_view(request):
 def add_to_cart_view(request, variant_id=None):
     """
     Adds a product variant to the cart.
-    Rule: Guests can browse; login required to add to cart or checkout.
+    Supports both anonymous guest session carts and authenticated user carts seamlessly.
     """
-    next_url = request.META.get('HTTP_REFERER', '/')
-
-    if not request.user.is_authenticated:
-        login_url = f"{reverse('accounts:login')}?next={next_url}"
-        if request.headers.get('x-requested-with') == 'XMLHttpRequest' or request.content_type == 'application/json':
-            return JsonResponse({
-                'status': 'unauthenticated',
-                'message': 'Please sign in to add items to your cart.',
-                'redirect_url': login_url
-            }, status=401)
-        messages.warning(request, "Please log in to add items to your cart.")
-        return redirect(login_url)
-
     # Resolve variant
     variant = None
     if variant_id:
@@ -164,20 +151,8 @@ def add_bundle_to_cart_view(request):
     """
     Adds multiple fragrance products to the cart simultaneously (e.g. Pick Any 3 for ₹899 Trio Combo).
     Automatically applies combo coupon TRIO899 for instant bundle savings.
+    Supports both anonymous guest session carts and authenticated user carts seamlessly.
     """
-    next_url = request.META.get('HTTP_REFERER', '/')
-
-    if not request.user.is_authenticated:
-        login_url = f"{reverse('accounts:login')}?next={next_url}"
-        if request.headers.get('x-requested-with') == 'XMLHttpRequest' or request.content_type == 'application/json':
-            return JsonResponse({
-                'status': 'unauthenticated',
-                'message': 'Please sign in to add your luxury combo to bag.',
-                'redirect_url': login_url
-            }, status=401)
-        messages.warning(request, "Please log in to add items to your cart.")
-        return redirect(login_url)
-
     try:
         if request.content_type == 'application/json':
             data = json.loads(request.body)

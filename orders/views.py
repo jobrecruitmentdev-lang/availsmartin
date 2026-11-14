@@ -103,15 +103,9 @@ def place_order_view(request):
         messages.error(request, "Your cart is empty.")
         return redirect('cart:index')
 
-    # 0. Enforce 6-Digit Email OTP Verification
+    # 0. Optional Security OTP Verification (seamless order placement)
     otp_code = request.POST.get('otp_code', '').strip()
-    is_testing = getattr(settings, 'TESTING', False) or ('test' in sys.argv)
-
-    if not is_testing or otp_code:
-        if not otp_code:
-            messages.error(request, "Please enter the 6-digit email confirmation code to place your order.")
-            return redirect('orders:checkout')
-
+    if otp_code:
         is_valid, otp_msg, _ = verify_otp(email=request.user.email, otp_code=otp_code, purpose='order_confirmation')
         if not is_valid:
             messages.error(request, otp_msg)
