@@ -12,7 +12,7 @@ from django.test import Client
 from accounts.models import User, EmailOTP
 from django.urls import reverse
 
-client = Client(SERVER_NAME='availsmart.in', HTTP_HOST='availsmart.in')
+client = Client(SERVER_NAME='availsmart.in', HTTP_HOST='availsmart.in', secure=True)
 
 print("--- TESTING REGISTRATION OTP FLOW ---")
 test_email = "testotp_reg_flow@availsmart.in"
