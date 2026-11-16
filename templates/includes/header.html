@@ -293,7 +293,8 @@
                             d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
                     </svg>
                     <span class="hidden sm:inline">Bag</span>
-                    <span id="cartBadge" x-data="{ count: {{ cart_count|default:'0' }} }" @cart-updated.window="count = $event.detail.count" x-text="count"
+                    <span id="cartBadge" x-data="{ count: {{ cart_count|default:'0' }} }"
+                        @cart-updated.window="count = $event.detail.count" x-text="count"
                         class="w-4 h-4 rounded-full bg-emerald text-white text-[10px] font-bold flex items-center justify-center">
                         {{ cart_count|default:"0" }}
                     </span>
@@ -314,7 +315,8 @@
             </a>
 
             <!-- Right: Fluid evenly distributed category links spanning the entire remaining width -->
-            <div class="flex-1 flex items-center justify-between gap-2 sm:gap-4 lg:gap-6 pl-2 sm:pl-4 border-l border-alabaster-border/60">
+            <div
+                class="flex-1 flex items-center justify-between gap-2 sm:gap-4 lg:gap-6 pl-2 sm:pl-4 border-l border-alabaster-border/60">
                 {% for cat in nav_categories %}
                 <div class="relative shrink-0 group flex" x-data="{ subOpen: false }" @mouseenter="subOpen = true"
                     @mouseleave="subOpen = false">
@@ -353,7 +355,8 @@
                             <a href="/catalog/{{ subcat.slug }}/"
                                 class="flex items-center justify-between px-3.5 py-2 rounded-xl text-xs text-forest-dark hover:bg-[#FAF8F5] hover:text-emerald transition font-medium">
                                 <span>{{ subcat.name }}</span>
-                                <svg class="w-3 h-3 text-textMuted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg class="w-3 h-3 text-textMuted" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M9 5l7 7-7 7" />
                                 </svg>

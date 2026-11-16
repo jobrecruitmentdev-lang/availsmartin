@@ -34,35 +34,54 @@ def home_view(request):
     categories = Category.objects.filter(parent__isnull=True, is_active=True).prefetch_related('children').order_by('sort_order')[:8]
     brands = Brand.objects.filter(is_active=True).order_by('name')[:12]
     
-    # Trending (Featured)
+    # 1. Flagship Standalone EDP Perfume Sprays (Best Selling Fragrances Grid - 100% Unique)
     featured_products = (
-        Product.objects.filter(is_featured=True, is_active=True)
+        Product.objects.filter(is_active=True)
+        .filter(Q(category__slug__in=['edp-sprays', 'gourmand-spicy', 'fresh-aquatic', 'dark-oudh-leather']) | Q(slug__in=['lattafa-khamrah-eau-de-parfum-100ml', 'rasasi-hawas-for-men-100ml', 'ahmed-al-maghribi-bin-shaikh-90ml', 'afnan-9pm-eau-de-parfum-100ml', 'lattafa-yara-candy-eau-de-parfum-100ml', 'ahmed-al-maghribi-marj-extrait-60ml']))
         .select_related('brand', 'category')
-        .prefetch_related('colors__images', 'variants')[:8]
+        .prefetch_related('colors__images', 'variants')
+        .distinct()[:6]
     )
-    
-    # New Arrivals
+    featured_ids = [p.id for p in featured_products]
+
+    # 2. Distinct Value Bundles, Combos, Discovery & Ritual Gift Sets (Zero Overlap with Best Sellers)
+    best_deals = (
+        Product.objects.filter(is_active=True)
+        .exclude(id__in=featured_ids)
+        .filter(slug__in=[
+            'availsmart-10-fragrance-discovery-box',
+            'pack-of-2-luxury-attar-duo-shanaya-white-oudh',
+            'royal-bakhoor-incense-burner-gift-set',
+            'dehn-al-oudh-cambodi-rare-vintage-oil-3ml'
+        ])
+        .select_related('brand', 'category')
+        .prefetch_related('colors__images', 'variants')
+        .order_by('-discount_percent')
+        .distinct()[:4]
+    )
+
+    # 3. 6 Pure 12ml Roll-On Attars for the 3 for ₹899 Interactive Combo Builder (Zero Overlap)
+    trio_attars = (
+        Product.objects.filter(is_non_alcoholic=True, is_active=True)
+        .filter(slug__in=[
+            'shanaya-luxury-concentrated-attar-12ml',
+            'imperial-white-oudh-non-alcoholic-attar-12ml',
+            'safwan-royal-musk-attar-12ml',
+            'ajmal-wisal-dhabab-perfume-oil-14ml',
+            'adil-qadri-lavish-musk-attar-12ml',
+            'availsmart-royal-ambergris-attar-12ml'
+        ])
+        .select_related('brand', 'category')
+        .prefetch_related('colors__images', 'variants')
+        .order_by('id')[:6]
+    )
+
+    # New Arrivals (for search/recent)
     new_arrivals = (
         Product.objects.filter(is_active=True)
         .select_related('brand', 'category')
         .prefetch_related('colors__images', 'variants')
         .order_by('-created_at')[:8]
-    )
-    
-    # Best Deals (highest discount percentage)
-    best_deals = (
-        Product.objects.filter(is_active=True, discount_percent__gt=0)
-        .select_related('brand', 'category')
-        .prefetch_related('colors__images', 'variants')
-        .order_by('-discount_percent')[:8]
-    )
-
-    # Flagship Pure Attars for the 3 for ₹899 Interactive Combo Builder
-    trio_attars = (
-        Product.objects.filter(is_non_alcoholic=True, is_active=True)
-        .select_related('brand', 'category')
-        .prefetch_related('colors__images', 'variants')
-        .order_by('-rating_avg', 'id')[:8]
     )
 
     wishlist_ids = _get_user_wishlist_ids(request.user)
