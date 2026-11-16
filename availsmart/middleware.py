@@ -41,6 +41,18 @@ class DualSessionMiddleware(MiddlewareMixin):
         request._session_cookie_name = cookie_name
         request._session_cookie_path = cookie_path
 
+        # STRICT SEPARATION: If storefront session contains a staff/admin user, purge it immediately.
+        # Administrative accounts can ONLY be authenticated inside the private portal (/benzo/*).
+        if cookie_name != 'benzo_admin_session' and '_auth_user_id' in request.session:
+            user_id = request.session.get('_auth_user_id')
+            try:
+                from accounts.models import User
+                u = User.objects.filter(pk=user_id).values('is_staff', 'is_superuser').first()
+                if u and (u['is_staff'] or u['is_superuser']):
+                    request.session.flush()
+            except Exception:
+                pass
+
     def process_response(self, request, response):
         try:
             accessed = request.session.accessed

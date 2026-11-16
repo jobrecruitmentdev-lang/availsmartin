@@ -208,6 +208,12 @@ def login_view(request):
                     user = inactive_user
 
             if user is not None:
+                # STRICT ROLE GUARD: Staff and superuser accounts must only log in via the private admin portal.
+                # Never allow administrative accounts into customer storefront sessions. Zero path leakage.
+                if user.is_staff or user.is_superuser:
+                    messages.error(request, "Invalid email or password.")
+                    return render(request, 'accounts/login.html', {'form': form})
+
                 login(request, user)
                 clear_attempts(request, 'login')
                 merge_guest_cart(request, user)
