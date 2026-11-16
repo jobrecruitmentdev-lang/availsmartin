@@ -28,9 +28,9 @@ reg_resp = client.post(reverse('accounts:register'), {
     'password': 'StrongPassword123!',
     'confirm_password': 'StrongPassword123!',
     'terms': 'on'
-}, follow=False)
+}, secure=True, follow=False)
 
-print(f"Registration POST status: {reg_resp.status_code}")
+print(f"Registration POST status: {reg_resp.status_code}, redirect to: {reg_resp.get('Location')}")
 assert reg_resp.status_code == 302
 assert reg_resp.url == reverse('accounts:verify_email'), f"Expected redirect to verify_email, got {reg_resp.url}"
 
@@ -50,7 +50,7 @@ print(f"PASS: 6-digit OTP generated in database: {otp_obj.otp_code}")
 wrong_resp = client.post(reverse('accounts:verify_email'), {
     'email': test_email,
     'otp_code': '000000'
-})
+}, secure=True)
 user.refresh_from_db()
 assert user.is_active is False, "User must remain inactive on wrong OTP"
 print("PASS: Wrong OTP rejected cleanly!")
@@ -59,7 +59,7 @@ print("PASS: Wrong OTP rejected cleanly!")
 correct_resp = client.post(reverse('accounts:verify_email'), {
     'email': test_email,
     'otp_code': otp_obj.otp_code
-}, follow=False)
+}, secure=True, follow=False)
 assert correct_resp.status_code == 302, f"Expected 302 redirect, got {correct_resp.status_code}"
 user.refresh_from_db()
 assert user.is_active is True, "User should be active after correct OTP verification"
