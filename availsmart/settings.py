@@ -138,6 +138,9 @@ MEDIA_ROOT = BASE_DIR / 'media'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Session Configuration
+SESSION_COOKIE_NAME = 'avail_smart_session'
+CUSTOMER_SESSION_COOKIE_NAME = 'avail_smart_session'
+ADMIN_SESSION_COOKIE_NAME = 'benzo_admin_session'
 SESSION_COOKIE_AGE = 86400 * 14  # 14 days
 SESSION_SAVE_EVERY_REQUEST = True
 
