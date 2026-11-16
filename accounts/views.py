@@ -95,26 +95,34 @@ def register_view(request):
             email = form.cleaned_data['email'].strip().lower()
             existing_user = User.objects.filter(email=email).first()
             if existing_user:
+                if existing_user.is_active:
+                    messages.info(request, "An account with this email address already exists. Please sign in.")
+                    return redirect('accounts:login')
+                # If account was registered previously but never verified with OTP
                 existing_user.name = form.cleaned_data['name']
                 existing_user.phone = form.cleaned_data.get('phone', '')
                 existing_user.set_password(form.cleaned_data['password'])
-                existing_user.is_active = True
                 existing_user.save()
                 user = existing_user
             else:
                 user = form.save(commit=False)
-                user.is_active = True  # Instant activation for seamless D2C shopping
+                user.is_active = False  # Enforce 6-digit OTP verification before activation
                 user.save()
 
-            # Immediate seamless login upon registration
-            login(request, user)
-            clear_attempts(request, 'login')
-            merge_guest_cart(request, user)
+            # Store pending state in session
+            request.session['pending_otp_email'] = user.email
+            request.session['pending_otp_purpose'] = 'registration'
+            if next_url:
+                request.session['pending_otp_next'] = next_url
 
-            messages.success(request, f"Welcome to AvailSmart, {user.name}! Your account has been activated successfully.")
-            if next_url and next_url.startswith('/'):
-                return redirect(next_url)
-            return redirect('/')
+            # Dispatch 6-digit cryptographic OTP to user's email via Hostinger SMTP
+            success, msg, _ = create_and_send_otp(email=user.email, purpose='registration', user=user, expiry_minutes=10)
+            if success:
+                messages.info(request, f"A 6-digit verification code has been dispatched to {user.email}.")
+            else:
+                messages.warning(request, msg)
+
+            return redirect('accounts:verify_email')
     else:
         form = UserRegistrationForm()
 

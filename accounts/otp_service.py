@@ -104,11 +104,13 @@ def create_and_send_otp(email: str, purpose: str = 'registration', user=None, me
         return True, user_msg, otp_code
 
     except Exception as e:
-        print(f"Error dispatching OTP email to {email}: {e}")
-        user_msg = f"A 6-digit verification code has been dispatched to {email}."
+        import traceback
+        traceback.print_exc()
+        print(f"[OTP SEND ERROR] Failed dispatching OTP email to {email}: {e}")
         if getattr(settings, 'DEBUG', False):
-            user_msg += f" (Test Code: {otp_code})"
-        return True, user_msg, otp_code
+            user_msg = f"A 6-digit verification code has been dispatched to {email}. (Test Code: {otp_code})"
+            return True, user_msg, otp_code
+        return False, f"Could not dispatch verification email: {e}. Please check your email or try again.", ""
 
 
 def verify_otp(email: str, otp_code: str, purpose: str = 'registration') -> tuple[bool, str, EmailOTP | None]:

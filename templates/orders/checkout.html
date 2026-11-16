@@ -342,12 +342,13 @@
                             </div>
                         </div>
 
-                        <!-- Place Order CTA (Seamless One-Click Authorization) -->
-                        <button type="submit" :disabled="isSubmittingFinal"
+                        <!-- Place Order CTA (Protected by 6-Digit Email OTP) -->
+                        <button type="button" @click="initiateOrderOtp(false)" :disabled="isRequestingOtp || isSubmittingFinal"
                             class="w-full py-4 rounded-full bg-[#14241B] hover:bg-[#C2714F] text-white text-xs uppercase tracking-widest font-medium text-center shadow-lg transition duration-200 active:scale-[0.98] flex items-center justify-center gap-2 group disabled:opacity-50">
-                            <span x-show="!isSubmittingFinal">Authorize & Place Order</span>
+                            <span x-show="!isRequestingOtp && !isSubmittingFinal">Verify & Place Order</span>
+                            <span x-show="isRequestingOtp" style="display: none;">Sending Verification Code...</span>
                             <span x-show="isSubmittingFinal" style="display: none;">Securing Your Studio Order...</span>
-                            <span x-show="!isSubmittingFinal"
+                            <span x-show="!isRequestingOtp && !isSubmittingFinal"
                                 class="group-hover:translate-x-1 transition duration-200">&rarr;</span>
                         </button>
 

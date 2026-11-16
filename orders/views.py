@@ -103,13 +103,16 @@ def place_order_view(request):
         messages.error(request, "Your cart is empty.")
         return redirect('cart:index')
 
-    # 0. Optional Security OTP Verification (seamless order placement)
+    # 0. Mandatory Security OTP Verification before order confirmation
     otp_code = request.POST.get('otp_code', '').strip()
-    if otp_code:
-        is_valid, otp_msg, _ = verify_otp(email=request.user.email, otp_code=otp_code, purpose='order_confirmation')
-        if not is_valid:
-            messages.error(request, otp_msg)
-            return redirect('orders:checkout')
+    if not otp_code:
+        messages.error(request, "Please enter the 6-digit confirmation code sent to your email to verify your order.")
+        return redirect('orders:checkout')
+
+    is_valid, otp_msg, _ = verify_otp(email=request.user.email, otp_code=otp_code, purpose='order_confirmation')
+    if not is_valid:
+        messages.error(request, otp_msg)
+        return redirect('orders:checkout')
 
     # 1. Resolve Delivery Address
     selected_address_id = request.POST.get('address_id')
