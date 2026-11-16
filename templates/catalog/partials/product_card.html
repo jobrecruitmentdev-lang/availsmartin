@@ -145,14 +145,16 @@ Context expected: prod (Product model instance), wishlist_ids (set of product ID
                 {% endif %}
             </div>
 
-            <!-- Row 2: Full-Width Clean Action Button -->
-            <a 
-                href="{% url 'catalog:product_detail' slug=prod.slug %}"
-                class="w-full py-2 px-3 rounded-xl bg-[#FAF8F5] hover:bg-forest-dark text-forest-dark hover:text-white border border-alabaster-border hover:border-forest-dark text-[11px] font-semibold tracking-wide flex items-center justify-center gap-1.5 transition-all duration-200"
+            <!-- Row 2: Adil Qadri High-Converting Golden Gradient Action Button -->
+            <button 
+                type="button"
+                onclick="quickAddToCart(event, {{ prod.id }})"
+                class="w-full py-2.5 px-4 rounded-xl bg-gradient-to-r from-[#D4AF37] via-[#E8CA72] to-[#B38728] hover:from-[#B38728] hover:to-[#D4AF37] text-[#0B130E] text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 shadow-xs hover:shadow-md transition-all active:scale-95 cursor-pointer"
+                title="Add to Cart"
             >
-                <span>Select Size</span>
-                <span class="text-xs">&rarr;</span>
-            </a>
+                <span>ADD TO CART</span>
+                <span class="text-sm">🛒</span>
+            </button>
         </div>
     </div>
 
