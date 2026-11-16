@@ -31,9 +31,9 @@ Partial template for Product Grid and Active Filter Chips (rendered on page load
     </div>
 {% endif %}
 
-<!-- Product Grid (4:5 Aspect Ratio Editorial Grid) -->
+<!-- Product Grid (4:5 Aspect Ratio Editorial Grid with Luxury Breathing Space) -->
 {% if products %}
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-5 sm:gap-6">
         {% for prod in products %}
             {% include 'catalog/partials/product_card.html' with prod=prod wishlist_ids=wishlist_ids %}
         {% endfor %}
