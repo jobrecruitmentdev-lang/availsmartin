@@ -244,17 +244,18 @@ function cartPageApp() {
         appliedCouponCode: '{{ coupon.code|default:"" }}',
 
         async updateQty(itemId, action) {
-            const formData = new FormData();
-            formData.append('action', action);
+            const params = new URLSearchParams();
+            params.append('action', action);
 
             try {
                 const res = await fetch(`/cart/update/${itemId}/`, {
                     method: 'POST',
                     headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
                         'X-CSRFToken': getCookie('csrftoken'),
                         'X-Requested-With': 'XMLHttpRequest'
                     },
-                    body: formData
+                    body: params.toString()
                 });
 
                 const data = await res.json();
@@ -327,17 +328,18 @@ function cartPageApp() {
         async applyCoupon() {
             if (!this.couponInput.trim()) return;
 
-            const formData = new FormData();
-            formData.append('code', this.couponInput.trim());
+            const params = new URLSearchParams();
+            params.append('code', this.couponInput.trim());
 
             try {
                 const res = await fetch('/cart/coupon/apply/', {
                     method: 'POST',
                     headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
                         'X-CSRFToken': getCookie('csrftoken'),
                         'X-Requested-With': 'XMLHttpRequest'
                     },
-                    body: formData
+                    body: params.toString()
                 });
 
                 const data = await res.json();

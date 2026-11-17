@@ -83,19 +83,20 @@ async function quickAddToCart(e, productId) {
     }
 
     const token = (typeof getCookie === 'function' ? getCookie('csrftoken') : '') || window.csrfToken || '';
-    const formData = new FormData();
-    formData.append('csrfmiddlewaretoken', token);
-    formData.append('product_id', productId);
-    formData.append('quantity', 1);
+    const params = new URLSearchParams();
+    params.append('csrfmiddlewaretoken', token);
+    params.append('product_id', productId);
+    params.append('quantity', 1);
 
     try {
         const res = await fetch('/cart/add/', {
             method: 'POST',
             headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
                 'X-CSRFToken': token,
                 'X-Requested-With': 'XMLHttpRequest'
             },
-            body: formData
+            body: params.toString()
         });
 
         const data = await res.json();

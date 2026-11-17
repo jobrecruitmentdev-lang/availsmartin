@@ -514,19 +514,20 @@
 
                 this.isRequestingOtp = true;
 
-                const formData = new FormData();
+                const params = new URLSearchParams();
                 {% if not request.user.is_authenticated %}
-                formData.append('email', this.customerEmail.trim());
+                params.append('email', this.customerEmail.trim());
                 {% endif %}
 
                 try {
                     const res = await fetch("{% url 'orders:send_order_otp' %}", {
                         method: 'POST',
                         headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded',
                             'X-CSRFToken': getCookie('csrftoken'),
                             'X-Requested-With': 'XMLHttpRequest'
                         },
-                        body: formData
+                        body: params.toString()
                     });
 
                 const data = await res.json();
