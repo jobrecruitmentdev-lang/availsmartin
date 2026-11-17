@@ -383,8 +383,8 @@
                     <button 
                         type="button" 
                         @click="handleAddToCart(false)"
-                        :disabled="!canAddToCart"
-                        class="flex-1 py-3.5 px-7 rounded-full bg-forest-dark hover:bg-forest text-white text-xs font-semibold tracking-wider shadow-sm transition active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                        :disabled="currentStock <= 0"
+                        class="flex-1 py-3.5 px-7 rounded-full bg-forest-dark hover:bg-forest text-white text-xs font-semibold tracking-wider shadow-sm transition active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 cursor-pointer"
                     >
                         <svg class="w-4 h-4 text-emerald-tint" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg>
                         <span>Add to Bag</span>
@@ -395,8 +395,8 @@
                 <button 
                     type="button" 
                     @click="handleAddToCart(true)"
-                    :disabled="!canAddToCart"
-                    class="w-full py-3.5 px-6 rounded-full bg-clay hover:bg-clay-hover text-white text-xs font-bold tracking-wider shadow-sm transition active:scale-95 disabled:opacity-50 flex items-center justify-center gap-2"
+                    :disabled="currentStock <= 0"
+                    class="w-full py-3.5 px-6 rounded-full bg-clay hover:bg-clay-hover text-white text-xs font-bold tracking-wider shadow-sm transition active:scale-95 disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer"
                 >
                     <span>Instant Studio Checkout</span>
                 </button>
@@ -726,8 +726,8 @@
         <button 
             type="button" 
             @click="handleAddToCart(false)"
-            :disabled="!canAddToCart"
-            class="py-2.5 px-6 rounded-full bg-forest-dark hover:bg-forest text-white text-xs font-bold tracking-wider shadow-md transition active:scale-95 disabled:opacity-50 shrink-0 flex items-center gap-1.5"
+            :disabled="currentStock <= 0"
+            class="py-2.5 px-6 rounded-full bg-forest-dark hover:bg-forest text-white text-xs font-bold tracking-wider shadow-md transition active:scale-95 disabled:opacity-50 shrink-0 flex items-center gap-1.5 cursor-pointer"
         >
             <span>Add to Bag</span>
             <span>&rarr;</span>
@@ -748,11 +748,16 @@ function productDetailApp() {
         activeImage: '',
         quantity: 1,
 
+        init() {
+            this.initDetail();
+        },
+
         initDetail() {
             if (this.colors && this.colors.length > 0) {
                 this.selectColor(this.colors[0].id);
             } else if (this.variants && this.variants.length > 0) {
-                this.selectVariant(this.variants[0]);
+                const firstInStock = this.variants.find(v => v.is_in_stock) || this.variants[0];
+                this.selectVariant(firstInStock);
             }
         },
 
@@ -795,26 +800,28 @@ function productDetailApp() {
         },
 
         get canAddToCart() {
-            return this.currentStock > 0 && this.selectedVariantId !== null;
+            return this.currentStock > 0;
         },
 
         selectColor(colorId) {
             this.selectedColorId = colorId;
             const images = this.currentImages;
-            if (images.length > 0) {
+            if (images && images.length > 0) {
                 this.activeImage = images[0].url;
             }
 
-            // Automatically pick first available size variant under this color
+            // Automatically pick first available in-stock size variant under this color
             const sizes = this.availableSizes;
-            if (sizes.length > 0) {
-                // If current size exists in new color, keep it; else pick first in-stock
-                const match = sizes.find(s => s.size === this.selectedSize && s.is_in_stock) || sizes[0];
-                this.selectVariant(match);
+            if (sizes && sizes.length > 0) {
+                const match = sizes.find(s => s.size === this.selectedSize && s.is_in_stock) || sizes.find(s => s.is_in_stock) || sizes[0];
+                if (match) {
+                    this.selectVariant(match);
+                }
             }
         },
 
         selectVariant(variant) {
+            if (!variant) return;
             this.selectedVariantId = variant.id;
             this.selectedSize = variant.size;
         },
@@ -832,19 +839,35 @@ function productDetailApp() {
         },
 
         async handleAddToCart(buyNow = false) {
+            // Auto-resolve variant if not explicitly picked yet
             if (!this.selectedVariantId) {
-                window.dispatchEvent(new CustomEvent('toast', { detail: { message: 'Please select a size.', type: 'warning' } }));
+                const sizes = this.availableSizes;
+                const fallback = (sizes && sizes.length > 0) ? (sizes.find(s => s.is_in_stock) || sizes[0]) : (this.variants.find(v => v.is_in_stock) || this.variants[0]);
+                if (fallback) {
+                    this.selectVariant(fallback);
+                }
+            }
+
+            if (!this.selectedVariantId) {
+                window.dispatchEvent(new CustomEvent('toast', { detail: { message: 'Please select your preferred bottle size.', type: 'warning' } }));
                 return;
             }
 
+            if (this.currentStock <= 0) {
+                window.dispatchEvent(new CustomEvent('toast', { detail: { message: 'This variant is currently out of stock.', type: 'warning' } }));
+                return;
+            }
+
+            const token = (typeof getCookie === 'function' ? getCookie('csrftoken') : '') || window.csrfToken || '';
             const formData = new FormData();
+            formData.append('csrfmiddlewaretoken', token);
             formData.append('quantity', this.quantity);
 
             try {
                 const res = await fetch(`/cart/add/${this.selectedVariantId}/`, {
                     method: 'POST',
                     headers: {
-                        'X-CSRFToken': getCookie('csrftoken'),
+                        'X-CSRFToken': token,
                         'X-Requested-With': 'XMLHttpRequest'
                     },
                     body: formData
@@ -864,9 +887,9 @@ function productDetailApp() {
                     if (badge) badge.innerText = data.cart_count;
 
                     if (buyNow) {
-                        window.location.href = '/cart/';
+                        window.location.href = '/orders/checkout/';
                     } else {
-                        // Open cart drawer
+                        // Open luxury slide-in cart drawer
                         window.dispatchEvent(new CustomEvent('open-cart'));
                     }
                 } else {
@@ -874,20 +897,67 @@ function productDetailApp() {
                 }
             } catch (err) {
                 console.error("Add to cart error:", err);
+                window.dispatchEvent(new CustomEvent('toast', { detail: { message: 'Item could not be added. Please try again.', type: 'error' } }));
             }
         }
     };
 }
 
-async function toggleWishlist(e, productId) {
-    e.stopPropagation();
-    e.preventDefault();
+// Global Quick Add to Cart Handler (used by Related Products cards)
+async function quickAddToCart(e, productId) {
+    if (e) {
+        e.stopPropagation();
+        e.preventDefault();
+    }
 
+    const token = (typeof getCookie === 'function' ? getCookie('csrftoken') : '') || window.csrfToken || '';
+    const formData = new FormData();
+    formData.append('csrfmiddlewaretoken', token);
+    formData.append('product_id', productId);
+    formData.append('quantity', 1);
+
+    try {
+        const res = await fetch('/cart/add/', {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': token,
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: formData
+        });
+
+        const data = await res.json();
+        if (res.status === 401 && data.redirect_url) {
+            window.location.href = data.redirect_url;
+            return;
+        }
+
+        if (data.status === 'success') {
+            window.dispatchEvent(new CustomEvent('toast', { detail: { message: data.message, type: 'success' } }));
+            window.dispatchEvent(new CustomEvent('cart-updated', { detail: { count: data.cart_count, total: data.cart_total } }));
+            const badge = document.getElementById('cartBadge');
+            if (badge) badge.innerText = data.cart_count;
+            window.dispatchEvent(new CustomEvent('open-cart'));
+        } else {
+            window.dispatchEvent(new CustomEvent('toast', { detail: { message: data.message, type: 'warning' } }));
+        }
+    } catch (err) {
+        console.error("Quick add error:", err);
+    }
+}
+
+async function toggleWishlist(e, productId) {
+    if (e) {
+        e.stopPropagation();
+        e.preventDefault();
+    }
+
+    const token = (typeof getCookie === 'function' ? getCookie('csrftoken') : '') || window.csrfToken || '';
     try {
         const res = await fetch(`/cart/wishlist/toggle/${productId}/`, {
             method: 'POST',
             headers: {
-                'X-CSRFToken': getCookie('csrftoken'),
+                'X-CSRFToken': token,
                 'X-Requested-With': 'XMLHttpRequest'
             }
         });
@@ -912,21 +982,6 @@ async function toggleWishlist(e, productId) {
     } catch (err) {
         console.error("Toggle wishlist error:", err);
     }
-}
-
-function getCookie(name) {
-    let cookieValue = null;
-    if (document.cookie && document.cookie !== '') {
-        const cookies = document.cookie.split(';');
-        for (let i = 0; i < cookies.length; i++) {
-            const cookie = cookies[i].trim();
-            if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                break;
-            }
-        }
-    }
-    return cookieValue;
 }
 </script>
 {% endblock %}

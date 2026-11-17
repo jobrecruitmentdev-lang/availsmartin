@@ -726,12 +726,13 @@
                 if (productIds.length < 3) return;
 
                 this.isSubmitting = true;
+                const token = (typeof getCookie === 'function' ? getCookie('csrftoken') : '') || window.csrfToken || '';
                 try {
                     const res = await fetch('/cart/add-bundle/', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
-                            'X-CSRFToken': getCookie('csrftoken'),
+                            'X-CSRFToken': token,
                             'X-Requested-With': 'XMLHttpRequest'
                         },
                         body: JSON.stringify({ product_ids: productIds })
@@ -1284,10 +1285,14 @@
 <!-- Quick Add to Cart & Wishlist scripts -->
 <script>
 async function quickAddToCart(e, productId) {
-    e.stopPropagation();
-    e.preventDefault();
+    if (e) {
+        e.stopPropagation();
+        e.preventDefault();
+    }
 
+    const token = (typeof getCookie === 'function' ? getCookie('csrftoken') : '') || window.csrfToken || '';
     const formData = new FormData();
+    formData.append('csrfmiddlewaretoken', token);
     formData.append('product_id', productId);
     formData.append('quantity', 1);
 
@@ -1295,7 +1300,7 @@ async function quickAddToCart(e, productId) {
         const res = await fetch('/cart/add/', {
             method: 'POST',
             headers: {
-                'X-CSRFToken': getCookie('csrftoken'),
+                'X-CSRFToken': token,
                 'X-Requested-With': 'XMLHttpRequest'
             },
             body: formData

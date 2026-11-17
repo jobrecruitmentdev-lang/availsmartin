@@ -102,12 +102,20 @@ def add_to_cart_view(request, variant_id=None):
     if variant_id:
         variant = get_object_or_404(ProductVariant, id=variant_id, is_active=True)
     else:
-        product_id = request.POST.get('product_id')
-        if product_id:
-            product = get_object_or_404(Product, id=product_id, is_active=True)
-            variant = product.variants.filter(is_active=True, stock_quantity__gt=0).first()
-            if not variant:
-                variant = product.variants.filter(is_active=True).first()
+        post_variant_id = request.POST.get('variant_id')
+        if post_variant_id:
+            try:
+                variant = ProductVariant.objects.filter(id=int(post_variant_id), is_active=True).first()
+            except (ValueError, TypeError):
+                variant = None
+
+        if not variant:
+            product_id = request.POST.get('product_id')
+            if product_id:
+                product = get_object_or_404(Product, id=product_id, is_active=True)
+                variant = product.variants.filter(is_active=True, stock_quantity__gt=0).first()
+                if not variant:
+                    variant = product.variants.filter(is_active=True).first()
 
     if not variant:
         return JsonResponse({'status': 'error', 'message': 'Product variant not found.'}, status=404)
