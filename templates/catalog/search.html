@@ -102,6 +102,10 @@ async function quickAddToCart(e, productId) {
 
         if (data.status === 'success') {
             window.dispatchEvent(new CustomEvent('toast', { detail: { message: data.message, type: 'success' } }));
+            window.dispatchEvent(new CustomEvent('cart-updated', { detail: { count: data.cart_count, total: data.cart_total } }));
+            const badge = document.getElementById('cartBadge');
+            if (badge) badge.innerText = data.cart_count;
+            window.dispatchEvent(new CustomEvent('open-cart'));
         } else {
             window.dispatchEvent(new CustomEvent('toast', { detail: { message: data.message, type: 'warning' } }));
         }

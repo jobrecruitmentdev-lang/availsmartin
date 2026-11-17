@@ -165,6 +165,9 @@
     <!-- Slide-in Mini Cart Drawer -->
     {% include 'includes/cart_drawer.html' %}
 
+    <!-- Global CSRF Token Container ensuring Django sends csrftoken cookie -->
+    <div id="csrfTokenContainer" style="display: none;">{% csrf_token %}</div>
+
     <!-- Helper script for AJAX CSRF token -->
     <script>
         function getCookie(name) {
@@ -178,6 +181,10 @@
                         break;
                     }
                 }
+            }
+            if (!cookieValue && name === 'csrftoken') {
+                const input = document.querySelector('#csrfTokenContainer input[name=csrfmiddlewaretoken]');
+                if (input) cookieValue = input.value;
             }
             return cookieValue;
         }

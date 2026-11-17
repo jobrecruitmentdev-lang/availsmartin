@@ -1312,6 +1312,8 @@ async function quickAddToCart(e, productId) {
             window.dispatchEvent(new CustomEvent('cart-updated', { detail: { count: data.cart_count, total: data.cart_total } }));
             const badge = document.getElementById('cartBadge');
             if (badge) badge.innerText = data.cart_count;
+            // Instantly open luxury slide-in cart drawer
+            window.dispatchEvent(new CustomEvent('open-cart'));
         } else {
             window.dispatchEvent(new CustomEvent('toast', { detail: { message: data.message, type: 'warning' } }));
         }

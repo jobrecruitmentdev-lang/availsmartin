@@ -4,6 +4,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.http import JsonResponse, HttpResponse
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
+from django.views.decorators.csrf import ensure_csrf_cookie
 from django.contrib import messages
 from django.urls import reverse
 from django.utils import timezone
@@ -15,6 +16,7 @@ from catalog.models import Product, ProductVariant
 def _get_cart(request):
     """
     Returns the shopping cart for authenticated user or guest session.
+    Guarantees session persistence for guest shoppers.
     """
     if request.user.is_authenticated:
         cart, _ = Cart.objects.get_or_create(user=request.user)
@@ -22,6 +24,11 @@ def _get_cart(request):
     
     if not request.session.session_key:
         request.session.create()
+
+    # Guarantee session persistence so DualSessionMiddleware and browser retain the cookie
+    request.session['has_cart'] = True
+    request.session.modified = True
+
     session_key = request.session.session_key
     cart, _ = Cart.objects.get_or_create(session_key=session_key)
     return cart
@@ -59,6 +66,7 @@ def _calculate_cart_totals(cart, coupon=None, payment_method=None):
     }
 
 
+@ensure_csrf_cookie
 def cart_detail_view(request):
     """
     Shopping cart page view with real-time item quantities, coupon discounts,

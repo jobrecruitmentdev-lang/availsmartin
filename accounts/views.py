@@ -59,27 +59,37 @@ def clear_attempts(request, key_prefix='login'):
     request.session.pop(f"{key_prefix}_lockout_until", None)
 
 
-def merge_guest_cart(request, user):
+def merge_guest_cart(request, user, old_session_key=None):
     """
     Transfers items from an anonymous session cart to the authenticated user's cart.
+    Guarantees cart items are never lost during login session cycling.
     """
-    session_key = request.session.session_key
-    if not session_key:
+    keys_to_check = []
+    if old_session_key:
+        keys_to_check.append(old_session_key)
+    current_key = request.session.session_key
+    if current_key and current_key not in keys_to_check:
+        keys_to_check.append(current_key)
+
+    if not keys_to_check:
         return
 
     try:
-        guest_cart = Cart.objects.filter(session_key=session_key).first()
-        if guest_cart and not guest_cart.is_empty:
-            user_cart, _ = Cart.objects.get_or_create(user=user)
-            for item in guest_cart.items.all():
-                existing_item = user_cart.items.filter(variant=item.variant).first()
-                if existing_item:
-                    existing_item.quantity += item.quantity
-                    existing_item.save()
-                else:
-                    item.cart = user_cart
-                    item.save()
-            guest_cart.delete()
+        user_cart, _ = Cart.objects.get_or_create(user=user)
+        for s_key in keys_to_check:
+            guest_carts = Cart.objects.filter(session_key=s_key)
+            for guest_cart in guest_carts:
+                if guest_cart.id == user_cart.id:
+                    continue
+                for item in guest_cart.items.all():
+                    existing_item = user_cart.items.filter(variant=item.variant).first()
+                    if existing_item:
+                        existing_item.quantity += item.quantity
+                        existing_item.save()
+                    else:
+                        item.cart = user_cart
+                        item.save()
+                guest_cart.delete()
     except Exception as e:
         print(f"Error merging cart on login: {e}")
 
@@ -149,9 +159,10 @@ def verify_email_otp_view(request):
             if user:
                 user.is_active = True
                 user.save(update_fields=['is_active'])
+                old_session_key = request.session.session_key
                 login(request, user)
                 clear_attempts(request, 'login')
-                merge_guest_cart(request, user)
+                merge_guest_cart(request, user, old_session_key=old_session_key)
 
                 # Clean session state
                 request.session.pop('pending_otp_email', None)
@@ -222,9 +233,10 @@ def login_view(request):
                     messages.error(request, "Invalid email or password.")
                     return render(request, 'accounts/login.html', {'form': form})
 
+                old_session_key = request.session.session_key
                 login(request, user)
                 clear_attempts(request, 'login')
-                merge_guest_cart(request, user)
+                merge_guest_cart(request, user, old_session_key=old_session_key)
 
                 if not remember_me:
                     request.session.set_expiry(0)  # Expires on browser close

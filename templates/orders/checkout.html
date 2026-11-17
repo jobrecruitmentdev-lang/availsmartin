@@ -95,7 +95,8 @@
                                         {% endif %}
                                     </div>
                                     <p class="text-xs text-[#5C564B] mt-1.5 leading-relaxed">
-                                        {{ addr.address_line1 }}{% if addr.address_line2 %}, {{ addr.address_line2 }}{% endif %}, {{ addr.city }}, {{ addr.state }} - {{ addr.pincode }}
+                                        {{ addr.address_line1 }}{% if addr.address_line2 %}, {{ addr.address_line2 }}{%
+                                        endif %}, {{ addr.city }}, {{ addr.state }} - {{ addr.pincode }}
                                     </p>
                                     <p class="text-xs text-[#8A8477] mt-1.5 flex items-center gap-1.5">
                                         <span>Direct Dispatch:</span>
@@ -112,6 +113,13 @@
                             <input type="radio" name="address_id" value="new" x-model="selectedAddress" class="hidden">
 
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                {% if not request.user.is_authenticated %}
+                                <div class="sm:col-span-2">
+                                    <label class="block text-xs font-medium text-[#14241B] mb-1.5">Email Address (For Order Tracking & 6-Digit OTP) *</label>
+                                    <input type="email" name="new_email" id="new_email" x-model="customerEmail" placeholder="e.g. maya@example.com"
+                                        class="w-full px-4 py-2.5 rounded-xl border border-[#D3CBBF] bg-[#FAF8F5] text-xs focus:bg-white focus:outline-none focus:border-[#14241B] transition">
+                                </div>
+                                {% endif %}
                                 <div>
                                     <label class="block text-xs font-medium text-[#14241B] mb-1.5">Recipient Full Name
                                         *</label>
@@ -316,7 +324,8 @@
                             <div class="flex items-center justify-between text-[#5C564B]">
                                 <span>Artisan Shipping & Fragile Care</span>
                                 <span class="font-medium text-[#14241B]">
-                                    {% if shipping_charge == 0 %}COMPLIMENTARY{% else %}₹{{ shipping_charge }}{% endif %}
+                                    {% if shipping_charge == 0 %}COMPLIMENTARY{% else %}₹{{ shipping_charge }}{% endif
+                                    %}
                                 </span>
                             </div>
 
@@ -343,7 +352,8 @@
                         </div>
 
                         <!-- Place Order CTA (Protected by 6-Digit Email OTP) -->
-                        <button type="button" @click="initiateOrderOtp(false)" :disabled="isRequestingOtp || isSubmittingFinal"
+                        <button type="button" @click="initiateOrderOtp(false)"
+                            :disabled="isRequestingOtp || isSubmittingFinal"
                             class="w-full py-4 rounded-full bg-[#14241B] hover:bg-[#C2714F] text-white text-xs uppercase tracking-widest font-medium text-center shadow-lg transition duration-200 active:scale-[0.98] flex items-center justify-center gap-2 group disabled:opacity-50">
                             <span x-show="!isRequestingOtp && !isSubmittingFinal">Verify & Place Order</span>
                             <span x-show="isRequestingOtp" style="display: none;">Sending Verification Code...</span>
@@ -403,7 +413,7 @@
                 <h3 class="text-2xl font-editorial text-[#14241B]">Confirm Studio Order</h3>
                 <p class="text-xs text-[#5C564B] mt-2 leading-relaxed">
                     We've emailed a random 6-digit confirmation code to:
-                    <span class="font-bold text-[#14241B] block mt-0.5">{{ request.user.email }}</span>
+                    <span class="font-bold text-[#14241B] block mt-0.5" x-text="customerEmail || '{{ request.user.email }}'">{{ request.user.email }}</span>
                 </p>
                 <div
                     class="mt-3 inline-block px-3 py-1 rounded-full bg-[#FAF8F5] border border-[#E8E4DC] text-xs font-semibold text-[#14241B]">
@@ -452,57 +462,74 @@
         return {
             selectedAddress: '{{ addresses.first.id|default:"new" }}',
             showNewForm: {% if addresses.exists %}false{% else %} true{% endif %},
-        paymentMethod: 'cod',
+            paymentMethod: 'cod',
+            customerEmail: '{{ request.user.email|default:"" }}',
             showOtpModal: false,
-                otpDigits: ['', '', '', '', '', ''],
-                    orderOtp: '',
-                        timer: 45,
-                            timerInterval: null,
-                                isRequestingOtp: false,
-                                    isSubmittingFinal: false,
+            otpDigits: ['', '', '', '', '', ''],
+            orderOtp: '',
+            timer: 45,
+            timerInterval: null,
+            isRequestingOtp: false,
+            isSubmittingFinal: false,
 
-                                        toggleAddressMode() {
-            this.showNewForm = !this.showNewForm;
-            if (this.showNewForm) {
-                this.selectedAddress = 'new';
-            } else {
-                this.selectedAddress = '{{ addresses.first.id }}';
-            }
-        },
+            toggleAddressMode() {
+                this.showNewForm = !this.showNewForm;
+                if (this.showNewForm) {
+                    this.selectedAddress = 'new';
+                } else {
+                    this.selectedAddress = '{{ addresses.first.id }}';
+                }
+            },
 
-        validateAddress() {
-            if (this.selectedAddress === 'new') {
-                const name = document.getElementById('new_full_name')?.value.trim();
-                const phone = document.getElementById('new_phone')?.value.trim();
-                const line1 = document.getElementById('new_address_line1')?.value.trim();
-                const city = document.getElementById('new_city')?.value.trim();
-                const state = document.getElementById('new_state')?.value.trim();
-                const pin = document.getElementById('new_pincode')?.value.trim();
-
-                if (!name || !phone || !line1 || !city || !state || !pin) {
+            validateAddress() {
+                {% if not request.user.is_authenticated %}
+                const email = this.customerEmail.trim();
+                if (!email || !email.includes('@')) {
                     window.dispatchEvent(new CustomEvent('toast', {
-                        detail: { message: 'Please fill in all mandatory delivery address fields.', type: 'warning' }
+                        detail: { message: 'Please enter a valid email address to receive your order verification code.', type: 'warning' }
                     }));
                     return false;
                 }
-            }
-            return true;
-        },
+                {% endif %}
 
-        async initiateOrderOtp(isResend = false) {
-            if (!this.validateAddress()) return;
-            if (isResend && this.timer > 0) return;
+                if (this.selectedAddress === 'new') {
+                    const name = document.getElementById('new_full_name')?.value.trim();
+                    const phone = document.getElementById('new_phone')?.value.trim();
+                    const line1 = document.getElementById('new_address_line1')?.value.trim();
+                    const city = document.getElementById('new_city')?.value.trim();
+                    const state = document.getElementById('new_state')?.value.trim();
+                    const pin = document.getElementById('new_pincode')?.value.trim();
 
-            this.isRequestingOtp = true;
-
-            try {
-                const res = await fetch("{% url 'orders:send_order_otp' %}", {
-                    method: 'POST',
-                    headers: {
-                        'X-CSRFToken': getCookie('csrftoken'),
-                        'X-Requested-With': 'XMLHttpRequest'
+                    if (!name || !phone || !line1 || !city || !state || !pin) {
+                        window.dispatchEvent(new CustomEvent('toast', {
+                            detail: { message: 'Please fill in all mandatory delivery address fields.', type: 'warning' }
+                        }));
+                        return false;
                     }
-                });
+                }
+                return true;
+            },
+
+            async initiateOrderOtp(isResend = false) {
+                if (!this.validateAddress()) return;
+                if (isResend && this.timer > 0) return;
+
+                this.isRequestingOtp = true;
+
+                const formData = new FormData();
+                {% if not request.user.is_authenticated %}
+                formData.append('email', this.customerEmail.trim());
+                {% endif %}
+
+                try {
+                    const res = await fetch("{% url 'orders:send_order_otp' %}", {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRFToken': getCookie('csrftoken'),
+                            'X-Requested-With': 'XMLHttpRequest'
+                        },
+                        body: formData
+                    });
 
                 const data = await res.json();
                 if (data.status === 'success') {

@@ -8,6 +8,7 @@ from django.template.loader import render_to_string
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
+from django.views.decorators.csrf import ensure_csrf_cookie
 from django.urls import reverse
 
 from .models import (
@@ -25,6 +26,7 @@ def _get_user_wishlist_ids(user):
     return set()
 
 
+@ensure_csrf_cookie
 def home_view(request):
     """
     Homepage view with slim hero banner, category tiles, trending items,
@@ -140,6 +142,7 @@ def _get_category_descendants(category):
     return descendant_ids
 
 
+@ensure_csrf_cookie
 def catalog_view(request, slug=None):
     """
     High-level filtered catalog listing supporting both traditional GET
@@ -585,6 +588,7 @@ def search_view(request):
     return render(request, 'catalog/search.html', context)
 
 
+@ensure_csrf_cookie
 def product_detail_view(request, slug):
     """
     Rich interactive product detail page with:

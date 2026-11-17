@@ -1,9 +1,12 @@
 import sys
 import json
+import secrets
 from decimal import Decimal
 from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
+from django.views.decorators.csrf import ensure_csrf_cookie
 from django.contrib import messages
 from django.urls import reverse
 from django.utils import timezone
@@ -14,23 +17,27 @@ from django.http import JsonResponse
 
 from .models import Order, OrderItem, Payment
 from cart.models import Cart, CartItem, Coupon
-from cart.views import _calculate_cart_totals
-from accounts.models import Address
+from cart.views import _get_cart, _calculate_cart_totals
+from accounts.models import Address, User
+from accounts.views import merge_guest_cart
 from accounts.otp_service import create_and_send_otp, verify_otp
 
 
-@login_required
+@ensure_csrf_cookie
 def checkout_view(request):
     """
-    Checkout page view: address selection or creation, order summary review,
-    and payment method selection.
+    Seamless D2C Checkout page view supporting both authenticated customers
+    and instant guest shoppers with 6-digit Email OTP confirmation.
     """
-    cart = Cart.objects.filter(user=request.user).first()
+    cart = _get_cart(request)
     if not cart or cart.is_empty:
         messages.info(request, "Your shopping bag is empty. Please add items before checking out.")
         return redirect('cart:index')
 
-    addresses = Address.objects.filter(user=request.user, is_active=True).order_by('-is_default', '-created_at')
+    if request.user.is_authenticated:
+        addresses = Address.objects.filter(user=request.user, is_active=True).order_by('-is_default', '-created_at')
+    else:
+        addresses = Address.objects.none()
 
     coupon = None
     coupon_id = request.session.get('coupon_id')
@@ -54,15 +61,26 @@ def checkout_view(request):
     return render(request, 'orders/checkout.html', context)
 
 
-@login_required
 @require_POST
 def send_order_otp_view(request):
     """
     Sends a 6-digit confirmation code to the customer's email before finalizing the studio order.
+    Supports authenticated users and guest checkouts seamlessly.
     """
-    cart = Cart.objects.filter(user=request.user).first()
+    cart = _get_cart(request)
     if not cart or cart.is_empty:
         return JsonResponse({'status': 'error', 'message': 'Your shopping bag is empty.'}, status=400)
+
+    if request.user.is_authenticated:
+        email = request.user.email.strip().lower()
+        user = request.user
+    else:
+        email = request.POST.get('email', '').strip().lower()
+        if not email or '@' not in email:
+            return JsonResponse({'status': 'error', 'message': 'Please enter a valid email address to receive your verification code.'}, status=400)
+        user = None
+        request.session['guest_checkout_email'] = email
+        request.session.modified = True
 
     coupon = None
     coupon_id = request.session.get('coupon_id')
@@ -71,9 +89,9 @@ def send_order_otp_view(request):
     totals = _calculate_cart_totals(cart, coupon)
 
     success, msg, _ = create_and_send_otp(
-        email=request.user.email,
+        email=email,
         purpose='order_confirmation',
-        user=request.user,
+        user=user,
         metadata={
             'total_amount': str(totals['total']),
             'item_count': f"{cart.total_items} items"
@@ -84,24 +102,50 @@ def send_order_otp_view(request):
     if success:
         return JsonResponse({
             'status': 'success',
-            'message': f"A 6-digit confirmation code has been dispatched to {request.user.email}."
+            'message': f"A 6-digit confirmation code has been dispatched to {email}."
         })
     else:
-        return JsonResponse({'status': 'error', 'message': msg}, status=429)
+        return JsonResponse({'status': 'error', 'message': msg}, status=429 if 'wait' in msg.lower() else 400)
 
 
-@login_required
 @require_POST
 def place_order_view(request):
     """
     Processes the checkout form, validates address and inventory,
     decrements stock, freezes order snapshot, creates Payment and OrderItems,
     and empties the cart.
+    Supports authenticated customers and seamless guest checkout.
     """
-    cart = Cart.objects.filter(user=request.user).first()
+    cart = _get_cart(request)
     if not cart or cart.is_empty:
         messages.error(request, "Your cart is empty.")
         return redirect('cart:index')
+
+    # Resolve customer user & email
+    if request.user.is_authenticated:
+        customer_user = request.user
+        customer_email = request.user.email.strip().lower()
+    else:
+        customer_email = request.POST.get('new_email', '').strip().lower() or request.session.get('guest_checkout_email', '')
+        if not customer_email or '@' not in customer_email:
+            messages.error(request, "Please provide a valid email address.")
+            return redirect('orders:checkout')
+        customer_name = request.POST.get('new_full_name', '').strip() or 'Valued Customer'
+        customer_phone = request.POST.get('new_phone', '').strip()
+
+        # Find or create customer account seamlessly
+        customer_user = User.objects.filter(email=customer_email).first()
+        if not customer_user:
+            customer_user = User.objects.create_user(
+                email=customer_email,
+                name=customer_name,
+                phone=customer_phone,
+                password=secrets.token_urlsafe(16),
+                is_active=True
+            )
+        elif not customer_user.is_active:
+            customer_user.is_active = True
+            customer_user.save(update_fields=['is_active'])
 
     # 0. Mandatory Security OTP Verification before order confirmation
     otp_code = request.POST.get('otp_code', '').strip()
@@ -109,7 +153,7 @@ def place_order_view(request):
         messages.error(request, "Please enter the 6-digit confirmation code sent to your email to verify your order.")
         return redirect('orders:checkout')
 
-    is_valid, otp_msg, _ = verify_otp(email=request.user.email, otp_code=otp_code, purpose='order_confirmation')
+    is_valid, otp_msg, _ = verify_otp(email=customer_email, otp_code=otp_code, purpose='order_confirmation')
     if not is_valid:
         messages.error(request, otp_msg)
         return redirect('orders:checkout')
@@ -118,7 +162,7 @@ def place_order_view(request):
     selected_address_id = request.POST.get('address_id')
     address_snapshot = None
 
-    if selected_address_id and selected_address_id != 'new':
+    if selected_address_id and selected_address_id != 'new' and request.user.is_authenticated:
         address = get_object_or_404(Address, id=selected_address_id, user=request.user, is_active=True)
         address_snapshot = {
             'full_name': address.full_name,
@@ -160,11 +204,10 @@ def place_order_view(request):
             'address_type': address_type,
         }
 
-        if save_address:
-            # Set as default if user has no other addresses
-            has_existing = Address.objects.filter(user=request.user, is_active=True).exists()
+        if save_address and customer_user:
+            has_existing = Address.objects.filter(user=customer_user, is_active=True).exists()
             Address.objects.create(
-                user=request.user,
+                user=customer_user,
                 full_name=full_name,
                 phone=phone,
                 address_line1=address_line1,
@@ -208,7 +251,7 @@ def place_order_view(request):
 
         order = Order.objects.create(
             order_number=order_number,
-            user=request.user,
+            user=customer_user,
             shipping_address_snapshot=address_snapshot,
             subtotal=totals['subtotal'],
             discount=total_discount,
@@ -254,6 +297,13 @@ def place_order_view(request):
         # 8. Empty Cart and Session
         cart.items.all().delete()
         request.session.pop('coupon_id', None)
+        request.session.pop('guest_checkout_email', None)
+
+    # Seamless login for guest shopper so they can view their order receipt
+    if not request.user.is_authenticated:
+        old_session_key = request.session.session_key
+        login(request, customer_user, backend='django.contrib.auth.backends.ModelBackend')
+        merge_guest_cart(request, customer_user, old_session_key=old_session_key)
 
     messages.success(request, f"Order #{order.order_number} placed successfully!")
     return redirect('orders:order_success', order_number=order.order_number)
