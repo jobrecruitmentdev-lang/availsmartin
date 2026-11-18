@@ -298,14 +298,17 @@
                 <div :class="showAllSizes ? 'max-h-48 overflow-y-auto pr-1' : ''"
                     class="flex flex-wrap gap-1.5 transition-all">
                     {% for s in available_sizes %}
-                    <button type="button" x-show="showAllSizes || {{ forloop.counter0 }} < 6" {% if
-                        available_sizes|length> 8 %}
-                        x-show="(showAllSizes || {{ forloop.counter0 }} < 6) && (!sizeQuery || '{{ s|lower|escapejs }}'
-                            .includes(sizeQuery.toLowerCase()))" {% endif %} @click="toggleSize('{{ s|escapejs }}')"
-                            :class="sizes.includes('{{ s|escapejs }}') ? 'bg-emerald text-white font-bold border-emerald shadow-2xs' : 'bg-white text-textMain border-emerald-border hover:bg-mint-tint'"
-                            class="px-2.5 py-1 text-xs rounded-xl border transition shadow-2xs truncate max-w-[200px]"
-                            title="{{ s }}">
-                            {{ s }}
+                    <button type="button" 
+                        {% if available_sizes|length > 8 %}
+                        x-show="(showAllSizes || {{ forloop.counter0 }} < 6) && (!sizeQuery || '{{ s|lower|escapejs }}'.includes(sizeQuery.toLowerCase()))"
+                        {% else %}
+                        x-show="showAllSizes || {{ forloop.counter0 }} < 6"
+                        {% endif %}
+                        @click="toggleSize('{{ s|escapejs }}')"
+                        :class="sizes.includes('{{ s|escapejs }}') ? 'bg-emerald text-white font-bold border-emerald shadow-2xs' : 'bg-white text-textMain border-emerald-border hover:bg-mint-tint'"
+                        class="px-2.5 py-1 text-xs rounded-xl border transition shadow-2xs truncate max-w-[200px]"
+                        title="{{ s }}">
+                        {{ s }}
                     </button>
                     {% endfor %}
                 </div>
@@ -381,8 +384,7 @@
 
                 <!-- Product Grid Container (updated via AJAX innerHTML) -->
                 <div id="productGridContainer">
-                    {% include 'catalog/partials/product_grid.html' with products=products active_filters=active_filters
-                    wishlist_ids=wishlist_ids %}
+                    {% include 'catalog/partials/product_grid.html' with products=products active_filters=active_filters wishlist_ids=wishlist_ids %}
                 </div>
             </div>
 
