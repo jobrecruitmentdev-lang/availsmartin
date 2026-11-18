@@ -851,74 +851,77 @@ EDP sprays, rare Cambodian Oudh, and discovery sample boxes with 36+ hour longev
     {% if trio_attars %}
     <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8" x-data="trioComboApp()" x-init="init()">
         <div
-            class="bg-gradient-to-br from-[#101923] via-[#0D151F] to-[#080D14] rounded-4xl border border-[#2A3B4C] p-6 sm:p-10 lg:p-12 shadow-2xl relative overflow-hidden text-white">
+            class="bg-gradient-to-br from-[#0D151F] via-[#101B27] to-[#0A1017] rounded-4xl border-2 border-[#D4AF37]/50 p-6 sm:p-10 lg:p-12 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.7),0_0_35px_rgba(212,175,55,0.12)] relative overflow-hidden text-white">
 
             <!-- Ambient Decorative Glow -->
             <div
-                class="absolute -top-32 -right-32 w-96 h-96 rounded-full bg-[#D4AF37]/10 filter blur-3xl pointer-events-none">
+                class="absolute -top-32 -right-32 w-96 h-96 rounded-full bg-[#D4AF37]/15 filter blur-3xl pointer-events-none">
             </div>
             <div
-                class="absolute -bottom-32 -left-32 w-96 h-96 rounded-full bg-[#1C529C]/10 filter blur-3xl pointer-events-none">
+                class="absolute -bottom-32 -left-32 w-96 h-96 rounded-full bg-[#1C529C]/15 filter blur-3xl pointer-events-none">
             </div>
 
             <div class="relative z-10 space-y-8">
 
                 <!-- Section Header -->
-                <div class="text-center max-w-2xl mx-auto space-y-2">
+                <div class="text-center max-w-2xl mx-auto space-y-2.5">
                     <div
-                        class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-[#C2714F]/20 border border-[#C2714F]/40 text-[#F5C2AF] text-[11px] font-bold uppercase tracking-widest shadow-2xs">
-                        <span>🔥 High-Conversion Bestseller</span>
-                        <span>•</span>
-                        <span>Save ₹298</span>
+                        class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#182433] border border-[#D4AF37]/40 text-[#E5C07B] text-[10.5px] font-bold uppercase tracking-[0.18em] shadow-sm">
+                        <span class="text-[#D4AF37]">👑</span>
+                        <span>Imperial Trio Bundle • Save ₹298 (25% OFF)</span>
+                        <span class="text-[#D4AF37]">⚜️</span>
                     </div>
                     <h2
                         class="font-editorial text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-white leading-tight">
-                        Build Your <span class="italic font-normal font-editorial text-[#D4AF37]">Royal Attar
+                        Build Your <span class="italic font-normal font-editorial bg-gradient-to-r from-[#F3E5AB] via-[#FFFFFF] to-[#E5C07B] bg-clip-text text-transparent">Royal Attar
                             Trio</span>
                     </h2>
-                    <p class="text-xs sm:text-sm text-white/70 max-w-xl mx-auto leading-relaxed">
+                    <p class="text-xs sm:text-sm text-white/75 max-w-xl mx-auto leading-relaxed">
                         Select any 3 pure 100% alcohol-free roll-on attars (12ml each) for just <strong
-                            class="text-white">₹899</strong> <span class="line-through text-white/40">₹1,197</span>.
+                            class="text-[#F3E5AB]">₹899</strong> <span class="line-through text-white/40">₹1,197</span>.
                         Includes Free Express Delivery & a Free 2ml Discovery Scent Vial!
                     </p>
                 </div>
 
-                <!-- 3 Interactive Selection Slots -->
+                <!-- 3 Interactive Selection Slots (Velvet Flacon Pedestals) -->
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4 lg:gap-6">
                     <template x-for="(slot, idx) in selectedSlots" :key="idx">
                         <div @click="selectSlot(idx)"
-                            class="relative p-5 rounded-3xl border transition-all duration-300 cursor-pointer text-center group flex flex-col justify-between"
-                            :class="activeSlot === idx ? 'bg-[#182535] border-[#D4AF37] ring-2 ring-[#D4AF37]/30 shadow-xl scale-[1.02]' : 'bg-[#121B26]/80 border-white/10 hover:border-white/30'">
+                            class="relative p-5 sm:p-6 rounded-3xl border-2 transition-all duration-300 cursor-pointer text-center group flex flex-col justify-between"
+                            :class="activeSlot === idx ? 'bg-gradient-to-b from-[#1C2C3E] to-[#121E2C] border-[#D4AF37] ring-2 ring-[#D4AF37]/40 shadow-[0_12px_30px_rgba(212,175,55,0.25)] scale-[1.02]' : 'bg-[#101722]/85 border-white/10 hover:border-[#D4AF37]/40 hover:bg-[#152130]'">
                             <!-- Slot Tag Badge -->
                             <div class="flex items-center justify-between mb-3">
-                                <span class="text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full"
-                                    :class="activeSlot === idx ? 'bg-[#D4AF37] text-[#0B0F17]' : 'bg-white/10 text-white/70'"
+                                <span class="text-[10px] font-black uppercase tracking-wider px-3 py-1 rounded-full shadow-2xs"
+                                    :class="activeSlot === idx ? 'bg-gradient-to-r from-[#D4AF37] to-[#B38728] text-[#0A1017]' : 'bg-white/10 text-white/70'"
                                     x-text="`Scent 0${idx + 1}`"></span>
-                                <span class="text-[10px] text-[#D4AF37] font-semibold" x-show="activeSlot === idx">●
-                                    Active Slot</span>
+                                <span class="text-[10.5px] text-[#F3E5AB] font-bold flex items-center gap-1" x-show="activeSlot === idx">
+                                    <span class="w-2 h-2 rounded-full bg-[#D4AF37] animate-ping"></span>
+                                    <span>Active Slot</span>
+                                </span>
                             </div>
 
-                            <!-- Flacon Visual -->
-                            <div class="w-32 h-36 mx-auto flex items-center justify-center p-2 mb-3">
+                            <!-- Flacon Visual on Velvet Pedestal -->
+                            <div class="relative w-36 h-40 mx-auto flex items-center justify-center p-2 mb-3">
+                                <div class="absolute inset-x-4 bottom-2 h-6 bg-[#D4AF37]/15 rounded-full blur-md"></div>
                                 <img :src="slot ? slot.image : ''" :alt="slot ? slot.name : 'Attar Flacon'"
-                                    class="max-w-full max-h-full object-contain filter drop-shadow-md group-hover:scale-105 transition-transform duration-300">
+                                    class="max-w-full max-h-full object-contain filter drop-shadow-[0_10px_15px_rgba(0,0,0,0.5)] group-hover:scale-105 transition-transform duration-300 relative z-10">
                             </div>
 
                             <!-- Fragrance Details -->
-                            <div>
-                                <h4 class="text-sm font-bold text-white truncate"
+                            <div class="space-y-1">
+                                <h4 class="text-sm sm:text-base font-bold text-white truncate drop-shadow-sm"
                                     x-text="slot ? slot.name : 'Select Fragrance'"></h4>
-                                <p class="text-[11px] text-[#D4AF37] mt-0.5 truncate font-medium"
+                                <p class="text-[11px] text-[#E5C07B] truncate font-semibold"
                                     x-text="slot ? slot.family : ''"></p>
-                                <p class="text-[10px] text-white/60 mt-1 line-clamp-1"
+                                <p class="text-[10.5px] text-white/60 line-clamp-1"
                                     x-text="slot ? `Top: ${slot.top}` : ''"></p>
                             </div>
 
                             <!-- Switch Button -->
-                            <div class="mt-4 pt-3 border-t border-white/10">
+                            <div class="mt-4 pt-3.5 border-t border-white/10">
                                 <button type="button"
-                                    class="w-full py-2 rounded-xl text-[11px] font-semibold transition"
-                                    :class="activeSlot === idx ? 'bg-white text-[#0B0F17] font-bold' : 'bg-white/5 hover:bg-white/10 text-white/80'">
+                                    class="w-full py-2.5 rounded-xl text-[11px] font-bold transition shadow-xs"
+                                    :class="activeSlot === idx ? 'bg-gradient-to-r from-[#D4AF37] to-[#E2C068] text-[#0A1017]' : 'bg-white/5 hover:bg-white/15 text-white/80'">
                                     <span
                                         x-text="activeSlot === idx ? '✓ Currently Choosing' : '⇄ Tap to Change Scent'"></span>
                                 </button>
@@ -927,35 +930,35 @@ EDP sprays, rare Cambodian Oudh, and discovery sample boxes with 36+ hour longev
                     </template>
                 </div>
 
-                <!-- Live Fragrance Drawer / Carousel to Choose Into Active Slot -->
-                <div class="bg-[#121B26] p-5 sm:p-6 rounded-3xl border border-white/10 space-y-4">
+                <!-- Live Fragrance Vault Drawer -->
+                <div class="bg-[#0E1622]/90 p-5 sm:p-6 rounded-3xl border border-[#D4AF37]/25 space-y-4 shadow-inner">
                     <div class="flex items-center justify-between border-b border-white/10 pb-3">
                         <span class="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-2">
-                            <span>✦</span>
-                            <span>Choose Fragrance for <span class="text-[#D4AF37]"
+                            <span class="text-[#D4AF37]">✦</span>
+                            <span>Choose Fragrance for <span class="text-[#F3E5AB] font-black"
                                     x-text="`Scent 0${activeSlot + 1}`"></span>:</span>
                         </span>
-                        <span class="text-[11px] text-white/60">Click any attar to swap</span>
+                        <span class="text-[11px] text-[#94A3B8] font-medium">Click any attar to swap</span>
                     </div>
 
                     <!-- Horizontal Grid of Available Attars -->
-                    <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-3">
+                    <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-3 sm:gap-3.5">
                         <template x-for="item in attars" :key="item.id">
                             <button type="button" @click="chooseFragrance(item)"
-                                class="p-3 rounded-2xl border text-left transition-all active:scale-95 cursor-pointer flex flex-col justify-between"
-                                :class="selectedSlots.some(s => s && s.id === item.id) ? 'bg-[#182535] border-[#D4AF37]/80 ring-1 ring-[#D4AF37]' : 'bg-[#0E1520] border-white/10 hover:border-white/30'">
+                                class="p-3 sm:p-3.5 rounded-2xl border transition-all active:scale-95 cursor-pointer flex flex-col justify-between text-left"
+                                :class="selectedSlots.some(s => s && s.id === item.id) ? 'bg-[#182637] border-[#D4AF37] ring-1 ring-[#D4AF37] shadow-[0_4px_16px_rgba(212,175,55,0.2)]' : 'bg-[#121B26] border-white/10 hover:border-[#D4AF37]/50 hover:bg-[#162230]'">
                                 <div class="w-16 h-16 mx-auto mb-2 flex items-center justify-center">
                                     <img :src="item.image" :alt="item.name"
-                                        class="max-w-full max-h-full object-contain">
+                                        class="max-w-full max-h-full object-contain filter drop-shadow">
                                 </div>
                                 <div>
                                     <h5 class="text-xs font-bold text-white truncate" x-text="item.name"></h5>
-                                    <span class="text-[10px] text-[#D4AF37] block truncate" x-text="item.family"></span>
+                                    <span class="text-[10px] text-[#E5C07B] block truncate font-medium" x-text="item.family"></span>
                                     <div
                                         class="flex items-center justify-between mt-2 pt-1 border-t border-white/10 text-[10px]">
                                         <span class="text-white/60">12ml Oil</span>
                                         <span class="font-bold"
-                                            :class="selectedSlots.some(s => s && s.id === item.id) ? 'text-[#D4AF37]' : 'text-emerald-400'"
+                                            :class="selectedSlots.some(s => s && s.id === item.id) ? 'text-[#F3E5AB]' : 'text-emerald-400'"
                                             x-text="selectedSlots.some(s => s && s.id === item.id) ? '✓ In Box' : '+ Select'"></span>
                                     </div>
                                 </div>
@@ -966,32 +969,35 @@ EDP sprays, rare Cambodian Oudh, and discovery sample boxes with 36+ hour longev
 
                 <!-- Bottom Sticky Conversion Bar (Summary & Checkout) -->
                 <div
-                    class="p-5 sm:p-6 rounded-3xl bg-[#182535] border border-[#D4AF37]/40 flex flex-col sm:flex-row items-center justify-between gap-6 shadow-xl">
+                    class="p-5 sm:p-6 rounded-3xl bg-gradient-to-r from-[#142130] via-[#182638] to-[#142130] border-2 border-[#D4AF37]/50 flex flex-col sm:flex-row items-center justify-between gap-6 shadow-2xl">
                     <div class="flex flex-wrap items-center gap-6 text-center sm:text-left">
                         <div>
-                            <span class="text-[10px] uppercase font-bold tracking-widest text-white/60 block">Regular
+                            <span class="text-[10px] uppercase font-bold tracking-widest text-white/50 block">Regular
                                 Price</span>
-                            <span class="text-sm line-through text-white/50">₹1,197 (3 × ₹399)</span>
+                            <span class="text-sm line-through text-white/40">₹1,197 (3 × ₹399)</span>
                         </div>
                         <div class="border-l border-white/10 pl-6">
-                            <span class="text-[10px] uppercase font-bold tracking-widest text-[#D4AF37] block">Trio
+                            <span class="text-[10px] uppercase font-black tracking-widest text-[#E5C07B] block">Trio
                                 Combo Price</span>
                             <div class="flex items-baseline gap-2">
-                                <span class="text-3xl font-extrabold text-white">₹899</span>
+                                <span class="text-3xl sm:text-4xl font-extrabold text-white">₹899</span>
                                 <span
-                                    class="px-2 py-0.5 rounded-full bg-[#C2714F] text-white text-[10px] font-bold">SAVE
+                                    class="px-2.5 py-0.5 rounded-full bg-[#C2714F] text-white text-[10px] font-bold shadow-2xs">SAVE
                                     ₹298 (25%)</span>
                             </div>
                         </div>
-                        <div class="hidden md:block border-l border-white/10 pl-6 text-left">
-                            <span class="text-[11px] text-emerald-400 font-semibold block">✓ FREE Express Delivery
-                                Included</span>
-                            <span class="text-[11px] text-white/70">✓ FREE 2ml Discovery Scent Vial</span>
+                        <div class="hidden md:block border-l border-white/10 pl-6 text-left space-y-0.5">
+                            <span class="text-[11px] text-emerald-400 font-semibold flex items-center gap-1.5">
+                                <span>✓</span> <span>FREE Express Delivery Included</span>
+                            </span>
+                            <span class="text-[11px] text-white/80 flex items-center gap-1.5">
+                                <span>✓</span> <span>FREE 2ml Discovery Scent Vial</span>
+                            </span>
                         </div>
                     </div>
 
                     <button type="button" @click="addTrioToBag()" :disabled="isSubmitting || selectedSlots.length < 3"
-                        class="w-full sm:w-auto px-10 py-4 rounded-full bg-gradient-to-r from-[#D4AF37] via-[#E2C068] to-[#C59B27] hover:brightness-110 text-[#0B0F17] font-bold text-xs uppercase tracking-wider shadow-lg transition active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shrink-0 cursor-pointer">
+                        class="w-full sm:w-auto px-9 py-4 rounded-full bg-gradient-to-r from-[#D4AF37] via-[#F3E5AB] to-[#C59B27] hover:brightness-110 text-[#0B0F17] font-extrabold text-xs uppercase tracking-wider shadow-[0_4px_20px_rgba(212,175,55,0.35)] transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shrink-0 cursor-pointer">
                         <span x-show="!isSubmitting">⚡ Add Royal Trio to Bag @ ₹899 &rarr;</span>
                         <span x-show="isSubmitting" style="display: none;">Adding Trio Box...</span>
                     </button>
@@ -1004,16 +1010,16 @@ EDP sprays, rare Cambodian Oudh, and discovery sample boxes with 36+ hour longev
     <script>
         const INITIAL_TRIO_ATTARS = [
             {% for p in trio_attars %}
-        {
-            id: { { p.id } },
-            name: "{{ p.name|escapejs }}",
+            {
+                id: {{ p.id }},
+                name: "{{ p.name|escapejs }}",
                 family: "{{ p.fragrance_family|default:'Royal Oriental'|escapejs }}",
-                    top: "{{ p.top_notes|default:'Bergamot, Saffron'|escapejs }}",
-                        price: { { p.effective_price |default: 399 } },
-            image: "{% if p.primary_image and p.primary_image.image %}{{ p.primary_image.image.url }}{% else %}/static/images/fallback-perfume.webp{% endif %}"
-        } {% if not forloop.last %}, {% endif %}
-        {% endfor %}
-    ];
+                top: "{{ p.top_notes|default:'Bergamot, Saffron'|escapejs }}",
+                price: {{ p.effective_price|default:399 }},
+                image: "{% if p.primary_image and p.primary_image.image %}{{ p.primary_image.image.url }}{% else %}/static/images/fallback-perfume.webp{% endif %}"
+            }{% if not forloop.last %},{% endif %}
+            {% endfor %}
+        ];
 
         function trioComboApp() {
             return {
