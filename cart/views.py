@@ -404,33 +404,35 @@ def cart_drawer_data_view(request):
 def toggle_wishlist_view(request, product_id):
     """
     Toggles product in user's saved wishlist.
+    Seamlessly supports both authenticated customers and guest browser sessions.
     """
-    next_url = request.META.get('HTTP_REFERER', '/')
-
-    if not request.user.is_authenticated:
-        login_url = f"{reverse('accounts:login')}?next={next_url}"
-        if request.headers.get('x-requested-with') == 'XMLHttpRequest' or request.content_type == 'application/json':
-            return JsonResponse({
-                'status': 'unauthenticated',
-                'message': 'Please sign in to save items to your wishlist.',
-                'redirect_url': login_url
-            }, status=401)
-        messages.warning(request, "Please log in to save items to your wishlist.")
-        return redirect(login_url)
-
     product = get_object_or_404(Product, id=product_id, is_active=True)
-    wishlist_item = Wishlist.objects.filter(user=request.user, product=product).first()
 
-    if wishlist_item:
-        wishlist_item.delete()
-        action = 'removed'
-        msg = f"Removed '{product.name}' from your wishlist."
+    if request.user.is_authenticated:
+        wishlist_item = Wishlist.objects.filter(user=request.user, product=product).first()
+        if wishlist_item:
+            wishlist_item.delete()
+            action = 'removed'
+            msg = f"Removed '{product.name}' from your wishlist."
+        else:
+            Wishlist.objects.create(user=request.user, product=product)
+            action = 'added'
+            msg = f"Added '{product.name}' to your wishlist!"
+        count = Wishlist.objects.filter(user=request.user).count()
     else:
-        Wishlist.objects.create(user=request.user, product=product)
-        action = 'added'
-        msg = f"Added '{product.name}' to your wishlist!"
-
-    count = Wishlist.objects.filter(user=request.user).count()
+        # Seamless Guest Session Wishlist (guarantees zero friction for browsing visitors)
+        wishlist_ids = request.session.get('wishlist_ids', [])
+        if product_id in wishlist_ids:
+            wishlist_ids.remove(product_id)
+            action = 'removed'
+            msg = f"Removed '{product.name}' from your wishlist."
+        else:
+            wishlist_ids.append(product_id)
+            action = 'added'
+            msg = f"Added '{product.name}' to your wishlist!"
+        request.session['wishlist_ids'] = wishlist_ids
+        request.session.modified = True
+        count = len(wishlist_ids)
 
     return JsonResponse({
         'status': 'success',
@@ -444,10 +446,18 @@ def toggle_wishlist_view(request, product_id):
 def wishlist_view(request):
     """
     Customer's wishlist listing page.
+    Renders saved items for both authenticated members and guest shopping sessions.
     """
-    if not request.user.is_authenticated:
-        messages.info(request, "Please sign in to view your wishlist.")
-        return redirect(f"{reverse('accounts:login')}?next=/cart/wishlist/")
+    if request.user.is_authenticated:
+        items = list(Wishlist.objects.filter(user=request.user).select_related('product', 'product__brand').prefetch_related('product__colors__images', 'product__variants'))
+        wishlist_ids = set(item.product_id for item in items)
+    else:
+        guest_ids = request.session.get('wishlist_ids', [])
+        products = Product.objects.filter(id__in=guest_ids, is_active=True).select_related('brand').prefetch_related('colors__images', 'variants')
+        items = [{'product': p} for p in products]
+        wishlist_ids = set(guest_ids)
 
-    items = Wishlist.objects.filter(user=request.user).select_related('product', 'product__brand').prefetch_related('product__colors__images', 'product__variants')
-    return render(request, 'cart/wishlist.html', {'wishlist_items': items})
+    return render(request, 'cart/wishlist.html', {
+        'wishlist_items': items,
+        'wishlist_ids': wishlist_ids
+    })

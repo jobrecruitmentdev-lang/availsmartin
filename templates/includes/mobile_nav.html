@@ -23,11 +23,9 @@
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
             </svg>
-            {% if wishlist_count > 0 %}
-                <span class="absolute top-0 right-2 w-3.5 h-3.5 rounded-full bg-clay text-white text-[9px] font-bold flex items-center justify-center">
-                    {{ wishlist_count }}
-                </span>
-            {% endif %}
+            <span id="mobileWishlistBadge" class="wishlist-badge absolute top-0 right-2 w-3.5 h-3.5 rounded-full bg-clay text-white text-[9px] font-bold flex items-center justify-center" {% if not wishlist_count or wishlist_count == 0 %}style="display: none;"{% endif %}>
+                {{ wishlist_count|default:0 }}
+            </span>
             <span>Saved</span>
         </a>
 

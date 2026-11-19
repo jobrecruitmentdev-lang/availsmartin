@@ -33,11 +33,13 @@ def nav_context(request):
         cart_count = 0
     context['cart_count'] = cart_count
 
-    # 3. Wishlist count
+    # 3. Wishlist count (supports both authenticated users and guest sessions)
     wishlist_count = 0
     try:
         if request.user.is_authenticated:
             wishlist_count = Wishlist.objects.filter(user=request.user).count()
+        elif hasattr(request, 'session'):
+            wishlist_count = len(request.session.get('wishlist_ids', []))
     except Exception:
         wishlist_count = 0
     context['wishlist_count'] = wishlist_count

@@ -19,10 +19,19 @@ from .models import (
 from cart.models import Wishlist
 
 
-def _get_user_wishlist_ids(user):
-    """Returns a set of product IDs saved by the user in their wishlist."""
+def _get_user_wishlist_ids(request_or_user):
+    """Returns a set of product IDs saved in the wishlist (supporting both authenticated users & guest sessions)."""
+    if hasattr(request_or_user, 'user'):
+        user = request_or_user.user
+        request = request_or_user
+    else:
+        user = request_or_user
+        request = None
+
     if user and user.is_authenticated:
         return set(Wishlist.objects.filter(user=user).values_list('product_id', flat=True))
+    elif request and hasattr(request, 'session'):
+        return set(request.session.get('wishlist_ids', []))
     return set()
 
 
@@ -115,7 +124,7 @@ def home_view(request):
         .order_by('-created_at')[:8]
     )
 
-    wishlist_ids = _get_user_wishlist_ids(request.user)
+    wishlist_ids = _get_user_wishlist_ids(request)
 
     context = {
         'banners': banners,
@@ -323,7 +332,7 @@ def catalog_view(request, slug=None):
     if in_stock_only:
         active_filters.append({'type': 'in_stock', 'label': "In Stock Only", 'value': '1'})
 
-    wishlist_ids = _get_user_wishlist_ids(request.user)
+    wishlist_ids = _get_user_wishlist_ids(request)
 
     # 6. Response Handling: AJAX JSON vs Normal Page Render
     is_ajax = (
@@ -548,7 +557,7 @@ def search_view(request):
     available_colors = color_qs.values('color_name', 'color_hex').annotate(pcount=Count('product', distinct=True)).order_by('color_name')
     available_sizes = ProductVariant.objects.filter(is_active=True, product__is_active=True).exclude(size='').values_list('size', flat=True).distinct().order_by('size')
 
-    wishlist_ids = _get_user_wishlist_ids(request.user)
+    wishlist_ids = _get_user_wishlist_ids(request)
 
     context = {
         'query': query,
@@ -672,7 +681,7 @@ def product_detail_view(request, slug):
         .prefetch_related('colors__images', 'variants')[:4]
     )
 
-    wishlist_ids = _get_user_wishlist_ids(request.user)
+    wishlist_ids = _get_user_wishlist_ids(request)
     is_wishlisted = product.id in wishlist_ids
 
     context = {

@@ -94,6 +94,26 @@ def merge_guest_cart(request, user, old_session_key=None):
         print(f"Error merging cart on login: {e}")
 
 
+def merge_guest_wishlist(request, user):
+    """
+    Transfers saved items from an anonymous session wishlist to the authenticated user's permanent database wishlist.
+    """
+    guest_wishlist_ids = request.session.get('wishlist_ids', [])
+    if not guest_wishlist_ids:
+        return
+
+    try:
+        from cart.models import Wishlist
+        from catalog.models import Product
+        products = Product.objects.filter(id__in=guest_wishlist_ids, is_active=True)
+        for prod in products:
+            Wishlist.objects.get_or_create(user=user, product=prod)
+        request.session.pop('wishlist_ids', None)
+        request.session.modified = True
+    except Exception as e:
+        print(f"Error merging wishlist on login: {e}")
+
+
 def register_view(request):
     if request.user.is_authenticated:
         return redirect('/')
@@ -163,6 +183,7 @@ def verify_email_otp_view(request):
                 login(request, user)
                 clear_attempts(request, 'login')
                 merge_guest_cart(request, user, old_session_key=old_session_key)
+                merge_guest_wishlist(request, user)
 
                 # Clean session state
                 request.session.pop('pending_otp_email', None)
@@ -237,6 +258,7 @@ def login_view(request):
                 login(request, user)
                 clear_attempts(request, 'login')
                 merge_guest_cart(request, user, old_session_key=old_session_key)
+                merge_guest_wishlist(request, user)
 
                 if not remember_me:
                     request.session.set_expiry(0)  # Expires on browser close
