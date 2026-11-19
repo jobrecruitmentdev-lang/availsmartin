@@ -423,7 +423,7 @@
             <!-- 6 Digit Input Boxes -->
             <div class="flex items-center justify-center gap-2 sm:gap-2.5 mb-6">
                 <template x-for="(digit, index) in 6" :key="index">
-                    <input type="text" maxlength="1" inputmode="numeric" pattern="[0-9]*" x-ref="'otp_digit_' + index"
+                    <input type="text" maxlength="1" inputmode="numeric" pattern="[0-9]*" :data-index="index"
                         @input="handleOtpInput($event, index)" @keydown="handleOtpKeyDown($event, index)"
                         @paste="handleOtpPaste($event)"
                         class="w-11 h-13 text-center text-xl font-bold text-[#14241B] bg-[#FAF8F5] border border-[#D3CBBF] rounded-xl focus:bg-white focus:border-[#14241B] focus:ring-2 focus:ring-[#14241B]/20 outline-none transition font-mono">
@@ -538,7 +538,11 @@
                     this.showOtpModal = true;
                     this.startTimer();
                     this.$nextTick(() => {
-                        if (this.$refs['otp_digit_0']) this.$refs['otp_digit_0'].focus();
+                        const modal = document.querySelector('[x-show="showOtpModal"]');
+                        if (modal) {
+                            const first = modal.querySelector('input[type="text"]');
+                            if (first) first.focus();
+                        }
                     });
                 } else {
                     window.dispatchEvent(new CustomEvent('toast', {
@@ -579,21 +583,34 @@
             this.otpDigits[index] = val;
             this.orderOtp = this.otpDigits.join('');
 
+            // Auto-advance to next box
             if (val && index < 5) {
-                const next = this.$refs['otp_digit_' + (index + 1)];
-                if (next) next.focus();
+                const container = e.target.closest('.flex');
+                const inputs = container ? container.querySelectorAll('input[type="text"]') : [];
+                if (inputs[index + 1]) {
+                    inputs[index + 1].focus();
+                    inputs[index + 1].select();
+                }
             }
         },
 
         handleOtpKeyDown(e, index) {
-            if (e.key === 'Backspace' && !e.target.value && index > 0) {
-                const prev = this.$refs['otp_digit_' + (index - 1)];
-                if (prev) {
-                    prev.focus();
-                    prev.value = '';
-                    this.otpDigits[index - 1] = '';
-                    this.orderOtp = this.otpDigits.join('');
+            const container = e.target.closest('.flex');
+            const inputs = container ? container.querySelectorAll('input[type="text"]') : [];
+
+            if (e.key === 'Backspace') {
+                if (!e.target.value && index > 0) {
+                    if (inputs[index - 1]) {
+                        inputs[index - 1].focus();
+                        inputs[index - 1].value = '';
+                        this.otpDigits[index - 1] = '';
+                        this.orderOtp = this.otpDigits.join('');
+                    }
                 }
+            } else if (e.key === 'ArrowLeft' && index > 0) {
+                if (inputs[index - 1]) inputs[index - 1].focus();
+            } else if (e.key === 'ArrowRight' && index < 5) {
+                if (inputs[index + 1]) inputs[index + 1].focus();
             }
         },
 
@@ -603,17 +620,19 @@
             if (!text) return;
 
             const chars = text.slice(0, 6).split('');
+            const container = e.target.closest('.flex');
+            const inputs = container ? container.querySelectorAll('input[type="text"]') : [];
+
             chars.forEach((ch, idx) => {
-                if (idx < 6) {
+                if (idx < 6 && inputs[idx]) {
+                    inputs[idx].value = ch;
                     this.otpDigits[idx] = ch;
-                    const input = this.$refs['otp_digit_' + idx];
-                    if (input) input.value = ch;
                 }
             });
             this.orderOtp = this.otpDigits.join('');
-            const lastIdx = Math.min(chars.length, 5);
-            if (this.$refs['otp_digit_' + lastIdx]) {
-                this.$refs['otp_digit_' + lastIdx].focus();
+            const nextFocus = Math.min(chars.length, 5);
+            if (inputs[nextFocus]) {
+                inputs[nextFocus].focus();
             }
         },
 

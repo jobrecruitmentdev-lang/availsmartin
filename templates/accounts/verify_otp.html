@@ -51,7 +51,7 @@
                             maxlength="1" 
                             inputmode="numeric"
                             pattern="[0-9]*"
-                            x-ref="'digit_' + index"
+                            :data-index="index"
                             @input="handleInput($event, index)"
                             @keydown="handleKeyDown($event, index)"
                             @paste="handlePaste($event)"
@@ -119,7 +119,8 @@ function otpVerificationApp() {
         init() {
             this.startTimer();
             this.$nextTick(() => {
-                if (this.$refs['digit_0']) this.$refs['digit_0'].focus();
+                const first = this.$el.querySelector('input[type="text"]');
+                if (first) first.focus();
             });
         },
 
@@ -147,21 +148,34 @@ function otpVerificationApp() {
             this.digits[index] = val;
             this.updateFullOtp();
 
+            // Auto-advance to next box
             if (val && index < 5) {
-                const next = this.$refs['digit_' + (index + 1)];
-                if (next) next.focus();
+                const container = e.target.closest('.flex');
+                const inputs = container ? container.querySelectorAll('input[type="text"]') : [];
+                if (inputs[index + 1]) {
+                    inputs[index + 1].focus();
+                    inputs[index + 1].select();
+                }
             }
         },
 
         handleKeyDown(e, index) {
-            if (e.key === 'Backspace' && !e.target.value && index > 0) {
-                const prev = this.$refs['digit_' + (index - 1)];
-                if (prev) {
-                    prev.focus();
-                    prev.value = '';
-                    this.digits[index - 1] = '';
-                    this.updateFullOtp();
+            const container = e.target.closest('.flex');
+            const inputs = container ? container.querySelectorAll('input[type="text"]') : [];
+
+            if (e.key === 'Backspace') {
+                if (!e.target.value && index > 0) {
+                    if (inputs[index - 1]) {
+                        inputs[index - 1].focus();
+                        inputs[index - 1].value = '';
+                        this.digits[index - 1] = '';
+                        this.updateFullOtp();
+                    }
                 }
+            } else if (e.key === 'ArrowLeft' && index > 0) {
+                if (inputs[index - 1]) inputs[index - 1].focus();
+            } else if (e.key === 'ArrowRight' && index < 5) {
+                if (inputs[index + 1]) inputs[index + 1].focus();
             }
         },
 
@@ -171,17 +185,19 @@ function otpVerificationApp() {
             if (!text) return;
 
             const chars = text.slice(0, 6).split('');
+            const container = e.target.closest('.flex');
+            const inputs = container ? container.querySelectorAll('input[type="text"]') : [];
+
             chars.forEach((ch, idx) => {
-                if (idx < 6) {
+                if (idx < 6 && inputs[idx]) {
+                    inputs[idx].value = ch;
                     this.digits[idx] = ch;
-                    const input = this.$refs['digit_' + idx];
-                    if (input) input.value = ch;
                 }
             });
             this.updateFullOtp();
-            const lastIdx = Math.min(chars.length, 5);
-            if (this.$refs['digit_' + lastIdx]) {
-                this.$refs['digit_' + lastIdx].focus();
+            const nextFocus = Math.min(chars.length, 5);
+            if (inputs[nextFocus]) {
+                inputs[nextFocus].focus();
             }
         },
 
