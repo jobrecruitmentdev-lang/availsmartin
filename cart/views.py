@@ -49,7 +49,7 @@ def _calculate_cart_totals(cart, coupon=None, payment_method=None):
     # Free express delivery on orders ₹499 or more
     shipping_charge = Decimal('0.00') if subtotal >= Decimal('499.00') or subtotal == Decimal('0.00') else Decimal('70.00')
 
-    # Extra ₹50 Instant Discount on Prepaid UPI / Online Payment (Adil Qadri RTO reducer)
+    # Extra ₹50 Instant Discount on Prepaid UPI / Online Payment (Prepaid Conversion Incentive)
     upi_discount = Decimal('0.00')
     if payment_method in ['razorpay', 'upi'] and subtotal >= Decimal('299.00'):
         upi_discount = Decimal('50.00')

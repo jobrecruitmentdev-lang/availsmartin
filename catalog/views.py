@@ -45,21 +45,21 @@ def home_view(request):
     categories = Category.objects.filter(parent__isnull=True, is_active=True).prefetch_related('children').order_by('sort_order')[:8]
     brands = Brand.objects.filter(is_active=True).order_by('name')[:12]
     
-    # 1. Best Seller Pure Concentrated Attars (Adil Qadri Collection Tab 1)
+    # 1. Best Seller Pure Concentrated Attars (AvailSmart Signature Collection Tab 1)
     best_seller_attars = (
         Product.objects.filter(is_active=True)
         .filter(slug__in=[
             'shanaya-luxury-concentrated-attar-12ml',
             'imperial-white-oudh-non-alcoholic-attar-12ml',
             'safwan-royal-musk-attar-12ml',
-            'adil-qadri-lavish-musk-attar-12ml'
+            'availsmart-lavish-musk-attar-12ml'
         ])
         .select_related('brand', 'category')
         .prefetch_related('colors__images', 'variants')
         .distinct()[:4]
     )
 
-    # 2. Best Seller French & Arabian EDP Sprays (Adil Qadri Collection Tab 2)
+    # 2. Best Seller French & Arabian EDP Sprays (Signature Collection Tab 2)
     best_seller_perfumes = (
         Product.objects.filter(is_active=True)
         .filter(slug__in=[
@@ -73,7 +73,7 @@ def home_view(request):
         .distinct()[:4]
     )
 
-    # 3. Value Combos & Discovery Boxes (Adil Qadri Collection Tab 3)
+    # 3. Value Combos & Discovery Boxes (Signature Collection Tab 3)
     discovery_and_combos = (
         Product.objects.filter(is_active=True)
         .filter(slug__in=[
@@ -108,7 +108,7 @@ def home_view(request):
             'imperial-white-oudh-non-alcoholic-attar-12ml',
             'safwan-royal-musk-attar-12ml',
             'ajmal-wisal-dhabab-perfume-oil-14ml',
-            'adil-qadri-lavish-musk-attar-12ml',
+            'availsmart-lavish-musk-attar-12ml',
             'availsmart-royal-ambergris-attar-12ml'
         ])
         .select_related('brand', 'category')

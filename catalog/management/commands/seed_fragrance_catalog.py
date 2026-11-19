@@ -176,7 +176,6 @@ class Command(BaseCommand):
         self.stdout.write("2. Seeding Global & D2C Fragrance Brands...")
         brands_data = [
             {'name': 'AvailSmart Imperial Reserve', 'slug': 'availsmart-reserve'},
-            {'name': 'Adil Qadri Signature', 'slug': 'adil-qadri'},
             {'name': 'Lattafa Perfumes Dubai', 'slug': 'lattafa'},
             {'name': 'Ahmed Al Maghribi', 'slug': 'ahmed-al-maghribi'},
             {'name': 'Ajmal Perfumes', 'slug': 'ajmal'},
@@ -272,7 +271,7 @@ class Command(BaseCommand):
             {
                 'name': 'Shanaya Luxury Concentrated Attar (12ml)',
                 'slug': 'shanaya-luxury-concentrated-attar-12ml',
-                'brand': 'adil-qadri',
+                'brand': 'availsmart-reserve',
                 'category': 'amber-musk-elixirs',
                 'base_price': Decimal('1199.00'),
                 'discount_price': Decimal('799.00'),
@@ -286,7 +285,7 @@ class Command(BaseCommand):
                 'is_non_alcoholic': True,
                 'bundle_text': 'Pack of 2 @ ₹1,199 (Save 50%)',
                 'short_description': 'The legendary imperial signature attar. 100% alcohol-free pure oil with rich sweet amber, floral warmth, and an unforgettable 36-hour trail.',
-                'full_description': 'Shanaya by Adil Qadri is one of India’s most celebrated luxury attars. Formulated without a single drop of alcohol, this concentrated perfume oil opens with luminous citrus and golden sweet amber before melting into a decadent heart of spiced cinnamon and Damascus rose. The dry-down reveals rich agarwood and cashmere white musk that remains on clothing well past 36 hours.',
+                'full_description': 'Shanaya by AvailSmart is one of India’s most celebrated luxury attars. Formulated without a single drop of alcohol, this concentrated perfume oil opens with luminous citrus and golden sweet amber before melting into a decadent heart of spiced cinnamon and Damascus rose. The dry-down reveals rich agarwood and cashmere white musk that remains on clothing well past 36 hours.',
                 'rating_avg': Decimal('4.94'),
                 'rating_count': 1840,
                 'is_featured': True,
@@ -433,7 +432,7 @@ class Command(BaseCommand):
             {
                 'name': 'Safwan Royal Musk Concentrated Attar (12ml)',
                 'slug': 'safwan-royal-musk-attar-12ml',
-                'brand': 'adil-qadri',
+                'brand': 'availsmart-reserve',
                 'category': 'amber-musk-elixirs',
                 'base_price': Decimal('999.00'),
                 'discount_price': Decimal('699.00'),
@@ -447,7 +446,7 @@ class Command(BaseCommand):
                 'is_non_alcoholic': True,
                 'bundle_text': 'Ideal For Daily Wear & Office Elegance',
                 'short_description': 'Crisp, velvety, and soothing pure white musk. 100% non-alcoholic attar oil evoking freshly laundered white linen and gentle floral breeze.',
-                'full_description': 'Safwan by Adil Qadri is revered for its pristine cleanliness and non-intrusive elegance. Crafted for everyday rituals and work settings, this pure roll-on attar opens with dewy florals and settles into a serene white musk and creamy sandalwood cocoon that stays comforting and fresh throughout the day.',
+                'full_description': 'Safwan by AvailSmart is revered for its pristine cleanliness and non-intrusive elegance. Crafted for everyday rituals and work settings, this pure roll-on attar opens with dewy florals and settles into a serene white musk and creamy sandalwood cocoon that stays comforting and fresh throughout the day.',
                 'rating_avg': Decimal('4.88'),
                 'rating_count': 1420,
                 'is_featured': False,
@@ -672,9 +671,9 @@ class Command(BaseCommand):
                 }
             },
             {
-                'name': 'Adil Qadri Lavish Musk Non-Alcoholic Attar (12ml)',
-                'slug': 'adil-qadri-lavish-musk-attar-12ml',
-                'brand': 'adil-qadri',
+                'name': 'AvailSmart Lavish Musk Non-Alcoholic Attar (12ml)',
+                'slug': 'availsmart-lavish-musk-attar-12ml',
+                'brand': 'availsmart-reserve',
                 'category': 'amber-musk-elixirs',
                 'base_price': Decimal('1199.00'),
                 'discount_price': Decimal('799.00'),
@@ -688,7 +687,7 @@ class Command(BaseCommand):
                 'is_non_alcoholic': True,
                 'bundle_text': 'Award-Winning Imperial Signature Scent',
                 'short_description': 'Opulent, sweet floral musk designed for memorable presence. 100% alcohol-free roll-on with golden honeyed undertones.',
-                'full_description': 'Lavish Musk by Adil Qadri is created for those who enjoy sweet, alluring floral musks with depth. The golden honeyed floral heart develops into a soft, velvety trail of musk that lingers on clothes for days.',
+                'full_description': 'Lavish Musk by AvailSmart is created for those who enjoy sweet, alluring floral musks with depth. The golden honeyed floral heart develops into a soft, velvety trail of musk that lingers on clothes for days.',
                 'rating_avg': Decimal('4.89'),
                 'rating_count': 1180,
                 'is_featured': False,
