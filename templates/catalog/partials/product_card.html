@@ -45,7 +45,7 @@ Context expected: prod (Product model instance), wishlist_ids (set of product ID
         </button>
 
         <!-- Product Main & Hover Secondary Image -->
-        <a href="{% url 'catalog:product_detail' slug=prod.slug %}" class="w-full h-full flex items-center justify-center relative">
+        <a href="{% if prod.slug %}{% url 'catalog:product_detail' slug=prod.slug %}{% else %}#{% endif %}" class="w-full h-full flex items-center justify-center relative">
             {% with prim_img=prod.primary_image sec_img=prod.secondary_image %}
                 {% if prim_img and prim_img.image %}
                     <img 
@@ -109,7 +109,7 @@ Context expected: prod (Product model instance), wishlist_ids (set of product ID
 
             <!-- Title (2-Line Balanced Container: Never brutally cuts off titles) -->
             <h3 class="text-sm font-semibold text-forest-dark line-clamp-2 min-h-[2.5rem] leading-snug group-hover:text-emerald transition tracking-tight">
-                <a href="{% url 'catalog:product_detail' slug=prod.slug %}" title="{{ prod.name }}">
+                <a href="{% if prod.slug %}{% url 'catalog:product_detail' slug=prod.slug %}{% else %}#{% endif %}" title="{{ prod.name }}">
                     {{ prod.name }}
                 </a>
             </h3>
