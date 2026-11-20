@@ -465,21 +465,20 @@
         return {
             loading: false,
             mobileFilterOpen: false,
-            totalCount: {{ total_count }
-    },
-    category: '{{ selected_category.slug|default:"" }}',
-        brands: { { selected_brands | safe } },
-    fragranceFamilies: { { selected_families | safe |default: "[]" } },
-    alcoholFree: { { alcohol_free_only | yesno: "true,false" } },
-    minPrice: { { min_price } },
-    maxPrice: { { max_price } },
-    colors: { { selected_colors | safe } },
-    sizes: { { selected_sizes | safe } },
-    rating: '{{ rating_filter|default:"" }}',
-        discount: '{{ discount_filter|default:"" }}',
-            inStock: { { in_stock_only | yesno: "true,false" } },
-    sort: '{{ sort|default:"newest" }}',
-        page: { { products.number |default: 1 } },
+            totalCount: {{ total_count|default:0 }},
+            category: '{{ selected_category.slug|default:"" }}',
+            brands: {{ selected_brands|safe }},
+            fragranceFamilies: {{ selected_families|safe|default:"[]" }},
+            alcoholFree: {{ alcohol_free_only|yesno:"true,false" }},
+            minPrice: {{ min_price }},
+            maxPrice: {{ max_price }},
+            colors: {{ selected_colors|safe }},
+            sizes: {{ selected_sizes|safe }},
+            rating: '{{ rating_filter|default:"" }}',
+            discount: '{{ discount_filter|default:"" }}',
+            inStock: {{ in_stock_only|yesno:"true,false" }},
+            sort: '{{ sort|default:"newest" }}',
+            page: {{ products.number|default:1 }},
 
         get activeFiltersCount() {
         let count = 0;
@@ -550,11 +549,10 @@
         else if (type === 'rating') this.rating = '';
         else if (type === 'discount') this.discount = '';
         else if (type === 'in_stock') this.inStock = false;
-        else if (type === 'min_price') this.minPrice = {{ catalog_min_price }
-    };
-            else if (type === 'max_price') this.maxPrice = {{ catalog_max_price }};
-    this.fetchFilteredResults(1);
-        },
+        else if (type === 'min_price') this.minPrice = {{ catalog_min_price }};
+        else if (type === 'max_price') this.maxPrice = {{ catalog_max_price }};
+        this.fetchFilteredResults(1);
+    },
 
     clearAllFilters() {
         this.category = '';
@@ -566,12 +564,11 @@
         this.rating = '';
         this.discount = '';
         this.inStock = false;
-        this.minPrice = {{ catalog_min_price }
-    };
-    this.maxPrice = {{ catalog_max_price }};
-    this.sort = 'newest';
-    this.fetchFilteredResults(1);
-        },
+        this.minPrice = {{ catalog_min_price }};
+        this.maxPrice = {{ catalog_max_price }};
+        this.sort = 'newest';
+        this.fetchFilteredResults(1);
+    },
 
     goToPage(pageNum) {
         this.page = pageNum;
@@ -585,18 +582,17 @@
         this.brands.forEach(b => params.append('brand', b));
         this.fragranceFamilies.forEach(f => params.append('fragrance_family', f));
         if (this.alcoholFree) params.set('alcohol_free', '1');
-        if (this.minPrice > {{ catalog_min_price }
-    }) params.set('min_price', this.minPrice);
-    if (this.maxPrice < {{ catalog_max_price }}) params.set('max_price', this.maxPrice);
-    this.colors.forEach(c => params.append('color', c));
-    this.sizes.forEach(s => params.append('size', s));
-    if (this.rating) params.set('rating', this.rating);
-    if (this.discount) params.set('discount', this.discount);
-    if (this.inStock) params.set('in_stock', '1');
-    if (this.sort && this.sort !== 'newest') params.set('sort', this.sort);
-    if (pageNum && pageNum > 1) params.set('page', pageNum);
-    return params;
-        },
+        if (this.minPrice > {{ catalog_min_price }}) params.set('min_price', this.minPrice);
+        if (this.maxPrice < {{ catalog_max_price }}) params.set('max_price', this.maxPrice);
+        this.colors.forEach(c => params.append('color', c));
+        this.sizes.forEach(s => params.append('size', s));
+        if (this.rating) params.set('rating', this.rating);
+        if (this.discount) params.set('discount', this.discount);
+        if (this.inStock) params.set('in_stock', '1');
+        if (this.sort && this.sort !== 'newest') params.set('sort', this.sort);
+        if (pageNum && pageNum > 1) params.set('page', pageNum);
+        return params;
+    },
 
         async fetchFilteredResults(pageNum = 1, pushToHistory = true) {
         this.loading = true;
@@ -618,6 +614,9 @@
                 const container = document.getElementById('productGridContainer');
                 if (container) {
                     container.innerHTML = data.html;
+                    if (window.Alpine) {
+                        Alpine.initTree(container);
+                    }
                 }
                 this.totalCount = data.total_count;
 
@@ -655,18 +654,17 @@
         this.brands = state.brands || [];
         this.fragranceFamilies = state.fragranceFamilies || [];
         this.alcoholFree = state.alcoholFree || false;
-        this.minPrice = state.minPrice || {{ catalog_min_price }
-    };
-    this.maxPrice = state.maxPrice || {{ catalog_max_price }};
-    this.colors = state.colors || [];
-    this.sizes = state.sizes || [];
-    this.rating = state.rating || '';
-    this.discount = state.discount || '';
-    this.inStock = state.inStock || false;
-    this.sort = state.sort || 'newest';
-    this.page = state.page || 1;
-        }
-    };
+        this.minPrice = state.minPrice || {{ catalog_min_price }};
+        this.maxPrice = state.maxPrice || {{ catalog_max_price }};
+        this.colors = state.colors || [];
+        this.sizes = state.sizes || [];
+        this.rating = state.rating || '';
+        this.discount = state.discount || '';
+        this.inStock = state.inStock || false;
+        this.sort = state.sort || 'newest';
+        this.page = state.page || 1;
+    }
+};
 }
 
     // Global Quick Add to Cart & Wishlist Handlers
